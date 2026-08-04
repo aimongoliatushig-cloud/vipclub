@@ -18,3 +18,8 @@ To be completed from approved business decisions, repository audit, and source-s
 
 - [Knowledge-base gap analysis](../../knowledge-base-gap-analysis.md)
 - [Stakeholder clarification register](../../stakeholder-clarification-register.md)
+
+
+## Provider API requirements
+
+The provider-ready specification is available in [POS API Requirements for Provider](POS_API_REQUIREMENTS_FOR_PROVIDER.md). It defines required customer, visit, reservation, entertainer, room, bill, item, webhook, reconciliation, and sandbox capabilities.
