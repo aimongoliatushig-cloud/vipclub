@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_process_42_entertainer_transfer" targetNamespace="https://vipclub.example/bpmn">
+  <bpmn:process id="process_42_entertainer_transfer" name="Entertainer Branch Transfer" isExecutable="false">
+    <bpmn:StartEvent id="start" name="Start" />
+    <bpmn:Task id="task1" name="Identify transfer need" />
+    <bpmn:Task id="task2" name="Match branch opportunity" />
+    <bpmn:Task id="task3" name="Obtain employee and manager approvals" />
+    <bpmn:Task id="task4" name="Update branch, schedule, and access" />
+    <bpmn:Task id="task5" name="Review transfer outcome" />
+    <bpmn:EndEvent id="end" name="Complete" />
+    <bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="task1" />
+    <bpmn:sequenceFlow id="f2" sourceRef="task1" targetRef="task2" />
+    <bpmn:sequenceFlow id="f3" sourceRef="task2" targetRef="task3" />
+    <bpmn:sequenceFlow id="f4" sourceRef="task3" targetRef="task4" />
+    <bpmn:sequenceFlow id="f5" sourceRef="task4" targetRef="task5" />
+    <bpmn:sequenceFlow id="f6" sourceRef="task5" targetRef="end" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="diagram"><bpmndi:BPMNPlane id="plane" bpmnElement="process_42_entertainer_transfer">
+    <bpmndi:BPMNShape id="s0" bpmnElement="start"><dc:Bounds x="80" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+    <bpmndi:BPMNShape id="s1" bpmnElement="task1"><dc:Bounds x="265" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+    <bpmndi:BPMNShape id="s2" bpmnElement="task2"><dc:Bounds x="450" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+    <bpmndi:BPMNShape id="s3" bpmnElement="task3"><dc:Bounds x="635" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+    <bpmndi:BPMNShape id="s4" bpmnElement="task4"><dc:Bounds x="820" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+    <bpmndi:BPMNShape id="s5" bpmnElement="task5"><dc:Bounds x="1005" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+    <bpmndi:BPMNShape id="s6" bpmnElement="end"><dc:Bounds x="1190" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+    <bpmndi:BPMNEdge id="e1" bpmnElement="f1"><di:waypoint x="116" y="138" /><di:waypoint x="265" y="138" /></bpmndi:BPMNEdge>
+    <bpmndi:BPMNEdge id="e2" bpmnElement="f2"><di:waypoint x="405" y="138" /><di:waypoint x="450" y="138" /></bpmndi:BPMNEdge>
+    <bpmndi:BPMNEdge id="e3" bpmnElement="f3"><di:waypoint x="590" y="138" /><di:waypoint x="635" y="138" /></bpmndi:BPMNEdge>
+    <bpmndi:BPMNEdge id="e4" bpmnElement="f4"><di:waypoint x="775" y="138" /><di:waypoint x="820" y="138" /></bpmndi:BPMNEdge>
+    <bpmndi:BPMNEdge id="e5" bpmnElement="f5"><di:waypoint x="960" y="138" /><di:waypoint x="1005" y="138" /></bpmndi:BPMNEdge>
+    <bpmndi:BPMNEdge id="e6" bpmnElement="f6"><di:waypoint x="1145" y="138" /><di:waypoint x="1190" y="138" /></bpmndi:BPMNEdge>
+  </bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>
