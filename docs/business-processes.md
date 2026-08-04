@@ -1,30 +1,73 @@
-# Business Processes
+# Business Process Catalog
 
-Document each process from trigger to outcome, including handoffs, exceptions, and responsible roles. Create a matching BPMN diagram for every approved process in [diagrams/bpmn](diagrams/bpmn/README.md).
+This catalog is the starting point for the VIP Club operating model. Each listed process will receive a detailed Markdown specification and a version-controlled BPMN diagram before implementation.
 
-## Process template
+## Process standards
 
-### Name
+Every detailed process must define its owner, roles, trigger, required inputs, normal flow, exceptions, decisions, data records, permissions, notifications, audit events, metrics, and acceptance criteria.
 
-- **Trigger:**
-- **Owner:**
-- **Inputs:**
-- **Steps:**
-- **Exceptions:**
-- **Outputs:**
-- **Systems involved:**
-- **Metrics:**
-- **BPMN source:** `diagrams/bpmn/<process-name>.bpmn`
-- **Rendered diagram:** `diagrams/bpmn/<process-name>.svg`
+## Phase 0 — Foundation
 
-## Processes to map
+| ID | Process | Purpose | Primary owner |
+| --- | --- | --- | --- |
+| P00 | Policy publication and versioning | Approve, publish, supersede, and apply policies safely. | CEO / Operations |
+| P01 | User, role, and branch access lifecycle | Create, change, suspend, and revoke access by role and branch. | HR / System administrator |
+| P02 | Audit and correction workflow | Correct sensitive records through traceable adjustment or reversal. | System administrator / Finance |
 
-- Member onboarding
-- Membership lifecycle
-- Benefits or rewards administration
-- Support and issue resolution
-- Reporting and operational review
+## Phase 1 — Foundation Operations and Customer Onboarding
 
-## Review rule
+| ID | Process | Purpose | Primary owner |
+| --- | --- | --- | --- |
+| P10 | Employee and entertainer onboarding | Create identity, branch, role, schedule, bank/contract records, and required acknowledgements. | HR |
+| P11 | Schedule and attendance | Assign shifts, record check-in/out, classify attendance, and manage corrections. | Branch manager |
+| P12 | Entertainer performance and rank evaluation | Convert verified performance events into explainable rank outcomes. | Operations / Branch manager |
+| P13 | Three-day income settlement | Calculate earnings, deductions, loan repayment, review, approve, and record settlement. | Accounting |
+| P14 | Performance-based loan | Check eligibility, obtain approval, disburse, and repay through settlements. | CEO / Accounting |
+| P15 | Customer registration and consent | Find or create customer profile and record marketing consent and channel preferences. | Host / Reception |
+| P16 | Reservation lifecycle | Request, confirm, assign, arrive, complete, cancel, and attribute revenue. | Reception / Branch manager |
 
-A process is complete only when its written definition and BPMN diagram agree, are linked here, and have been reviewed by the responsible business owner.
+## Phase 2 — Workforce Task Management
+
+| ID | Process | Purpose | Primary owner |
+| --- | --- | --- | --- |
+| P20 | Task assignment and acknowledgement | Assign work by role and branch, notify the assignee, and record receipt. | CEO / Manager |
+| P21 | Task execution and completion | Record progress, comments, evidence, result, review, rework, and closure. | Assignee / Manager |
+| P22 | Overdue task escalation | Remind, escalate, and report delayed or blocked work. | Manager |
+| P23 | Formal order and policy acknowledgement | Issue a required instruction and capture read/acknowledgement evidence. | CEO / Manager |
+| P24 | Maintenance request and closure | Report, assign, repair, verify, and close maintenance work. | Branch manager |
+
+## Phase 3 — CRM, Loyalty, Benefits, and Intelligence
+
+| ID | Process | Purpose | Primary owner |
+| --- | --- | --- | --- |
+| P30 | Customer visit and spend attribution | Link verified visits and eligible spend to a customer, branch, reservation, and entertainer when applicable. | Reception / Operations |
+| P31 | Membership-level evaluation | Apply approved branch-specific policy to assign one of five customer membership levels. | CRM manager |
+| P32 | Benefit and cashback lifecycle | Issue, use, expire, reverse, and audit privileges and cashback value. | CRM manager / Finance |
+| P33 | Customer segmentation and campaign | Build a segment, validate consent, send a campaign, and track communication history and outcomes. | Marketing / CRM manager |
+| P34 | Customer intelligence review | Analyze visit cadence, spend, value, loyalty, branch behavior, and entertainer affinity. | Manager / CEO |
+
+## Phase 4 and later
+
+| ID | Process | Purpose | Primary owner |
+| --- | --- | --- | --- |
+| P40 | CEO–Manager Goal Engine | Propose, approve, execute, review, and improve monthly branch goals. | CEO / Manager |
+| P41 | Feedback, complaints, and retention | Receive, restrict, investigate, resolve, and measure people-related concerns. | HR |
+| P42 | Customer and entertainer branch transfer | Offer an appropriate alternate branch while preserving authorization and attribution. | Branch manager |
+| P43 | Payroll, compliance, and financial reconciliation | Apply approved statutory rules, post records, reconcile, and retain evidence. | Accounting |
+
+## BPMN delivery order
+
+1. P15 Customer registration and consent
+2. P11 Schedule and attendance
+3. P13 Three-day income settlement
+4. P20 Task assignment and acknowledgement
+5. P21 Task execution and completion
+6. P16 Reservation lifecycle
+7. P31 Membership-level evaluation
+8. P32 Benefit and cashback lifecycle
+9. P33 Customer segmentation and campaign
+10. P40 CEO–Manager Goal Engine
+
+## Open design decisions
+
+Detailed BPMN work must not invent policy. The main pending decisions are membership formula and thresholds, cross-branch classification, task approval/reopening, benefit/cashback controls, and channel-provider behavior.
