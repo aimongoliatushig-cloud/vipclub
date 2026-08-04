@@ -1,6 +1,6 @@
 # Delivery Roadmap
 
-The VIP Club system is planned in four phases. Only the first two phases are currently defined.
+The VIP Club system is planned in four phases. The first three phases are now outlined.
 
 ## Phase 1 — Foundation Operations
 
@@ -28,6 +28,13 @@ The VIP Club system is planned in four phases. Only the first two phases are cur
 - Completion can include images and execution notes.
 - Dashboards show task status, deadlines, and completion statistics.
 
-## Phases 3 and 4
+## Phase 3 — CRM and Customer Intelligence
+
+- Capture customer relationship information.
+- Analyze reservations, including entertainer preferences.
+- Measure customer loyalty.
+- Assign members to one of five membership levels based on a confirmed spend-based metric.
+
+## Phase 4
 
 - **Open question:** Scope, outcomes, dependencies, owners, and success measures have not yet been defined.
