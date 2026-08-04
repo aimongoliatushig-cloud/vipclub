@@ -13,6 +13,7 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 | P00 | Policy publication and versioning | Approve, publish, supersede, and apply policies safely. | CEO / Operations |
 | P01 | User, role, and branch access lifecycle | Create, change, suspend, and revoke access by role and branch. | HR / System administrator |
 | P02 | Audit and correction workflow | Correct sensitive records through traceable adjustment or reversal. | System administrator / Finance |
+| P03 | Branch setup and activation | Create a future branch, apply defaults, assign its team and roles, configure scope, and activate reporting safely. | System administrator / CEO |
 
 ## Phase 1 — Foundation Operations and Customer Onboarding
 
