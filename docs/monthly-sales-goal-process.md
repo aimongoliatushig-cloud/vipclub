@@ -43,6 +43,23 @@ Three days before the start of a new month, Hermes prepares a planning draft fro
 9. At month-end, the result and action-plan outcome become evidence for the next planning cycle.
 
 
+
+## Historical sales data for goal calculation
+
+Before goal planning, import prior monthly branch sales from the approved POS, accounting system, or validated spreadsheet export into a reconciled branch-sales-history record.
+
+Each imported record includes:
+
+- branch;
+- month and year;
+- gross and net sales according to the approved definition;
+- source system or file;
+- import date and operator;
+- reconciliation status and evidence;
+- corrections or adjustments.
+
+Hermes uses only reconciled, authorized sales history. It can compare the same month in prior years, recent-month trends, and branch-specific patterns, then explain which baseline and assumptions support its recommendation. The CEO and manager remain responsible for choosing and approving the final target.
+
 ## Afternoon goal reminders
 
 - Hermes runs a scheduled reminder in the afternoon at a configurable branch-local time.
@@ -73,7 +90,8 @@ Approved → Active → Closed
 
 - Confirm whether the Branch Manager is also the Branch Sales Manager, or whether Sales Manager is a separate role.
 - Confirm planning deadline, CEO response target, and final approval cutoff.
-- Confirm the sales baseline and target-setting method.
+- Confirm the sales baseline and target-setting method, such as the same month last year, rolling average, or another approved rule.
+- Confirm the source system or spreadsheet format for historical sales import and reconciliation.
 - Confirm which data Hermes may use and the required human review of its recommendations.
 - Confirm sales source of truth and refresh frequency for dashboard progress.
 - Confirm default afternoon reminder time, branch-local timezone, recipient rules, and PWA delivery, permission, and fallback behavior.
