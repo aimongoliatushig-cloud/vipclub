@@ -42,6 +42,15 @@ Three days before the start of a new month, Hermes prepares a planning draft fro
 8. Hermes can provide reminders, summaries, and recommendations during the month, but cannot change the target or approve actions without human authorization.
 9. At month-end, the result and action-plan outcome become evidence for the next planning cycle.
 
+
+## Afternoon goal reminders
+
+- Hermes runs a scheduled reminder in the afternoon at a configurable branch-local time.
+- The reminder is sent through the manager's approved channels, initially Telegram and the PWA/web-app notification channel.
+- It summarizes the approved monthly goal, current progress, priority actions, and any reported blockers.
+- The reminder is advisory; it does not create, alter, approve, or close goals automatically.
+- Delivery, read state when available, and reminder configuration changes are retained for audit and operational follow-up.
+
 ## States
 
 ```text
@@ -67,3 +76,4 @@ Approved → Active → Closed
 - Confirm the sales baseline and target-setting method.
 - Confirm which data Hermes may use and the required human review of its recommendations.
 - Confirm sales source of truth and refresh frequency for dashboard progress.
+- Confirm default afternoon reminder time, branch-local timezone, recipient rules, and Telegram/PWA opt-in or fallback behavior.
