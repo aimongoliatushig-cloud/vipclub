@@ -14,7 +14,7 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
-| Club Branch | One of four operational branches with company, cost center, managers, and settings. | Company, Employee, Customer Visit, Task |
+| Club Branch | An operational branch with company, cost center, timezone, managers, settings, status, and effective dates. New branches are configured without code changes. | Company, Employee, Customer Visit, Task, Policy Scope |
 | Role Scope / Access Grant | Defines a user’s branch, role, date range, and restricted actions or fields. | User, Club Branch |
 | Audit Event | Immutable record of consequential actions and before/after summary. | Actor, any business record |
 | Policy Version | Effective-dated rules used by calculations and workflows. | Ranking, loans, loyalty, benefits |
