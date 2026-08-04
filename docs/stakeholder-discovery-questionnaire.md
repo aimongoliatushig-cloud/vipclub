@@ -48,11 +48,12 @@ Use these questions in structured interviews. Record each answer in the stakehol
 3. What employee lifecycle states and offboarding steps are required?
 4. How are lateness, absence, no-show, leave, and attendance corrections defined?
 5. What penalty rules are legally approved and how can they be appealed?
+6. What does **гарааны торгууль** mean in business practice? Define its trigger, amount/formula, evidence, approval, correction, and appeal process.
 6. What data is private to HR and unavailable to branch managers?
-7. What survey, feedback, complaint, and anti-retaliation process is required?
-8. What retention or resignation-risk indicators may be used?
-9. How are internal transfers approved and tracked?
-10. What staff training and policy acknowledgements are mandatory?
+8. What survey, feedback, complaint, and anti-retaliation process is required?
+9. What retention or resignation-risk indicators may be used?
+10. How are internal transfers approved and tracked?
+11. What staff training and policy acknowledgements are mandatory?
 
 ## General accountant and payroll accountant
 
