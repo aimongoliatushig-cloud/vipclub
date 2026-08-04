@@ -26,9 +26,40 @@ Verified sales and income events
 → review, approval, payment evidence, and audit
 ```
 
+
+## Employment type 2 — Day-based contract worker
+
+This worker is engaged under a labor contract and is paid according to the number of days worked.
+
+- Base calculation uses approved worked days.
+- Additional worked days must be included in the pay calculation.
+- Approved late and no-show penalties are deducted.
+- Approved loan repayment is deducted.
+- The salary calculation must retain source attendance and adjustment records.
+
+## Employment type 3 — Main fixed-salary employee
+
+This worker has a regular fixed salary rather than primarily performance-based income.
+
+- Base calculation uses the agreed fixed salary.
+- Additional worked days must be included when applicable.
+- Approved late and no-show penalties are deducted.
+- Approved loan repayment is deducted.
+- The salary calculation must retain source attendance and adjustment records.
+
+## Common salary-calculation principle
+
+```text
+Base pay or eligible performance income
++ approved additional workdays or additions
+− approved lateness/no-show penalties
+− approved loan repayment
+± approved adjustments
+= net payable amount
+```
+
 ## Open decisions
 
-- Define the other two employment types and their income and loan rules.
 - Confirm whether all employment types are eligible, and the minimum tenure or income requirements.
 - Confirm maximum-loan formula, approval authority, repayment range, and treatment on departure.
 - Confirm which sales records are eligible and how cancellations, refunds, and corrections affect settlement.
