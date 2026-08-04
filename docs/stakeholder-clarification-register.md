@@ -30,6 +30,7 @@ Use this register to collect decisions and missing data from the CEO, branch man
 | CL-014 | Confirm which verified sales records and share rates determine entertainer three-day settlements. | General accountant / Branch managers | High | Open |
 | CL-015 | Confirm whether every employment type is loan-eligible and define minimum tenure, income history, maximum amount, repayment range, and departure treatment. | CEO / HR / General accountant | High | Open |
 | CL-016 | Confirm loan approval authority, bank/payment evidence requirements, and adjustment or reversal process. | CEO / Payment accountant | High | Open |
+| CL-017 | Approve entertainer ranking lifecycle: four levels, rolling evaluation window, promotion thresholds, controlled demotion/grace rule, hard gates, benefits, and appeal process. | CEO / General Manager / Lead entertainer | High | Open |
 
 ## 3. Tasks, maintenance, and management goals
 
