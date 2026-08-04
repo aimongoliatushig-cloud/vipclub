@@ -66,3 +66,10 @@ Every background job must be idempotent, observable, replayable where safe, and 
 ## Repository-specific setup — pending audit
 
 The exact Frappe/ERPNext versions, custom-app name, bench or container commands, database topology, deployment process, current integrations, test commands, and CI workflow must be documented after the repository and environment audit. This guide intentionally does not invent those details.
+
+
+## PWA experience decision
+
+Build one internal PWA for all internal roles, with individual credentials and role- and branch-aware workspaces. Reuse shared components and workflows, but present only the actions and data appropriate to each role. Keep the customer-facing PWA separate.
+
+Test permissions server-side for every role, branch, record, and sensitive field. UI visibility tests complement but never replace permission tests.
