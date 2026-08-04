@@ -47,6 +47,19 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-TASK-008 | A task must retain execution notes. |
 | FR-TASK-009 | Dashboards must show incomplete and completed work, deadlines, and completion statistics. |
 
+
+## Monthly sales goal approval
+
+| ID | Requirement |
+| --- | --- |
+| FR-GOAL-001 | Each branch sales manager must be able to prepare a monthly sales target and action plan before the new month. |
+| FR-GOAL-002 | Hermes must generate evidence-based planning recommendations approximately three days before the new month, including focus areas and suggested actions. |
+| FR-GOAL-003 | The CEO must be able to review, question, return for revision, approve, or reject a submitted plan. |
+| FR-GOAL-004 | Only the CEO’s approval can activate the monthly branch sales target. |
+| FR-GOAL-005 | The system must keep each proposal, review comment, revision, approval, and source-data summary in an audit trail. |
+| FR-GOAL-006 | The system must display actual sales against the approved target as an achievement percentage and progress bar. |
+| FR-GOAL-007 | Hermes may advise, summarize, and remind; it must not approve or silently change a sales target or action plan. |
+
 ## Open questions with material delivery impact
 
 - What task states are required beyond open and complete?
