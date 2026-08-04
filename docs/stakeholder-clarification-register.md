@@ -57,6 +57,7 @@ Use this register to collect decisions and missing data from the CEO, branch man
 | ID | Question or data needed | Decision owner | Risk | Status |
 | --- | --- | --- | --- | ---|
 | CL-040 | Confirm the five membership-level names, entry level, and customer-facing descriptions. | CEO / Marketing | High | Open |
+| CL-040A | Approve the proposed membership lifecycle: New/Provisional status, rolling three-month average, inactive months counted as zero, and a controlled downgrade grace rule. | CEO / General Manager | High | Open |
 | CL-041 | Choose the membership calculation: rolling 12-month spend, active-month average, lifetime average, lifetime spend, or another approved formula. | CEO / General accountant / Marketing | High | Open |
 | CL-042 | Define what counts as eligible spend and how refunds, cancellations, discounts, complimentary items, and corrections affect it. | General accountant / CEO | High | Open |
 | CL-043 | Confirm branch-specific thresholds, who can change them, effective dates, audit rule, and how multi-branch customers are classified. | CEO / Branch managers | High | Open |
