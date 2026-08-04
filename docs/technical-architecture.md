@@ -113,3 +113,10 @@ Use **one internal role-aware PWA** for all employees and internal team members.
 This is one application and codebase, not separate apps per internal role. Permission enforcement remains server-side; hiding a screen or menu is never a security control.
 
 Use a **separate customer-facing PWA** for customer registration, membership, benefits, cashback, reservations, and consent-based interactions. It has distinct user experience and privacy boundaries.
+
+
+## Branch scalability decision
+
+The system starts with four branches but must support future branches without code changes. An authorized administrator can create a branch and configure its company/cost-center mapping, timezone, managers, team assignments, role access, operational settings, notification configuration, and reporting scope.
+
+New branches inherit approved default policies and configuration templates, while allowing authorized branch-specific settings where the policy permits. Historical records remain associated with the branch that owned them at the time of the event.
