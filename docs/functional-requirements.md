@@ -60,6 +60,16 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-GOAL-006 | The system must display actual sales against the approved target as an achievement percentage and progress bar. |
 | FR-GOAL-007 | Hermes may advise, summarize, and remind; it must not approve or silently change a sales target or action plan. |
 
+
+## Branch setup and scalability
+
+| ID | Requirement |
+| --- | --- |
+| FR-BRANCH-001 | An authorized administrator must be able to create and activate a new branch without a software deployment. |
+| FR-BRANCH-002 | Branch setup must support company/cost-center mapping, timezone, managers, team assignments, role access, operational settings, notification configuration, and reporting scope. |
+| FR-BRANCH-003 | New branches must inherit approved default policies and templates, while preserving authorized branch-specific configuration. |
+| FR-BRANCH-004 | Historical records must retain the branch associated with the event at the time it occurred. |
+
 ## Open questions with material delivery impact
 
 - What task states are required beyond open and complete?
