@@ -50,7 +50,7 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 
 | ID | Process | Purpose | Primary owner |
 | --- | --- | --- | --- |
-| P40 | CEO–Manager Goal Engine | Propose, approve, execute, review, and improve monthly branch goals. | CEO / Manager |
+| P40 | CEO–Manager Goal Engine | Propose, approve, execute, review, and improve monthly branch goals. See [monthly sales goal approval](monthly-sales-goal-process.md). | CEO / Manager |
 | P41 | Feedback, complaints, and retention | Receive, restrict, investigate, resolve, and measure people-related concerns. | HR |
 | P42 | Customer and entertainer branch transfer | Offer an appropriate alternate branch while preserving authorization and attribution. | Branch manager |
 | P43 | Payroll, compliance, and financial reconciliation | Apply approved statutory rules, post records, reconcile, and retain evidence. | Accounting |
