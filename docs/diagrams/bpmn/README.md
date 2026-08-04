@@ -38,3 +38,16 @@ Example:
 - `process-43-payroll-bank-transfer.bpmn`
 
 These are the first core workflow diagrams. As decisions are approved, they will be expanded with exception paths, role swimlanes, and supporting detailed process documents.
+
+
+## Additional supporting BPMN diagrams
+
+- `process-02-access-lifecycle.bpmn`
+- `process-10-employee-onboarding.bpmn`
+- `process-12-attendance-correction.bpmn`
+- `process-14-rank-evaluation.bpmn`
+- `process-17-loan-lifecycle.bpmn`
+- `process-24-maintenance.bpmn`
+- `process-41-complaint.bpmn`
+- `process-42-customer-transfer.bpmn`
+- `process-42-entertainer-transfer.bpmn`
