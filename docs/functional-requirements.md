@@ -23,6 +23,8 @@ This is an evidence-based working draft derived from project discussions. Items 
 | Purchasing manager | Manages approved procurement requests, suppliers, purchasing workflow, and purchasing records. |
 | Technical assistant | Receives, diagnoses, updates, and closes assigned technical maintenance and equipment-support work with evidence. |
 | Carpenter | Receives and completes assigned branch facilities, fixture, and repair work with progress updates and completion evidence. |
+| Security officer | Supports visitor and branch safety, incident reporting, and approved security procedures. |
+| Driver | Provides approved safe transport for eligible VIP visitors and records the assigned trip according to privacy and safety rules. |
 | System administrator | Manages authorized system configuration, access, policy setup, and audit-support functions. |
 
 ### Role-design note
