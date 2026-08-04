@@ -52,6 +52,44 @@ The intended metric appears to be average customer spend over an evaluation peri
 3. **Lifetime average:** total eligible spend divided by all months since membership began.
 4. **Lifetime spend:** total eligible spend without an average.
 
+
+## Proposed membership evaluation lifecycle
+
+This is a proposed default for approval, not a final policy.
+
+1. A new customer begins as **New / Provisional** rather than immediately receiving the highest membership level from a single month.
+2. At the end of each month, calculate the customer's rolling monthly spend using the completed months since enrollment, up to the approved evaluation window.
+3. Use a three-month rolling average as the initial proposed window:
+
+```text
+Rolling average monthly spend
+= eligible spend in the current month and previous two completed months
+÷ number of completed months in the window
+```
+
+4. Months with no eligible spend count as zero after the customer is enrolled; this reflects reduced activity rather than excluding inactive months.
+5. A customer can be upgraded after meeting the approved threshold and minimum-history rule.
+6. A customer can be downgraded when the rolling average falls below the current level's threshold, but use an approved grace rule to avoid abrupt one-month changes.
+7. The system records the branch policy, source spend, previous/new level, calculation, and explanation for each evaluation.
+
+### Example
+
+A new customer spends 10 million MNT in month one, then spends nothing in months two and three.
+
+- After one month: keep the customer provisional or apply a provisional promotional status.
+- After three months: the rolling average is 10 million ÷ 3 = 3.33 million MNT per month.
+- The member then qualifies for the level matching 3.33 million MNT under that branch's approved benchmark.
+
+This prevents a one-time high purchase from granting an immediate permanent Diamond-level entitlement while still recognizing genuine sustained spending.
+
+## Membership-policy decisions needed
+
+- Confirm the initial evaluation window: three, six, or twelve months.
+- Confirm the minimum completed months required before the first permanent level.
+- Confirm whether upgrade can take effect immediately or only at month-end.
+- Confirm downgrade grace period, maximum downgrade step, and requalification rule.
+- Confirm whether the five levels are branch-specific or company-wide when a customer visits multiple branches.
+
 ## Open questions with material business impact
 
 - Which candidate formula is authoritative?
