@@ -83,7 +83,8 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
 | Branch Sales History | Reconciled historical monthly sales for a branch, including period, gross/net amount, source system, import status, and reconciliation evidence. | Branch, Goal Cycle, Source System |
-| Goal Cycle / Proposal / Action | Monthly branch target, proposal, owner actions, progress, and review. | Branch, Manager, KPI Snapshot, Branch Sales History |
+| Sales Target Policy Version | Effective-dated default and branch-specific improvement percentage, baseline method, override authority, and formula. | Branch, Goal Cycle, Branch Sales History |
+| Goal Cycle / Proposal / Action | Monthly branch target, proposal, owner actions, progress, and review. | Branch, Manager, KPI Snapshot, Branch Sales History, Sales Target Policy |
 | KPI / Reporting Snapshot | Time-bound calculated management metric with traceable source values. | Branch, Customer, Employee |
 | Notification | In-app or external delivery request, state, priority, and deep link. | Recipient, Source Entity |
 | Integration Cursor | Synchronization position, success/failure, retry, and reconciliation details. | External System |
