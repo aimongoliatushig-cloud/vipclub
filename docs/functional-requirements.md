@@ -4,7 +4,7 @@ This is an evidence-based working draft derived from project discussions. Items 
 
 ## Roles
 
-| Role | Confirmed responsibility |
+| Role | Primary responsibility |
 | --- | --- |
 | CEO | Company-wide oversight, cross-branch task assignment, and designated approvals. |
 | Branch manager | Branch operations, team management, in-branch task assignment, and local configuration within approved scope. |
@@ -26,6 +26,8 @@ This is an evidence-based working draft derived from project discussions. Items 
 | System administrator | Manages authorized system configuration, access, policy setup, and audit-support functions. |
 
 ### Role-design note
+
+A role responsibility describes what a person owns. Individual capabilities—such as an entertainer requesting a loan—belong in the relevant workflow requirements, not in this role catalog.
 
 The final role-permission matrix must define branch scope, data visibility, approval rights, and segregation of duties for each role. Job titles do not automatically grant unrestricted financial or customer-data access.
 
