@@ -8,7 +8,6 @@ This is an evidence-based working draft derived from project discussions. Items 
 | --- | --- |
 | CEO | Company-wide oversight, cross-branch task assignment, and designated approvals. |
 | Branch manager | Branch operations, team management, in-branch task assignment, and local configuration within approved scope. |
-| Employee | Receives tasks, contributes comments, records execution, submits results, and tracks assigned work. |
 | Entertainer | Uses the workforce portal for schedule, attendance, income, rank, reservations, benefits, tasks, and communication. |
 | Server | Supports branch service operations and receives role-appropriate tasks, schedules, and notifications. |
 | Bartender | Supports beverage/service operations and receives role-appropriate tasks, schedules, and notifications. |
