@@ -7,7 +7,7 @@ This is an evidence-based working draft derived from project discussions. Items 
 | Role | Primary responsibility |
 | --- | --- |
 | CEO | Company-wide oversight, cross-branch task assignment, and designated approvals. |
-| Branch manager | Branch operations, team management, in-branch task assignment, and local configuration within approved scope. |
+| Branch manager | Branch operations, team management, in-branch task assignment, local configuration within approved scope, and proposing and executing monthly sales targets and action plans to improve branch sales. |
 | Entertainer | Uses the workforce portal for schedule, attendance, income, rank, reservations, benefits, tasks, and communication. |
 | Lead entertainer | Oversees entertainer standards, coaching, readiness, and operational follow-up; exact approval and disciplinary authority remains to be defined. |
 | Server | Supports branch service operations and receives role-appropriate tasks, schedules, and notifications. |
