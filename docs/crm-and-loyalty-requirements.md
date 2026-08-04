@@ -64,3 +64,36 @@ The intended metric appears to be average customer spend over an evaluation peri
 - Can a manager edit only that manager's branch configuration?
 - Which roles can view individual member intelligence and entertainer-preference data?
 - What date range and branch filters must the analytics support?
+
+
+## Customer segmentation and campaigns
+
+- Managers can define customer segments using available customer attributes and behavior.
+- Managers can add eligible members to a segment and create a campaign for that segment.
+- Messages may include text, images, and other supported media.
+- A message is sent only when the member has consented to promotional or event messaging through the selected channel.
+- Supported preferred channels currently include Viber, Telegram, and email.
+- Each member has a communication history showing campaigns, messages, channels, send times, delivery status when available, and consent or opt-out changes.
+
+## Benefits and cashback
+
+- Each of the five membership levels can have different benefits and privileges.
+- Managers can create, update, and retire benefits and associate them with membership levels.
+- The system must record each privilege use, including free visits or other eligible consumption.
+- Each member can hold cashback value or points with a monetary value.
+- The system must record every cashback credit and redemption as a ledger entry.
+- Customers can be notified of cashback through their consented preferred channels.
+- Cashback may be redeemed for eligible items such as drinks or other approved consumption.
+
+## Additional confirmed requirements
+
+| ID | Requirement |
+| --- | --- |
+| FR-CRM-010 | Managers must be able to create and manage customer segments. |
+| FR-CRM-011 | The system must support consent-aware multimedia campaign messaging. |
+| FR-CRM-012 | The system must retain a per-member communication history. |
+| FR-CRM-013 | Managers must be able to manage benefits by membership level. |
+| FR-CRM-014 | The system must record benefit usage. |
+| FR-CRM-015 | The system must maintain an auditable cashback credit and redemption ledger. |
+| FR-CRM-016 | The system must notify customers about cashback through their consented preferred channels. |
+
