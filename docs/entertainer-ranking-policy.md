@@ -2,7 +2,7 @@
 
 ## Status
 
-**Proposed — requires formal CEO or General Manager approval before configuration or use.**
+**Selected proposed approach — requires formal CEO or General Manager approval before configuration or use.**
 
 ## Purpose
 
@@ -24,9 +24,10 @@ Final names, thresholds, benefits, and effective dates require approval.
 3. At the approved evaluation cadence, the system calculates a rolling performance score using the approved window and policy version.
 4. An entertainer is promoted when the score, minimum evidence, and hard gates are met.
 5. An entertainer is not demoted because of one weak period alone.
-6. Demotion is allowed only after the score remains below the required threshold for the approved grace period, or when an approved hard gate applies.
-7. Every result records source events, policy version, score, hard gates, previous/new rank, explanation, and effective date.
-8. A manual review, appeal, adjustment, and audit process is available for disputed data or exceptional circumstances.
+6. Repeated unresolved no-shows may trigger an approved hard gate or benefit suspension.
+7. Demotion is allowed when the rolling score remains below the required threshold for the approved grace period, including sustained sales decline, or when an approved hard gate applies.
+8. Every result records source events, policy version, score, hard gates, previous/new rank, explanation, and effective date.
+9. A manual review, appeal, adjustment, and audit process is available for disputed data or exceptional circumstances.
 
 ## Recommended controls
 
