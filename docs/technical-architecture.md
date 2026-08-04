@@ -104,3 +104,12 @@ Required environments are local development, staging/UAT, and production. Each n
 ## Repository audit required
 
 The exact app name, ERPNext/Frappe versions, bench/container commands, database topology, deployment workflow, CI pipeline, and currently available integrations must be verified from the real repository and environment before implementation.
+
+
+## PWA application decision
+
+Use **one internal role-aware PWA** for all employees and internal team members. Every person has an individual username and password. After sign-in, the PWA adapts its workspace, dashboard, navigation, tasks, and permitted actions based on the user’s assigned role, branch, and ownership scope.
+
+This is one application and codebase, not separate apps per internal role. Permission enforcement remains server-side; hiding a screen or menu is never a security control.
+
+Use a **separate customer-facing PWA** for customer registration, membership, benefits, cashback, reservations, and consent-based interactions. It has distinct user experience and privacy boundaries.
