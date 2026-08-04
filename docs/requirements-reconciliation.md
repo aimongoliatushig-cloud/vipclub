@@ -45,3 +45,41 @@ The ERPNext/Frappe package is now the detailed blueprint. The live project conve
 3. The existing Phase 1 master specification.
 4. The ERPNext/Frappe knowledge package.
 5. Proposed defaults and new assumptions.
+
+
+## Additions confirmed after the initial merge
+
+### Organization and roles
+
+The role catalog now includes CEO, branch manager, lead entertainer, entertainer, server, bartender, host/receptionist, VIP customer, marketing and content manager, general accountant, transaction accountant, payment accountant, accounting clerk, human resources manager, purchasing manager, technical assistant, carpenter, security officer, driver, and system administrator.
+
+The generic Employee login role was removed. Personnel records may still use employee data, but access is granted through specific job roles.
+
+### Employment, pay, and loans
+
+Three pay models are now recognized:
+
+1. Performance-based entertainer subcontractor, settled every three days from verified sales and approved adjustments.
+2. Day-based contract worker, paid from approved worked days and additional approved days.
+3. Main fixed-salary employee, paid from fixed salary plus approved additional workdays.
+
+Each model may apply approved lateness/no-show penalties, loan repayments, and audited adjustments.
+
+### Monthly sales goals and Hermes
+
+- Each branch sales manager prepares a monthly sales target and action plan.
+- Hermes prepares evidence-based recommendations roughly three days before the new month.
+- The CEO reviews, asks questions, returns for revision, and alone approves the active goal.
+- Approved target progress is tracked through actual sales, achievement percentage, and a progress bar.
+- Hermes sends configurable afternoon reminders through the PWA only; it cannot approve or silently change targets.
+
+### CRM, loyalty, and communication
+
+- Customer intelligence includes member segmentation, visit cadence, spend ranges, entertainer affinity, lifetime value, and campaign outcomes.
+- Membership thresholds are branch-specific and configurable by authorized users; cross-branch classification remains open.
+- Benefits and cashback require an auditable entitlement and ledger model.
+- Customer communications remain consent-based and channel-preference-aware; internal operational notifications use the PWA.
+
+## Remaining reconciliation gaps
+
+The reconciliation is now current for documented conversation decisions, but it cannot be final until the existing ERPNext/Frappe repository, the Phase 1 master specification, current integrations, and approved policy documents are audited. Any future business decision must be reflected in the relevant module document and in this register if it changes scope, conflicts with an earlier rule, or introduces an implementation risk.
