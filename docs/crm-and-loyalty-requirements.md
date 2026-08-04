@@ -55,7 +55,9 @@ The intended metric appears to be average customer spend over an evaluation peri
 
 ## Proposed membership evaluation lifecycle
 
-This is a proposed default for approval, not a final policy.
+**Status: Proposed — requires formal CEO or General Manager approval before configuration or use.**
+
+This is the selected proposed default, not a final policy.
 
 1. A new customer begins as **New / Provisional** rather than immediately receiving the highest membership level from a single month.
 2. At the end of each month, calculate the customer's rolling monthly spend using the completed months since enrollment, up to the approved evaluation window.
@@ -84,6 +86,7 @@ This prevents a one-time high purchase from granting an immediate permanent Diam
 
 ## Membership-policy decisions needed
 
+- **CEO or General Manager approval required:** approve the proposed three-month rolling-average lifecycle, including provisional status and inactive months counting as zero.
 - Confirm the initial evaluation window: three, six, or twelve months.
 - Confirm the minimum completed months required before the first permanent level.
 - Confirm whether upgrade can take effect immediately or only at month-end.
