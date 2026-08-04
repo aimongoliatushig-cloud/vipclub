@@ -44,6 +44,21 @@ Three days before the start of a new month, Hermes prepares a planning draft fro
 
 
 
+
+## Sales-target policy setting
+
+An authorized administrator maintains a versioned, effective-dated improvement percentage. The default target formula is:
+
+```text
+Target for branch and month
+= reconciled sales for the same branch and month in the prior year
+× (1 + approved improvement percentage)
+```
+
+Example: if the prior-year sales for the same month were 100 million MNT and the configured improvement percentage is 5%, the system proposes a target of 105 million MNT.
+
+The policy can have a company-wide default and authorized branch-specific override. Hermes shows the baseline, percentage, formula, source sales record, and any override in its recommendation. The CEO may approve a different final target with a recorded reason.
+
 ## Historical sales data for goal calculation
 
 Before goal planning, import prior monthly branch sales from the approved POS, accounting system, or validated spreadsheet export into a reconciled branch-sales-history record.
