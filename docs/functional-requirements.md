@@ -18,6 +18,9 @@ This is an evidence-based working draft derived from project discussions. Items 
 | General accountant | Oversees accounting records, reconciliations, financial controls, and approved reporting. |
 | Transaction accountant | Records and reconciles operating transactions, settlements, and supporting financial evidence. |
 | Payment accountant | Prepares and records authorized payments and maintains payment evidence and status. |
+| Accounting clerk | Supports transaction entry, record maintenance, evidence collection, and assigned reconciliation work under financial controls. |
+| Human resources manager | Owns employee lifecycle, people policy, staffing, personnel records, and approved HR workflows. |
+| Purchasing manager | Manages approved procurement requests, suppliers, purchasing workflow, and purchasing records. |
 | System administrator | Manages authorized system configuration, access, policy setup, and audit-support functions. |
 
 ### Role-design note
