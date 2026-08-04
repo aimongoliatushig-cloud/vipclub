@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_process-16-reservation" targetNamespace="https://vipclub.example/bpmn">
+  <bpmn:process id="process-16-reservation" name="Reservation Lifecycle" isExecutable="false">
+    <bpmn:StartEvent id="process-16-reservation_start" name="Start" />
+    <bpmn:Task id="process-16-reservation_task1" name="Create reservation request" />
+    <bpmn:Task id="process-16-reservation_task2" name="Check availability" />
+    <bpmn:Task id="process-16-reservation_task3" name="Assign and confirm" />
+    <bpmn:Task id="process-16-reservation_task4" name="Record arrival and completion" />
+    <bpmn:Task id="process-16-reservation_task5" name="Attribute verified visit and revenue" />
+    <bpmn:EndEvent id="process-16-reservation_end" name="Complete" />
+    <bpmn:sequenceFlow id="process-16-reservation_flow1" sourceRef="process-16-reservation_start" targetRef="process-16-reservation_task1" />
+    <bpmn:sequenceFlow id="process-16-reservation_flow2" sourceRef="process-16-reservation_task1" targetRef="process-16-reservation_task2" />
+    <bpmn:sequenceFlow id="process-16-reservation_flow3" sourceRef="process-16-reservation_task2" targetRef="process-16-reservation_task3" />
+    <bpmn:sequenceFlow id="process-16-reservation_flow4" sourceRef="process-16-reservation_task3" targetRef="process-16-reservation_task4" />
+    <bpmn:sequenceFlow id="process-16-reservation_flow5" sourceRef="process-16-reservation_task4" targetRef="process-16-reservation_task5" />
+    <bpmn:sequenceFlow id="process-16-reservation_flow6" sourceRef="process-16-reservation_task5" targetRef="process-16-reservation_end" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="process-16-reservation_diagram">
+    <bpmndi:BPMNPlane id="process-16-reservation_plane" bpmnElement="process-16-reservation">
+      <bpmndi:BPMNShape id="process-16-reservation_start_di" bpmnElement="process-16-reservation_start"><dc:Bounds x="80" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-16-reservation_task1_di" bpmnElement="process-16-reservation_task1"><dc:Bounds x="265" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-16-reservation_task2_di" bpmnElement="process-16-reservation_task2"><dc:Bounds x="450" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-16-reservation_task3_di" bpmnElement="process-16-reservation_task3"><dc:Bounds x="635" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-16-reservation_task4_di" bpmnElement="process-16-reservation_task4"><dc:Bounds x="820" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-16-reservation_task5_di" bpmnElement="process-16-reservation_task5"><dc:Bounds x="1005" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-16-reservation_end_di" bpmnElement="process-16-reservation_end"><dc:Bounds x="1190" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="process-16-reservation_flow1_di" bpmnElement="process-16-reservation_flow1"><di:waypoint x="116" y="138" /><di:waypoint x="265" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-16-reservation_flow2_di" bpmnElement="process-16-reservation_flow2"><di:waypoint x="405" y="138" /><di:waypoint x="450" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-16-reservation_flow3_di" bpmnElement="process-16-reservation_flow3"><di:waypoint x="590" y="138" /><di:waypoint x="635" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-16-reservation_flow4_di" bpmnElement="process-16-reservation_flow4"><di:waypoint x="775" y="138" /><di:waypoint x="820" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-16-reservation_flow5_di" bpmnElement="process-16-reservation_flow5"><di:waypoint x="960" y="138" /><di:waypoint x="1005" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-16-reservation_flow6_di" bpmnElement="process-16-reservation_flow6"><di:waypoint x="1145" y="138" /><di:waypoint x="1190" y="138" /></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>
