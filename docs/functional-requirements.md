@@ -21,6 +21,7 @@ This is an evidence-based working draft derived from project discussions. Items 
 | Human resources manager | Owns employee lifecycle, people policy, staffing, personnel records, and approved HR workflows. |
 | Purchasing manager | Manages approved procurement requests, suppliers, purchasing workflow, and purchasing records. |
 | Technical assistant | Receives, diagnoses, updates, and closes assigned technical maintenance and equipment-support work with evidence. |
+| Carpenter | Receives and completes assigned branch facilities, fixture, and repair work with progress updates and completion evidence. |
 | System administrator | Manages authorized system configuration, access, policy setup, and audit-support functions. |
 
 ### Role-design note
