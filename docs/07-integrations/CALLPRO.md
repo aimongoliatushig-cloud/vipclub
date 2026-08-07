@@ -96,7 +96,7 @@ Authorized reporting supports:
 - Record import/webhook failures, retry, reconciliation, and last success.
 - Do not expose secrets in Markdown, logs, or business records.
 
-## Provider discovery — TBD
+## Provider discovery
 
 **TBD — Business configuration required:**
 
