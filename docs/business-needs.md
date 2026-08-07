@@ -12,6 +12,7 @@ The business currently needs to reduce fragmented data, manual calculation risk,
 | --- | --- | --- |
 | Increase total and branch sales | Sales growth funds the business and validates branch action plans. | Actual sales versus approved monthly target |
 | Improve repeat visits and loyalty | Retained customers create more stable revenue and lower acquisition cost. | Repeat-visit rate, active members, status movement and retention |
+| Improve contact and service conversion | Calls, check-ins, rooms, requests, drop-offs, and bills must form an explainable service funnel. | Answer rate, booking conversion, visit conversion, drop-off, reconciliation exceptions |
 | Build cross-branch loyalty | One identity and point balance encourage members to use all four branches. | Cross-branch active members, point earn and redemption mix |
 | Protect price integrity and premium positioning | Permanent discounts weaken margin and branch differentiation. | Effective point cost, redemption cost, gross margin, privilege cost |
 | Improve attendance and reduce no-show | Reliable staffing protects service quality and revenue. | Attendance, punctuality, no-show rate |
@@ -43,7 +44,11 @@ Managers need to assign work, receive acknowledgement, follow progress, review e
 
 ### 4. Customer onboarding, reservations, and service
 
-Hosts and receptionists need fast customer lookup or registration, duplicate control, consent capture, preferred communication channels, reservation support, and service history. VIP customers need an appropriate customer-facing experience for membership status, points, privileges, reservations, and approved interactions.
+Call Operators need CallPro-assisted call facts, masked customer lookup/create, purpose classification, reservations, VIP service recognition, and current-shift entertainer availability without full CRM. Reception needs registration, consent, reservation, arrival/check-in, room/session, and structured drop-off. Managers and bartenders need a consolidated realtime service view. VIP customers need the existing Customer Assistant extended for approved public entertainer profiles, room-aware requests, feedback, membership, points, privileges, reservations, and consent.
+
+### Entertainer profile, service, ranking, and income
+
+The business needs configurable internal entertainer traits and measurements with strict public-field separation; four public ranks; new entertainers starting at Gold; four-dimension evidence and human rank decisions; realtime room requests; optional branch-priced extra services; personal performance coaching; and a transparent three-day income statement with effective-dated compensation rules.
 
 ### 5. CRM, membership, points, privileges, and campaigns
 
@@ -62,11 +67,11 @@ CRM is the source of truth for membership, points, privileges, redemptions, eval
 
 ### 6. Sales goals and management intelligence
 
-Every branch needs a monthly sales target and action plan. Sales managers propose; the CEO reviews and approves; Hermes provides data-based recommendations and PWA reminders. The system must show actual sales against target, achievement percentage, progress, risks, and actions.
+The CEO sets each relevant monthly branch/manager target. The Branch Manager reviews it, builds an AI-assisted action plan, submits it for CEO approval, and executes approved ERPNext/Frappe projects/tasks. The system shows target, actual, attainment, plan progress, historical outcomes, and configurable human-reviewed reward/penalty evidence. AI remains advisory.
 
 ### 7. Security, governance, and integration
 
-The business needs deny-by-default permissions, privacy controls, audit logs, configurable and versioned policies, correction by reversal/adjustment, and reliable integration with POS, attendance, corporate banking, messaging, and E-Barimt systems as approved.
+The business needs deny-by-default permissions, field masking, segregation of duties, audit logs, effective-dated policies, correction by reversal/adjustment, Frappe realtime operations, and reliable integration with CallPro, POS, attendance, corporate banking, messaging, and E-Barimt as approved.
 
 ## Priority capability map
 
