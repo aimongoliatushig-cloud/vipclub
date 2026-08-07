@@ -33,6 +33,23 @@ The following are now the preferred requirements baseline:
 
 These decisions supersede the earlier rolling three-month evaluation and separate cashback framing. Example rates, thresholds, quotas, and notice windows remain unapproved values.
 
+## Client interview gaps — resolve before affected implementation
+
+| Gap | Required decision or evidence |
+| --- | --- |
+| CallPro provider contract | Official API/version, auth, fields, history, events, rate limits, sandbox, retention, blocking, and provider owner |
+| Entertainer profile privacy | Final public/staff/internal fields, measurement access, matching use, masking, and retention |
+| Entertainer ranking | KPI weights, thresholds, loyalty rule, work nights, Diamond conditions, cadence, demotion, and authority |
+| Entertainer compensation | Rank shares, tips, wine commission, spreading-tip term/value/share, deductions, overrides, and accounting |
+| Room and realtime service | Room/session identity, QR security, availability transitions, request states, two-minute policy, escalation, and recovery |
+| Customer feedback and incidents | Visibility, review SLA, verification, response, appeal, and KPI/ranking use |
+| Drop-off and reconciliation | Reason taxonomy, bill source/linking, tolerance, exception aging, resolution authority, and KPI use |
+| Extra services | Official term, categories, capability approval, branch pricing, payment, availability, and revenue sharing |
+| Manager KPI and rewards | Components, weights, penalty boundaries, reward formula/allocation, appeal, and accounting |
+| Branch health | Metrics, weights, cadence, severity, colors, and critical alerts |
+| Anonymous feedback | Eligibility, disclosure, reveal authority/reason, retention, and audit review |
+| AI agents | Tool allowlists, authorized sources, explanation standard, and prohibited operations |
+
 ## High-priority product-definition gaps
 
 | Gap | Required decision |
@@ -58,9 +75,9 @@ These decisions supersede the earlier rolling three-month evaluation and separat
 
 ## Technical and operational gaps
 
-- Final frontend framework and PWA build strategy.
-- API contract, authentication/session policy, device/session management, and error-handling standard.
-- POS transaction/refund contract, point-redemption integration, reconciliation, and sandbox evidence.
+- Final frontend framework and PWA build strategy; audit the existing Customer Assistant before extending it.
+- API contract, authentication/session policy, room-QR token model, device/session management, realtime subscription authorization, and error-handling standard.
+- CallPro and POS contracts, transaction/refund and point-redemption integration, event recovery, reconciliation, and sandbox evidence.
 - Integration credentials, sandbox environments, rate limits, retries, idempotency, and reconciliation specifications.
 - Encryption, secret management, backup/restore target, monitoring, logs, alerts, and incident response.
 - Test strategy, seed data, accessibility baseline, performance targets, release procedure, and rollback plan.
