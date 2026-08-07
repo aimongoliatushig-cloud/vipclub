@@ -4,20 +4,21 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 
 ## Model principles
 
-- Every sensitive financial, policy, rank, loyalty, and status change is auditable.
+- Every sensitive financial, policy, rank, membership, point, privilege, and status change is auditable.
 - Corrections use reversal or adjustment records rather than silent deletion.
-- Policies, thresholds, percentages, benefits, and formulas are versioned and effective-dated.
+- Policies, thresholds, percentages, privileges, points, and formulas are versioned and effective-dated.
 - Branch and role scope is enforced server-side.
 - Source-system imports are idempotent and reconcilable.
+- Each member has one company-wide membership account, one visible status, and one point account; branches may vary privilege eligibility only.
 
 ## Organization and access
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
 | Club Branch | An operational branch with company, cost center, timezone, managers, settings, status, and effective dates. New branches are configured without code changes. | Company, Employee, Customer Visit, Task, Policy Scope |
-| Role Scope / Access Grant | Defines a user’s branch, role, date range, and restricted actions or fields. | User, Club Branch |
+| Role Scope / Access Grant | Defines a user's branch, role, date range, and restricted actions or fields. | User, Club Branch |
 | Audit Event | Immutable record of consequential actions and before/after summary. | Actor, any business record |
-| Policy Version | Effective-dated rules used by calculations and workflows. | Ranking, loans, loyalty, benefits |
+| Policy Version | Effective-dated rules used by calculations and workflows. | Ranking, loans, membership, points, privileges |
 
 ## Workforce and operations
 
@@ -35,7 +36,7 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
-| Customer | Core member identity and contact profile. | Consent, Preference, Visit, Reservation |
+| Customer | Core member identity and contact profile. | Consent, Preference, Visit, Reservation, Membership Account |
 | Customer Identity Match | Normalized phone/external identity and duplicate or merge status. | Customer |
 | Customer Consent | Versioned acceptance or revocation of terms and promotional consent. | Customer |
 | Customer Channel Preference | Approved channels and branch subscriptions, such as Viber, Telegram, and email. | Customer, Consent |
@@ -46,24 +47,32 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 ## CRM, segmentation, and messaging
 
 | Entity | Purpose | Key relationships |
-| --- | --- | ---|
+| --- | --- | --- |
 | Customer Segment | Saved behavioral or profile-based group of eligible customers. | Segment Membership, Campaign |
-| Segment Membership | A customer’s membership in a segment and how it was determined. | Customer, Customer Segment |
+| Segment Membership | A customer's membership in a segment and how it was determined. | Customer, Customer Segment |
 | Campaign | Consent-aware broadcast definition, audience, channel, content, approval, and outcome. | Segment, Message Delivery |
 | Message Delivery | Per-customer message history: channel, send time, delivery state, and provider reference. | Customer, Campaign, Consent |
-| Customer Intelligence Snapshot | Calculated customer metrics such as recency, frequency, spend, visit cadence, and entertainer affinity. | Customer, Visits, Reservations |
+| Customer Intelligence Snapshot | Calculated customer metrics such as recency, frequency, spend, point activity, status, visit cadence, and entertainer affinity. | Customer, Visits, Reservations, Membership |
 
-## Five-level membership, benefits, and cashback
+## Unified membership, points, and privileges
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
-| Loyalty Policy Version | Five levels, threshold formula, points/value rules, expiry, downgrade, and effective dates. | Branch, Evaluation, Benefit |
-| Membership Evaluation Snapshot | Explainable result that assigns a member level using approved policy and source values. | Customer, Loyalty Policy |
-| Membership Level Assignment | Current and historical level for a customer, branch scope, effective dates, and reason. | Customer, Membership Evaluation |
-| Benefit Definition | Configurable privilege, eligibility, limits, value, and branch scope. | Loyalty Policy, Benefit Entitlement |
-| Benefit Entitlement | A customer’s available allowance for a benefit in a period. | Customer, Benefit Definition |
-| Benefit Redemption | What benefit was used, by whom, when, where, and any reversal. | Entitlement, Branch, Operator |
-| Cashback Ledger Entry | Immutable credit, redemption, expiry, reversal, or adjustment with monetary value. | Customer, Policy, Source Record |
+| Membership Account | The member's single company-wide loyalty identity, anniversary date, current visible status reference, and lifecycle state. | Customer, Status Assignment, Point Account |
+| Membership Policy Version | Five status names, 12-month qualification rules, eligible-spend logic, threshold inputs, grace and downgrade rules, and effective dates. | Evaluation, Branch Threshold Input, Status Assignment |
+| Branch Threshold Input | Effective-dated branch manager input used by the approved normalization formula; it must not create a separate visible branch rank. | Club Branch, Membership Policy |
+| Membership Evaluation Snapshot | Explainable 12-month anniversary or approved upgrade evaluation with source spend, policy version, shortfall, result, and next review dates. | Membership Account, Policy, Source Transactions |
+| Membership Status Assignment | Current and historical Bronze, Silver, Gold, Diamond, or Black Diamond status for the member across all branches. | Membership Account, Evaluation |
+| Membership Grace Period | Start, expiry, retention threshold, remaining spend, completion result, and any one-level downgrade. | Membership Evaluation, Status Assignment |
+| Membership Assignment Decision | Automatic, Manager Recommended, or CEO Approved launch/override decision with proposer, reason, approver, evidence, and effective date. | Membership Account, Evaluation, Audit Event |
+| Point Account | The member's single cross-branch point account and derived available balance. | Membership Account, Point Ledger Entry |
+| Point Ledger Entry | Immutable earn, redemption, expiry, reversal, or adjustment with MNT value, branch, source, policy, and reconciliation state. | Point Account, Transaction, Redemption |
+| Branch Privilege Policy | Effective-dated branch eligibility and operating terms by company-wide status. | Club Branch, Membership Policy, Benefit Definition |
+| Benefit Definition | Configurable privilege, eligibility, quota period, limits, value, terms, and branch scope. | Branch Privilege Policy, Benefit Entitlement |
+| Benefit Entitlement | A member's available allowance for a privilege in a defined monthly, annual, or other policy period. | Membership Account, Benefit Definition |
+| Benefit Redemption | What privilege was used, by whom, when, where, and any reversal or no-show outcome. | Entitlement, Branch, Operator |
+
+Cashback is not a separate balance in the selected model. Any legacy cashback label maps to the Point Account and Point Ledger Entry unless a later approved decision explicitly creates a distinct product.
 
 ## Performance, rank, income, and loans
 
@@ -93,19 +102,23 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 
 ## Key relationship flows
 
-```text
-Customer → Visit / Reservation → Customer Intelligence → Membership Evaluation
-Membership Level → Benefit Entitlement → Benefit Redemption
-Customer → Cashback Ledger Entry → Available Cashback Balance
+~~~text
+Customer → Membership Account → one Status Assignment
+Customer → Visits / POS Transactions → Eligible Spend → Evaluation
+POS Transaction → Point Ledger Entry → Point Account → Redemption
+Company-wide Status + Branch Privilege Policy → Entitlement → Redemption
+Evaluation → 30-day Grace Period → Retain or at most one-level Downgrade
+Customer → Reservation → Customer Intelligence → Segment / Campaign
 Employee / Entertainer → Attendance + Performance + Income → Rank / Settlement / Loan
 CEO or Manager → Operational Task → Comment / Evidence → Review / Completion
-```
+~~~
 
 ## Important open data decisions
 
-- Exact customer membership formula, thresholds, evaluation frequency, and cross-branch scope.
-- Final five membership-level names and benefit rules.
-- Cashback point-to-currency value, expiry, allowed items, and approval/reversal rules.
-- Source of truth and reconciliation method for POS sales, attendance, reservations, and messaging delivery.
+- Exact eligible-spend definition, threshold values, and method for normalizing branch inputs into one company-wide status.
+- Upgrade timing before the 12-month anniversary and minimum-history rules.
+- Final point earn rates, point-to-MNT value, expiry, balance limits, eligible redemptions, refund handling, and fraud controls.
+- Final privilege terms: Bronze entry, annual transport conditions, monthly entry reset, reservation notice windows, guest and no-show rules, and premium-branch eligibility.
+- Source of truth and reconciliation method for POS sales, reservations, point redemptions, and messaging delivery.
 - Customer and entertainer privacy, retention, masking, and role visibility.
 - Final ERPNext reuse versus custom DocType mapping after repository audit.
