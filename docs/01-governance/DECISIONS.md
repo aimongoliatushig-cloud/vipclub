@@ -71,3 +71,64 @@ This decision does not approve the example 1%–5% earn rates, five spend thresh
 ### Implementation guardrail
 
 No implementation may expose a different visible status by branch, create a second point balance, restore the superseded three-month lifecycle, or hard-code unapproved example values without a later approved decision.
+
+## DR-ENT-001 — Human-controlled entertainer ranking and Gold start
+
+- **Date recorded:** 2026-08-07
+- **Status:** Selected baseline
+- **Source:** Client interview requirements delta
+
+### Decision
+
+Entertainers use Bronze, Silver, Gold, and Diamond ranks. New entertainers start at Gold. The system calculates four-dimension evidence and an explainable recommendation; an authorized human makes the final rank decision.
+
+### Superseded assumptions
+
+- Onboarding/provisional entertainer starting rank.
+- Fully automated rank changes.
+
+### Values not yet approved
+
+Metric weights, thresholds, work nights, loyalty rule, Diamond conditions, cadence, promotion/demotion, grace, and final approval hierarchy remain TBD.
+
+## DR-GOAL-001 — CEO-set monthly target and manager plan
+
+- **Date recorded:** 2026-08-07
+- **Status:** Selected baseline
+- **Source:** Client interview requirements delta
+
+### Decision
+
+The CEO sets the monthly sales target. The Branch Manager prepares an AI-assisted action plan and submits it for CEO approval. Execution uses ERPNext/Frappe projects/tasks where practical. Month-end review covers sales, plan execution, KPI, and human-reviewed reward/penalty outcomes.
+
+### Superseded assumptions
+
+- Branch Sales Manager proposes the monthly target.
+- Planning is fixed at exactly three days before the month.
+
+### Values not yet approved
+
+Early-month deadlines, target baseline, KPI weights, penalty boundaries, reward formula, and branch-health formula remain TBD.
+
+## DR-OPS-001 — Existing Customer Assistant and Frappe realtime operations
+
+- **Date recorded:** 2026-08-07
+- **Status:** Selected baseline
+- **Source:** Client interview requirements delta
+
+### Decision
+
+Extend the existing Customer Assistant and internal PWA. Use permission-checked Frappe services and the selected Frappe realtime/event mechanism for room/session, check-in, reservations, entertainer availability/visibility, requests, and operations workstation updates. Do not create a redundant customer app or a second realtime system.
+
+CallPro integrates through a provider-neutral adapter after API discovery. Provider call facts remain separate from ERP-side business classification.
+
+## DR-AI-001 — Role-scoped assistants with human authority
+
+- **Date recorded:** 2026-08-07
+- **Status:** Selected baseline
+- **Source:** Client interview requirements delta
+
+### Decision
+
+CEO, Manager, and Entertainer assistants have separate role contexts and allowlisted backend tools. AI may analyze, explain, recommend, forecast, coach, and draft projects/tasks. It cannot expand permissions or authorize ranking, compensation, punishment, termination, financial posting, policy, target plan, or reward/penalty decisions.
+
