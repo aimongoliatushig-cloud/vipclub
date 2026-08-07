@@ -12,25 +12,25 @@ Define KPI meaning, source evidence, owner, refresh cadence, drill-down, and whe
 
 | Metric | Definition/source | Owner/cadence | Decision status |
 | --- | --- | --- | --- |
-| Call answer rate | Answered calls ÷ eligible incoming calls from reconciled CallPro facts | Call operations / daily-periodic | Reporting selected; provider fields TBD |
-| Call booking conversion | Calls linked to completed reservation creation ÷ eligible handled calls | Call operations / daily-periodic | Selected reporting metric; denominator TBD |
+| Call answer rate | Answered calls ÷ eligible incoming calls from reconciled CallPro facts | Call operations / daily-periodic | Reporting selected; provider fields: **TBD — Business configuration required** |
+| Call booking conversion | Calls linked to completed reservation creation ÷ eligible handled calls | Call operations / daily-periodic | Selected reporting metric; denominator: **TBD — Business configuration required** |
 | Call purpose distribution | Count/share by ERP-side purpose classification | Call operations / daily-periodic | Selected reporting metric |
 | Entertainer request response time | Arrival or approved response timestamp minus request time | Branch operations / realtime-daily | Candidate manager/customer-experience KPI |
 | Entertainer request completion rate | Completed eligible requests ÷ eligible requests | Branch operations / daily-periodic | Candidate KPI |
-| Missed entertainer requests | Eligible requests ending Missed or timing out under approved rule | Branch operations / daily | Candidate KPI; timeout TBD |
+| Missed entertainer requests | Eligible requests ending Missed or timing out under approved rule | Branch operations / daily | Candidate KPI; timeout: **TBD — Business configuration required** |
 | Visit conversion | Billed/served groups ÷ checked-in groups | Branch operations / daily-periodic | Selected reporting metric |
 | Customer drop-off rate | Recorded legitimate drop-offs ÷ checked-in groups | Branch operations / daily-periodic | Selected reporting metric |
 | Reconciliation exception rate | Unexplained customer sessions ÷ checked-in groups | Branch operations / daily-periodic | Selected exception metric |
-| Customer feedback trend | Counts/rates by compliment, complaint, suggestion, branch, and resolved state | Branch Manager / periodic | Reporting selected; compensation use TBD |
-| Entertainer sales/performance | Approved eligible sales/performance from reconciled source | Ranking owner / configured window | Ranking dimension; threshold/weight TBD |
-| Entertainer attendance/reliability | Attendance, late, no-show, work-night evidence | Ranking owner / configured window | Ranking dimension; rules/weight TBD |
-| Entertainer customer loyalty | Repeat customers/reservations under approved definition | Ranking owner / configured window | Ranking dimension; repeat rule/weight TBD |
-| Entertainer behavioral record | Reviewed verified incidents, not raw complaints | Ranking owner / configured window | Ranking dimension; scoring TBD |
+| Customer feedback trend | Counts/rates by compliment, complaint, suggestion, branch, and resolved state | Branch Manager / periodic | Reporting selected; compensation use: **TBD — Business configuration required** |
+| Entertainer sales/performance | Approved eligible sales/performance from reconciled source | Ranking owner / configured window | Ranking dimension; threshold/weight: **TBD — Business configuration required** |
+| Entertainer attendance/reliability | Attendance, late, no-show, work-night evidence | Ranking owner / configured window | Ranking dimension; rules/weight: **TBD — Business configuration required** |
+| Entertainer customer loyalty | Repeat customers/reservations under approved definition | Ranking owner / configured window | Ranking dimension; repeat rule/weight: **TBD — Business configuration required** |
+| Entertainer behavioral record | Reviewed verified incidents, not raw complaints | Ranking owner / configured window | Ranking dimension; scoring: **TBD — Business configuration required** |
 | Manager target attainment | Actual reconciled sales ÷ CEO-set target | CEO / periodic-monthly | Selected measure |
-| Manager task execution | Approved completion/overdue evidence from projects/tasks | CEO / periodic-monthly | Candidate KPI weight TBD |
-| Manager attendance/reliability | Approved manager attendance, late, no-show evidence | CEO / monthly | Candidate KPI weight TBD |
-| Manager reward/penalty | Result of approved effective-dated financial policy and human review | HR/Accounting / monthly | Formula/boundaries TBD |
-| Branch health | Configured composition of approved branch metrics | CEO / daily or periodic TBD | **TBD — Branch Health Score formula to be finalized with client.** |
+| Manager task execution | Approved completion/overdue evidence from projects/tasks | CEO / periodic-monthly | Candidate KPI weight: **TBD — Business configuration required** |
+| Manager attendance/reliability | Approved manager attendance, late, no-show evidence | CEO / monthly | Candidate KPI weight: **TBD — Business configuration required** |
+| Manager reward/penalty | Result of approved effective-dated financial policy and human review | HR/Accounting / monthly | Formula/boundaries: **TBD — Business configuration required** |
+| Branch health | Configured composition of approved branch metrics | CEO / cadence: **TBD — Business configuration required** | **TBD — Business configuration required** |
 
 ## Candidate customer-experience inputs
 
