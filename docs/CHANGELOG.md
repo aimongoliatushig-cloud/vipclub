@@ -17,7 +17,7 @@ Merged the client interview requirements into the existing authoritative specifi
 - Configurable entertainer revenue shares, tips, wine commission, spreading tip, transparent three-day statements, and audit.
 - Room-QR Customer Assistant, public entertainer profiles, realtime availability/requests, extra services, and customer feedback.
 - Reception check-in, structured drop-off, bill reconciliation exceptions, and consolidated manager/bartender operations view.
-- CEO-set targets, manager AI-assisted plans, ERPNext tasks/projects, manager KPI candidates, penalty/reward review, history, and branch-health TBD.
+- CEO-set targets, manager AI-assisted plans, ERPNext tasks/projects, manager KPI candidates, penalty/reward review, history, and branch-health configuration marked **TBD — Business configuration required**.
 - Direct internal messaging, upward and recipient-anonymous feedback, audited sender reveal.
 - Role-scoped CEO, Manager, and Entertainer assistants.
 - KPI, dashboard, permission, segregation, API, realtime, data-model, state, module, and integration documentation.
@@ -32,7 +32,7 @@ Merged the client interview requirements into the existing authoritative specifi
 
 ### Still open
 
-CallPro provider contract, ranking values, Diamond conditions, compensation values, deductions, extra-service rules, request SLA, room/session security, drop-off/reconciliation policy, manager KPI, penalties, rewards, branch health, task states, anonymous-feedback policy, and AI tool allowlists remain explicit TBD decisions.
+CallPro provider contract, ranking values, Diamond conditions, compensation values, deductions, extra-service rules, request SLA, room/session security, drop-off/reconciliation policy, manager KPI, penalties, rewards, branch health, task states, anonymous-feedback policy, and AI tool allowlists are marked **TBD — Business configuration required**.
 
 ## 2026-08-07 — Unified membership and loyalty baseline
 
