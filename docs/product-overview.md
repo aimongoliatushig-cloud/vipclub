@@ -67,7 +67,7 @@ See [CRM and Loyalty Requirements](crm-and-loyalty-requirements.md) for the comp
 - Start new entertainers at Gold; calculate explainable four-dimension ranking recommendations while authorized humans make final decisions.
 - Provide transparent three-day entertainer statements with configurable rank share, tips, wine commission, spreading tip, deductions, and historical policy versions.
 - Let the CEO set monthly targets; managers build AI-assisted action plans; CEO approves; results feed KPI, reward/penalty review, and the next cycle.
-- Keep branch-health, manager KPI weights, financial boundaries, extra-service rules, and external API details explicitly TBD until approved.
+- Keep branch-health, manager KPI weights, financial boundaries, extra-service rules, and external API details at **TBD — Business configuration required** until approved.
 
 ## Hermes assistant
 
