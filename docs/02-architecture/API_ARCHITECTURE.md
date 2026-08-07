@@ -96,7 +96,7 @@ Errors should distinguish:
 - duplicate/idempotent replay;
 - unavailable external provider;
 - reconciliation required;
-- policy/TBD not configured.
+- required business configuration is not completed.
 
 Do not expose secrets, private fields, or raw stack traces to end users.
 
