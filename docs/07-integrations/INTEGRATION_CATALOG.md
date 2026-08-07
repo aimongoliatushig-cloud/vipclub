@@ -17,7 +17,7 @@ List source systems, ownership, direction, authentication discovery, reconciliat
 | Attendance | Check-in/out and attendance evidence | Attendance system → ERP with correction workflow | Approved attendance source plus ERP adjustments | [Attendance](ATTENDANCE.md) |
 | Bank | Approved payment initiation/evidence and reconciliation | Controlled bidirectional | Bank for transaction result; ERP for approved business payment | [Bank](BANK.md) |
 | E-Barimt | Tax/receipt evidence | Controlled bidirectional | Provider/authority response plus ERP source transaction | [E-Barimt](EBARIMT.md) |
-| Messaging providers | Consented customer campaign and delivery state | ERP → provider; status → ERP | ERP for consent/audience; provider for delivery facts | Provider **TBD** |
+| Messaging providers | Consented customer campaign and delivery state | ERP → provider; status → ERP | ERP for consent/audience; provider for delivery facts | **TBD — Business configuration required** |
 
 ## Shared controls
 
