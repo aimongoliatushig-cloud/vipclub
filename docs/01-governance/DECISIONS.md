@@ -89,7 +89,7 @@ Entertainers use Bronze, Silver, Gold, and Diamond ranks. New entertainers start
 
 ### Values not yet approved
 
-Metric weights, thresholds, work nights, loyalty rule, Diamond conditions, cadence, promotion/demotion, grace, and final approval hierarchy remain TBD.
+Metric weights, thresholds, work nights, loyalty rule, Diamond conditions, cadence, promotion/demotion, grace, and final approval hierarchy remain **TBD — Business configuration required**.
 
 ## DR-GOAL-001 — CEO-set monthly target and manager plan
 
@@ -108,7 +108,7 @@ The CEO sets the monthly sales target. The Branch Manager prepares an AI-assiste
 
 ### Values not yet approved
 
-Early-month deadlines, target baseline, KPI weights, penalty boundaries, reward formula, and branch-health formula remain TBD.
+Early-month deadlines, target baseline, KPI weights, penalty boundaries, reward formula, and branch-health formula remain **TBD — Business configuration required**.
 
 ## DR-OPS-001 — Existing Customer Assistant and Frappe realtime operations
 
