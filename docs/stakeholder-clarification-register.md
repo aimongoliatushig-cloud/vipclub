@@ -53,19 +53,22 @@ Use this register to collect decisions and missing data from the CEO, branch man
 | CL-034 | Confirm what customer information, reservations, and entertainer-affinity insight each role may view. | CEO / Legal adviser | High | Open |
 | CL-035 | Confirm whether eligible VIP transport is a loyalty benefit, its qualification rules, booking process, and privacy safeguards. | CEO / Branch managers | Medium | Open |
 
-## 5. Membership, benefits, and cashback
+## 5. Membership, points, and privileges
+
+The supplied unified Membership & Loyalty proposal is the preferred requirements baseline. “Proposed” below means selected for the working baseline but still awaiting the named business owner's formal policy approval where required.
 
 | ID | Question or data needed | Decision owner | Risk | Status |
-| --- | --- | --- | --- | ---|
-| CL-040 | Confirm the five membership-level names, entry level, and customer-facing descriptions. | CEO / Marketing | High | Open |
-| CL-040A | Approve the proposed membership lifecycle: New/Provisional status, rolling three-month average, inactive months counted as zero, and a controlled downgrade grace rule. | CEO / General Manager | High | Open |
-| CL-041 | Choose the membership calculation: rolling 12-month spend, active-month average, lifetime average, lifetime spend, or another approved formula. | CEO / General accountant / Marketing | High | Open |
-| CL-042 | Define what counts as eligible spend and how refunds, cancellations, discounts, complimentary items, and corrections affect it. | General accountant / CEO | High | Open |
-| CL-043 | Confirm branch-specific thresholds, who can change them, effective dates, audit rule, and how multi-branch customers are classified. | CEO / Branch managers | High | Open |
-| CL-044 | Confirm membership-evaluation frequency, upgrade/downgrade, grace period, manual override, and review process. | CEO / Marketing | High | Open |
-| CL-045 | Define benefits for each level, including free-entry allowances, VIP transport, reservation priority, and branch scope. | CEO / Branch managers / Marketing | High | Open |
-| CL-046 | Confirm cashback monetary value, credit sources, eligible redemptions, expiry, balance limits, fraud controls, approvals, and reversal process. | CEO / General accountant | High | Open |
-| CL-047 | Confirm how benefit use and cashback redemption are verified at the branch and reconciled with sales/POS records. | Branch managers / Transaction accountant | High | Open |
+| --- | --- | --- | --- | --- |
+| CL-040 | Confirm customer-facing descriptions and translations for the selected five names: Bronze, Silver, Gold, Diamond, and Black Diamond. | CEO / Marketing | High | Proposed |
+| CL-040A | Earlier New/Provisional plus rolling three-month average lifecycle. Superseded by the 12-month anniversary model in the preferred proposal. | CEO / General Manager | High | Superseded |
+| CL-041 | Approve the 12-month individual qualification/anniversary model and define eligible spend, upgrade timing, minimum history, refunds, cancellations, discounts, complimentary items, and corrections. | CEO / General accountant / Marketing | High | Proposed |
+| CL-043 | Confirm the five spend-threshold values and how branch inputs and multi-branch spend are normalized into one company-wide visible status. | CEO / Branch managers / General accountant | High | Open |
+| CL-044 | Approve the 30-day grace period, at-most-one-level downgrade, shortfall notification cadence, manual exception authority, and review/appeal process. | CEO / Marketing | High | Proposed |
+| CL-045 | Validate the working privilege matrix: annual transport quotas, monthly non-carrying entry quotas, reservation priority/notice, guest rules, premium-branch eligibility, hold/no-show, abuse, reset, and reversal rules. | CEO / Branch managers / Marketing | High | Open |
+| CL-046 | Confirm point economics: final earn rates, point-to-MNT conversion, liability treatment, expiry, balance limits, eligible redemptions, breakage, refund behavior, fraud controls, approvals, and reversals. | CEO / General accountant | High | Open |
+| CL-047 | Confirm how point earn/redemption and privilege use are verified at each branch and reconciled with POS transaction/refund records. | Branch managers / Transaction accountant / Technical owner | High | Open |
+| CL-048 | Approve launch migration: use verified history from April 2026 onward; allow manager nomination when data is incomplete; require reason, source tag, and CEO approval; then move all members to the same automatic rules. | CEO / General Manager / Branch managers | High | Proposed |
+| CL-049 | Confirm which roles may view or edit status, points, privileges, spend shortfall, branch rules, entertainer affinity, and manual assignment evidence. | CEO / Legal adviser | High | Open |
 
 ## 6. Integrations, security, and implementation
 
