@@ -22,7 +22,7 @@ Define who may prepare, review, approve, activate, pay, reconcile, and audit sen
 | Manager penalty | Policy calculation/flag | HR/management/finance review | Authorized payroll adjustment | HR/accounting/audit |
 | Employment termination review | System may flag only | Authorized human HR/management process | HR lifecycle workflow | CEO/HR audit |
 | Monthly target and plan | CEO sets target; manager prepares plan | CEO approves plan | Goal service activates approved version | CEO/management review |
-| Customer phone block | Call Operator/manager action or proposal per policy | Review authority **TBD** | Call-control/customer service | Manager/audit |
+| Customer phone block | Call Operator/manager action or proposal per policy | Review authority **TBD — Business configuration required** | Call-control/customer service | Manager/audit |
 | Verified incident | Manager reports, evidence attached | Authorized management/HR review | Incident service marks verified/resolved | HR/CEO audit |
 | Reconciliation exception | System detects; manager investigates | Branch Manager resolves; higher review as required | Reconciliation service | CEO/accounting |
 | Anonymous identity reveal | Authorized request with purpose | Tightly permissioned CEO/audit authority | Audit service reveals minimum identity | Independent audit log review |
