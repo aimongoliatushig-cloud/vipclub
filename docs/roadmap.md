@@ -38,7 +38,7 @@ GitHub Markdown is the business source of truth; Linear tracks delivery work. Th
 
 - Implement CEO-set monthly targets, AI-assisted manager plans, CEO plan approval, ERPNext projects/tasks, progress coaching, and monthly history.
 - Implement configurable manager KPI evidence, human-reviewed underperformance flags, above-target reward allocation, and audit.
-- Implement candidate branch-health snapshots with the final formula remaining TBD until approved.
+- Implement candidate branch-health snapshots with the final formula marked **TBD — Business configuration required** until approved.
 - Validate membership point economics, entertainer compensation, extra-service revenue, manager reward/penalty accounting, payroll, statutory rules, E-Barimt, bank/payment, and reconciliation.
 - Deliver reporting for CallPro/operator, service conversion/drop-off, requests, feedback, ranking, income, rewards, plans, and branch operations.
 - Complete security, privacy, monitoring, backup/recovery, training, pilot, support, and production rollout.
@@ -50,6 +50,6 @@ GitHub Markdown is the business source of truth; Linear tracks delivery work. Th
 - CEO sets monthly sales targets; managers build plans, replacing manager-proposed targets.
 - Planning deadlines are configurable, replacing the hard-coded three-days-before-month rule.
 - Ranking, compensation, discipline, employment, targets/plans, rewards, and policies remain human-authorized.
-- CallPro endpoint details, KPI/health formulas, exact financial values, extra-service rules, and operational SLAs remain explicit TBDs.
+- CallPro endpoint details, KPI/health formulas, exact financial values, extra-service rules, and operational SLAs are marked **TBD — Business configuration required**.
 - ERPNext/Frappe remains the business system of record; PWA and AI are authorized interaction layers.
 - One visible customer membership status and point balance remain company-wide; branch variation applies to privileges.
