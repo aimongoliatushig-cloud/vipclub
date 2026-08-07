@@ -30,7 +30,7 @@
 | CL-014 | Энтертайнерийн гурван өдрийн тооцоонд орох борлуулалтын бүртгэл, орлого хуваарилах хувийг батална уу. | Ерөнхий нягтлан / Салбарын менежер | Өндөр | Нээлттэй |
 | CL-015 | Ажил эрхлэлтийн төрөл бүр зээлд хамрагдах эсэх, доод хугацаа, орлогын түүх, дээд дүн, эргэн төлөлт, ажлаас гарах үеийн зохицуулалтыг батална уу. | CEO / ХН / Ерөнхий нягтлан | Өндөр | Нээлттэй |
 | CL-016 | Зээлийн батлах эрх, банк/төлбөрийн нотолгоо, засвар эсвэл буцаалтын үйл явцыг батална уу. | CEO / Төлбөрийн нягтлан | Өндөр | Нээлттэй |
-| CL-017 | **CEO эсвэл Ерөнхий менежерийн баталгаа шаардлагатай:** энтертайнерийн дөрвөн зэрэглэл, гулсах үнэлгээ, давтан ирээгүй тохиолдлын hard gate/эрхийн түдгэлзүүлэлт, борлуулалтын тогтвортой бууралтын зэрэг бууруулах дүрэм, хөнгөлөлтийн хугацаа, эрх, гомдлын үйл явцыг батална уу. | CEO / Ерөнхий менежер / Ахлах энтертайнер | Өндөр | Нээлттэй |
+| CL-017 | Энтертайнерийн шинэ ranking baseline-ийг батална уу: шинэ энтертайнер Gold-оос эхлэх; дөрвөн rank; sales, attendance/reliability, customer loyalty, verified incident evidence; тайлбарлагдах recommendation; authorized human final decision; promotion/demotion болон appeal. | CEO / Ерөнхий менежер / Ахлах энтертайнер | Өндөр | Санал болгосон |
 
 ## 3. Ажил, засвар, удирдлагын зорилго
 
@@ -40,7 +40,7 @@
 | CL-021 | Хугацаа хэтэрсэн ажлын сануулга, шатлан мэдэгдэх хугацаа, PWA мэдэгдэл, CEO-ийн харагдацыг батална уу. | Салбарын менежер / CEO | Дунд | Нээлттэй |
 | CL-022 | Бүх ажилтан өдөр тутмын ажлын төлөвлөгөө ашиглах эсэх, ажлын нотолгооны түвшинг батална уу. | CEO / Салбарын менежер | Дунд | Нээлттэй |
 | CL-023 | Техникийн болон мужааны засварын ангилал, яаралтай түвшин, батлах дүрэм, үйлчилгээний хугацааг батална уу. | Салбарын менежер | Дунд | Нээлттэй |
-| CL-024 | Сарын борлуулалтын зорилтын суурь, салбарын менежерийн санал, CEO-ийн баталгаа, хяналтын хуанлийг батална уу. | CEO / Салбарын менежер | Өндөр | Нээлттэй |
+| CL-024 | Шинэ сарын cycle-ийг батална уу: CEO target тогтоох; Branch Manager action plan боловсруулах; CEO plan батлах; эхний өдрүүдийн deadline, source baseline, review timing, history-г тохируулах. | CEO / Салбарын менежерүүд | Өндөр | Санал болгосон |
 
 ## 4. Харилцагч, CRM, мессеж
 
@@ -79,6 +79,47 @@
 | CL-052 | Backup, сэргээх, мониторинг, access review, incident response, audit retention шаардлагыг батална уу. | CEO / Техникийн эзэн | Өндөр | Нээлттэй |
 | CL-053 | Ажилтан, харилцагч, санхүүгийн өгөгдлийн нууцлал, хадгалалт, устгал, masking, export control дүрмийг батална уу. | CEO / Хуульч / Техникийн эзэн | Өндөр | Нээлттэй |
 | CL-054 | Туршилтын салбар, хэрэглэгч, сургалтын эзэн, нэвтрүүлэх шалгуур, support эзнийг батална уу. | CEO / Салбарын менежер | Дунд | Нээлттэй |
+
+## 7. Дуудлага болон CallPro
+
+| ID | Асуулт эсвэл шаардлагатай өгөгдөл | Шийдвэрийн эзэн | Эрсдэл | Статус |
+| --- | --- | --- | --- | --- |
+| CL-055 | CallPro-ийн албан ёсны API document, version, authentication, call field, history, webhook/polling, signature, rate limit, retry, sandbox, retention, support owner-ийг батална уу. | Техникийн эзэн / Call Operations | Өндөр | Нээлттэй |
+| CL-056 | Call Operator permission, customer minimum field, VIP indicator, phone masking, call purpose, optional note, current-shift entertainer visibility-г батална уу. | CEO / Call Operations / Хуульч | Өндөр | Санал болгосон |
+| CL-057 | Prank/abusive/block/unblock policy, reason/evidence, хугацаа, review/appeal, CallPro эсвэл ERP enforcement-ийг батална уу. | CEO / Call Operations / Хуульч | Өндөр | Нээлттэй |
+
+## 8. Энтертайнер profile, ranking, compensation, extra
+
+| ID | Асуулт эсвэл шаардлагатай өгөгдөл | Шийдвэрийн эзэн | Эрсдэл | Статус |
+| --- | --- | --- | --- | --- |
+| CL-060 | Public, staff-visible, internal-only, private entertainer field болон body measurement/matching trait-ийг хэн ашиглахыг батална уу. | CEO / ХН / Хуульч / Салбарын менежерүүд | Өндөр | Нээлттэй |
+| CL-061 | Entertainer KPI definition/weight, rank threshold, repeat-customer rule, late/no-show limit, work night, cadence, promotion/demotion, final approver-ийг батална уу. | CEO / Ерөнхий менежер / Ахлах энтертайнер | Өндөр | Нээлттэй |
+| CL-062 | Diamond requirement-д ойролцоогоор 3 сарын qualifying performance, 9 шинэ entertainer recruitment орох эсэх болон evidence-ийг батална уу. | CEO / Ерөнхий менежер | Өндөр | Нээлттэй |
+| CL-063 | Rank share 50/60/70/80% санал, normal tip, wine commission, spreading tip нэр/value/share, branch override, accounting treatment-ийг батална уу. | CEO / Ерөнхий нягтлан / Салбарын менежерүүд | Өндөр | Нээлттэй |
+| CL-064 | Deduction category/amount болон missed/late entertainer request нь human review-ийн дараа deduction болох эсэхийг батална уу. | CEO / ХН / Ерөнхий нягтлан / Хуульч | Өндөр | Нээлттэй |
+| CL-065 | Extra service-ийн албан нэр, category, capability approval, branch price, customer payment/request flow, availability, revenue share-ийг батална уу. | CEO / Салбарын менежерүүд / Ерөнхий нягтлан | Өндөр | Нээлттэй |
+
+## 9. Customer Assistant болон салбарын ажиллагаа
+
+| ID | Асуулт эсвэл шаардлагатай өгөгдөл | Шийдвэрийн эзэн | Эрсдэл | Статус |
+| --- | --- | --- | --- | --- |
+| CL-070 | Room QR/session authentication, token lifetime, customer/group binding, request status, availability transition, 2 минутын target, escalation, outage fallback-ийг батална уу. | Техникийн эзэн / Салбарын менежерүүд | Өндөр | Нээлттэй |
+| CL-071 | Customer feedback category, visibility, review/response, compliment evidence, complaint-оос verified incident болох нөхцөлийг батална уу. | CEO / Салбарын менежерүүд / Хуульч | Өндөр | Нээлттэй |
+| CL-072 | Drop-off reason, free text, bill link source, reconciliation tolerance, exception aging, resolution authority, KPI use-ийг батална уу. | CEO / Салбарын менежерүүд / Нягтлан | Өндөр | Нээлттэй |
+| CL-073 | Bartender/Floor Operations service field, phone masking, workstation scope, room-status source, realtime freshness-ийг батална уу. | CEO / Салбарын менежерүүд / Хуульч / Техникийн эзэн | Өндөр | Нээлттэй |
+| CL-074 | Discreet membership theme болон customer/public availability wording-ийг батална уу. | CEO / Маркетинг / Хуульч | Дунд | Нээлттэй |
+
+## 10. Manager KPI, health, task, AI, messaging
+
+| ID | Асуулт эсвэл шаардлагатай өгөгдөл | Шийдвэрийн эзэн | Эрсдэл | Статус |
+| --- | --- | --- | --- | --- |
+| CL-080 | Manager KPI component/weight, attendance/task weighting, customer-experience metric compensation-д орох эсэхийг батална уу. | CEO / ХН / Ерөнхий нягтлан | Өндөр | Нээлттэй |
+| CL-081 | Target penalty boundary, salary base, stacking, exception, appeal, 80/70/60/50% interview input-ийн treatment-ийг батална уу. | CEO / ХН / Ерөнхий нягтлан / Хуульч | Өндөр | Нээлттэй |
+| CL-082 | Above-target reward pool formula, incremental sales, manager share, team allocation authority, review, accounting, payout-ийг батална уу. | CEO / Ерөнхий нягтлан | Өндөр | Нээлттэй |
+| CL-083 | Branch Health Score metric, weight, cadence, severity, red/amber/green threshold, critical alert-ийг тодорхойлно уу. | CEO / Ерөнхий менежер | Өндөр | Нээлттэй |
+| CL-084 | Project/Task state, acceptance, rework/reopen, hierarchy exception, reminder, escalation, attachment, retention-ийг батална уу. | CEO / Ерөнхий менежер / Салбарын менежерүүд | Дунд | Нээлттэй |
+| CL-085 | Direct-message retention, recipient-anonymous feedback eligibility, disclosure, identity reveal authority/reason, audit review-ийг батална уу. | CEO / ХН / Хуульч | Өндөр | Нээлттэй |
+| CL-086 | CEO, Manager, Entertainer assistant tool allowlist, data source, explanation standard, prohibited action-ийг батална уу. | CEO / Техникийн эзэн / Хуульч | Өндөр | Нээлттэй |
 
 ## Баталгаажуулалтын тэмдэглэл
 
