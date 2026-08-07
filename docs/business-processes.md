@@ -37,15 +37,28 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 | P23 | Formal order and policy acknowledgement | Issue a required instruction and capture read/acknowledgement evidence. | CEO / Manager |
 | P24 | Maintenance request and closure | Report, assign, repair, verify, and close maintenance work. | Branch manager |
 
-## Phase 3 — CRM, Loyalty, Benefits, and Intelligence
+## Phase 3 — CRM, Membership, Points, Privileges, and Intelligence
 
 | ID | Process | Purpose | Primary owner |
 | --- | --- | --- | --- |
-| P30 | Customer visit and spend attribution | Link verified visits and eligible spend to a customer, branch, reservation, and entertainer when applicable. | Reception / Operations |
-| P31 | Membership-level evaluation | Apply approved branch-specific policy to assign one of five customer membership levels. | CRM manager |
-| P32 | Benefit and cashback lifecycle | Issue, use, expire, reverse, and audit privileges and cashback value. | CRM manager / Finance |
-| P33 | Customer segmentation and campaign | Build a segment, validate consent, send a campaign, and track communication history and outcomes. | Marketing / CRM manager |
-| P34 | Customer intelligence review | Analyze visit cadence, spend, value, loyalty, branch behavior, and entertainer affinity. | Manager / CEO |
+| P30 | Customer visit and spend attribution | Reconcile verified visits and eligible spend to a customer, branch, reservation, and entertainer when applicable. | Reception / Operations |
+| P31 | Unified membership evaluation | Evaluate eligible spend against the effective policy and maintain one Bronze-to-Black-Diamond status across all branches. | CRM manager |
+| P32 | Point earn, redemption, and correction | Earn points from verified POS transactions; redeem, expire, reverse, adjust, and reconcile one cross-branch point ledger. | CRM manager / Finance |
+| P33 | Privilege entitlement and use | Issue branch-eligible quotas and privileges, check availability, use or reverse them, reset periodic allowances, and audit every event. | CRM manager / Branch manager |
+| P34 | Customer segmentation and campaign | Build a segment, validate consent, send a campaign, and track communication history and outcomes. | Marketing / CRM manager |
+| P35 | Customer intelligence review | Analyze visit cadence, spend, point activity, status, privilege use, branch behavior, and entertainer affinity. | Manager / CEO |
+| P36 | Membership launch migration and manual approval | Calculate initial statuses from available history or route manager nominations through CEO approval with reason and source tags. | CEO / CRM manager |
+
+## Membership process rules
+
+- Membership evaluation stores one visible status for the member across the company.
+- Branch policy changes privilege eligibility, not the displayed status name.
+- The retention review occurs on the member's 12-month anniversary.
+- A missed retention threshold starts a 30-day grace period; any completed downgrade reduces status by no more than one level.
+- CRM records the spend shortfall needed to retain or unlock status and may send approved notifications.
+- POS supplies transaction facts; CRM owns status, point ledger, privileges, anniversary, and approval state.
+- Monthly entry quotas do not carry over. Annual transport and other periodic quotas reset according to the effective policy.
+- Open numerical values and exact operating rules remain configuration or explicit approvals, never hidden constants.
 
 ## Phase 4 and later
 
@@ -64,11 +77,15 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 4. P20 Task assignment and acknowledgement
 5. P21 Task execution and completion
 6. P16 Reservation lifecycle
-7. P31 Membership-level evaluation
-8. P32 Benefit and cashback lifecycle
-9. P33 Customer segmentation and campaign
-10. P40 CEO–Manager Goal Engine
+7. P31 Unified membership evaluation
+8. P32 Point earn, redemption, and correction
+9. P33 Privilege entitlement and use
+10. P36 Membership launch migration and manual approval
+11. P34 Customer segmentation and campaign
+12. P40 CEO–Manager Goal Engine
+
+Existing membership and benefit/cashback BPMN diagrams must be revised before implementation so they reflect the unified status, 12-month anniversary, 30-day grace, point ledger, and branch-specific privilege model.
 
 ## Open design decisions
 
-Detailed BPMN work must not invent policy. The main pending decisions are membership formula and thresholds, cross-branch classification, task approval/reopening, benefit/cashback controls, and channel-provider behavior.
+Detailed BPMN work must not invent policy. The membership framework is selected, while eligible spend, cross-branch threshold normalization, exact thresholds, upgrade timing, point economics, privilege terms, role authority, reconciliation, and abuse controls remain open decisions.
