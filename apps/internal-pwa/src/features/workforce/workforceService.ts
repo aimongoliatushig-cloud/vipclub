@@ -2,8 +2,12 @@ import {
   shiftTemplates,
   workforceRoles,
   type AssignmentInput,
+  type AttendanceDecisionAction,
+  type AttendanceException,
   type CoverageRow,
   type ExecutiveFollowUpSummary,
+  type ManagerDashboardSummary,
+  type ReadinessRow,
   type ResponseQueueItem,
   type ShiftAssignment,
   type StaffingRequirement,
@@ -16,6 +20,7 @@ import {
 const STORAGE_KEY = 'vipclub.workforce.manager-prototype.v1'
 const DAY_MS = 86_400_000
 const ACKNOWLEDGEMENT_WINDOW_MS = DAY_MS
+const AUTHORIZED_BRANCH_ID = 'branch-central'
 
 export function toDateKey(date: Date): string {
   const year = date.getFullYear()
@@ -47,7 +52,9 @@ export function weekDates(weekStart: string): string[] {
 export function getCoverage(roster: WeeklyRoster): CoverageRow[] {
   return roster.requirements.map((requirement) => {
     const scheduled = roster.assignments.filter(
-      (assignment) => assignment.date === requirement.date && assignment.role === requirement.role,
+      (assignment) => assignment.date === requirement.date
+        && assignment.role === requirement.role
+        && !isMemberUnavailable(roster, assignment.teamMemberId, assignment.date),
     ).length
     return {
       ...requirement,
@@ -58,8 +65,24 @@ export function getCoverage(roster: WeeklyRoster): CoverageRow[] {
 }
 
 export interface WorkforceService {
-  getTeamMembers(): TeamMember[]
+  getTeamMembers(branchId?: string): TeamMember[]
   getRoster(weekStart: string): WeeklyRoster
+  getManagerDashboard(weekStart: string): ManagerDashboardSummary
+  getReadiness(weekStart: string): ReadinessRow[]
+  getAttendanceExceptions(weekStart: string): AttendanceException[]
+  decideAttendanceException(
+    weekStart: string,
+    exceptionId: string,
+    decision: AttendanceDecisionAction,
+    reason: string,
+  ): WeeklyRoster
+  overrideAvailability(
+    weekStart: string,
+    teamMemberId: string,
+    date: string,
+    available: boolean,
+    reason: string,
+  ): WeeklyRoster
   upsertAssignment(weekStart: string, input: AssignmentInput): WeeklyRoster
   removeAssignment(weekStart: string, assignmentId: string, reason?: string): WeeklyRoster
   publishRoster(weekStart: string, shortageReason?: string): WeeklyRoster
@@ -85,19 +108,20 @@ export interface WorkforceService {
 }
 
 const demoWeekStart = startOfWeek(new Date())
+const demoStatusAt = new Date().toISOString()
 
 const teamMembers: TeamMember[] = [
-  { id: 'tm-anu', name: 'Anu Bat', initials: 'AB', role: 'Entertainer', active: true, unavailableDates: [] },
-  { id: 'tm-bolor', name: 'Bolor Erdene', initials: 'BE', role: 'Entertainer', active: true, unavailableDates: [] },
-  { id: 'tm-naraa', name: 'Naraa Munkh', initials: 'NM', role: 'Entertainer', active: true, unavailableDates: [] },
-  { id: 'tm-solongo', name: 'Solongo Tseren', initials: 'ST', role: 'Entertainer', active: true, unavailableDates: [addDays(demoWeekStart, 3)] },
-  { id: 'tm-temuulen', name: 'Temuulen Baatar', initials: 'TB', role: 'Server', active: true, unavailableDates: [] },
-  { id: 'tm-bilguun', name: 'Bilguun Dorj', initials: 'BD', role: 'Server', active: true, unavailableDates: [addDays(demoWeekStart, 4)] },
-  { id: 'tm-sarnai', name: 'Sarnai Gan', initials: 'SG', role: 'Bartender', active: true, unavailableDates: [] },
-  { id: 'tm-oyun', name: 'Oyun Bold', initials: 'OB', role: 'Bartender', active: true, unavailableDates: [] },
-  { id: 'tm-enkhjin', name: 'Enkhjin Amar', initials: 'EA', role: 'Reception', active: true, unavailableDates: [] },
-  { id: 'tm-munkh', name: 'Munkh Orgil', initials: 'MO', role: 'Security', active: true, unavailableDates: [] },
-  { id: 'tm-altan', name: 'Altan Sukh', initials: 'AS', role: 'Security', active: true, unavailableDates: [] },
+  { id: 'tm-anu', name: 'Anu Bat', initials: 'AB', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt, rank: 'Gold' },
+  { id: 'tm-bolor', name: 'Bolor Erdene', initials: 'BE', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'reserved', statusUpdatedAt: demoStatusAt, rank: 'Silver' },
+  { id: 'tm-naraa', name: 'Naraa Munkh', initials: 'NM', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'break', statusUpdatedAt: demoStatusAt, rank: 'Bronze' },
+  { id: 'tm-solongo', name: 'Solongo Tseren', initials: 'ST', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [addDays(demoWeekStart, 3)], operationalStatus: 'late', statusUpdatedAt: demoStatusAt, rank: 'Diamond' },
+  { id: 'tm-temuulen', name: 'Temuulen Baatar', initials: 'TB', branchId: AUTHORIZED_BRANCH_ID, role: 'Server', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-bilguun', name: 'Bilguun Dorj', initials: 'BD', branchId: AUTHORIZED_BRANCH_ID, role: 'Server', active: true, unavailableDates: [addDays(demoWeekStart, 4)], operationalStatus: 'absent', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-sarnai', name: 'Sarnai Gan', initials: 'SG', branchId: AUTHORIZED_BRANCH_ID, role: 'Bartender', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-oyun', name: 'Oyun Bold', initials: 'OB', branchId: AUTHORIZED_BRANCH_ID, role: 'Bartender', active: true, unavailableDates: [], operationalStatus: 'leave', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-enkhjin', name: 'Enkhjin Amar', initials: 'EA', branchId: AUTHORIZED_BRANCH_ID, role: 'Reception', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-munkh', name: 'Munkh Orgil', initials: 'MO', branchId: AUTHORIZED_BRANCH_ID, role: 'Security', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-altan', name: 'Altan Sukh', initials: 'AS', branchId: AUTHORIZED_BRANCH_ID, role: 'Security', active: true, unavailableDates: [], operationalStatus: 'off-shift', statusUpdatedAt: demoStatusAt },
 ]
 
 function id(prefix: string): string {
@@ -106,6 +130,19 @@ function id(prefix: string): string {
 
 function clone<T>(value: T): T {
   return structuredClone(value)
+}
+
+function latestAvailabilityOverride(roster: WeeklyRoster, teamMemberId: string, date: string) {
+  return (roster.availabilityOverrides ?? [])
+    .filter((item) => item.teamMemberId === teamMemberId && item.date === date)
+    .sort((left, right) => right.at.localeCompare(left.at))[0]
+}
+
+function isMemberUnavailable(roster: WeeklyRoster, teamMemberId: string, date: string): boolean {
+  const override = latestAvailabilityOverride(roster, teamMemberId, date)
+  if (override) return !override.available
+  const member = teamMembers.find((item) => item.id === teamMemberId)
+  return Boolean(member?.unavailableDates.includes(date))
 }
 
 function isDateKey(value: string): boolean {
@@ -132,6 +169,46 @@ function assignment(member: TeamMember, date: string, shift: keyof typeof shiftT
     ...shiftTemplates[shift],
     response: 'assigned',
   }
+}
+
+function createAttendanceExceptions(weekStart: string, assignments: ShiftAssignment[]): AttendanceException[] {
+  const specs: Array<Omit<AttendanceException, 'id' | 'assignmentId' | 'scheduledStart'>> = [
+    {
+      teamMemberId: 'tm-anu', date: addDays(weekStart, 3), type: 'late', status: 'open',
+      checkInAt: `${addDays(weekStart, 3)}T20:13:00+08:00`, lateMinutes: 13,
+      evidence: 'Verified device check-in at the Central Branch entrance.',
+    },
+    {
+      teamMemberId: 'tm-bilguun', date: addDays(weekStart, 3), type: 'no-show', status: 'open',
+      evidence: 'No verified check-in was recorded by the shift threshold.',
+    },
+    {
+      teamMemberId: 'tm-solongo', date: addDays(weekStart, 2), type: 'approved-absence', status: 'approved',
+      requestNote: 'Approved medical leave from the HR source record.',
+      evidence: 'Approved Leave Application linked to the published assignment.',
+    },
+    {
+      teamMemberId: 'tm-oyun', date: addDays(weekStart, 3), type: 'leave-request', status: 'open',
+      requestNote: 'Family appointment; requesting this evening away from the branch.',
+      evidence: 'Team-member leave request submitted before shift start.',
+    },
+    {
+      teamMemberId: 'tm-enkhjin', date: addDays(weekStart, 1), type: 'mismatch', status: 'open',
+      checkInAt: `${addDays(weekStart, 1)}T17:42:00+08:00`,
+      evidence: 'Check-in exists, but the device branch code differs from the published assignment.',
+    },
+    {
+      teamMemberId: 'tm-temuulen', date: addDays(weekStart, 4), type: 'correction', status: 'open',
+      requestNote: 'Device was offline at arrival; security log records entry at 17:55.',
+      evidence: 'Correction request includes the branch security desk reference.',
+    },
+  ]
+
+  return specs.flatMap((spec) => {
+    const source = assignments.find((item) => item.teamMemberId === spec.teamMemberId && item.date === spec.date)
+    if (!source) return []
+    return [{ ...spec, id: id('attendance'), assignmentId: source.id, scheduledStart: source.start }]
+  })
 }
 
 function createSeedRoster(weekStart: string): WeeklyRoster {
@@ -173,6 +250,8 @@ function createSeedRoster(weekStart: string): WeeklyRoster {
     requirements: createRequirements(weekStart),
     requirementVersion: 1,
     requirementsEffectiveFrom: weekStart,
+    attendanceExceptions: createAttendanceExceptions(weekStart, assignments),
+    availabilityOverrides: [],
     executiveFollowUps: [],
     audit: [{ id: id('audit'), at: now, actor: 'Ariun Manager', action: 'created', version: 1 }],
   }
@@ -204,8 +283,9 @@ export class BrowserWorkforceService implements WorkforceService {
     return clone(roster)
   }
 
-  getTeamMembers(): TeamMember[] {
-    return clone(teamMembers)
+  getTeamMembers(branchId = AUTHORIZED_BRANCH_ID): TeamMember[] {
+    if (branchId !== AUTHORIZED_BRANCH_ID) throw new Error('Branch access denied.')
+    return clone(teamMembers.filter((member) => member.branchId === branchId))
   }
 
   getRoster(weekStart: string): WeeklyRoster {
@@ -221,15 +301,145 @@ export class BrowserWorkforceService implements WorkforceService {
         : item
     ))
     const needsResponseMigration = assignments.some((item, index) => item !== existing.assignments[index])
-    const needsMigration = !('requirementVersion' in existing) || !('executiveFollowUps' in existing) || needsResponseMigration
+    const needsMigration = !('requirementVersion' in existing)
+      || !('executiveFollowUps' in existing)
+      || !('attendanceExceptions' in existing)
+      || !('availabilityOverrides' in existing)
+      || needsResponseMigration
     const roster = {
       ...existing,
       assignments,
       requirementVersion: existing.requirementVersion ?? 1,
       requirementsEffectiveFrom: existing.requirementsEffectiveFrom ?? existing.weekStart,
+      attendanceExceptions: existing.attendanceExceptions ?? createAttendanceExceptions(existing.weekStart, assignments),
+      availabilityOverrides: existing.availabilityOverrides ?? [],
       executiveFollowUps: existing.executiveFollowUps ?? [],
     }
     return needsMigration ? this.writeRoster(roster) : clone(roster)
+  }
+
+  getManagerDashboard(weekStart: string): ManagerDashboardSummary {
+    const roster = this.getRoster(weekStart)
+    const members = this.getTeamMembers(roster.branchId).filter((member) => member.active)
+    const count = (status: TeamMember['operationalStatus']) => members.filter((member) => member.operationalStatus === status).length
+    const onShiftStatuses = new Set<TeamMember['operationalStatus']>(['reserved', 'serving', 'break', 'late'])
+    return {
+      onShift: members.filter((member) => onShiftStatuses.has(member.operationalStatus)).length,
+      available: count('available'),
+      reserved: count('reserved'),
+      serving: count('serving'),
+      break: count('break'),
+      late: count('late'),
+      absent: count('absent'),
+      leave: count('leave'),
+      dataFreshAt: members.reduce((latest, member) => member.statusUpdatedAt > latest ? member.statusUpdatedAt : latest, roster.lastSavedAt),
+    }
+  }
+
+  getReadiness(weekStart: string): ReadinessRow[] {
+    const roster = this.getRoster(weekStart)
+    const attendanceAvailable = roster.status === 'published' || roster.status === 'closed' || roster.status === 'superseded'
+    const memberById = new Map(teamMembers.map((member) => [member.id, member]))
+
+    return getCoverage(roster).map((row) => {
+      const relevant = attendanceAvailable
+        ? roster.attendanceExceptions.filter((item) => (
+            item.date === row.date && memberById.get(item.teamMemberId)?.role === row.role && item.status !== 'rejected'
+          ))
+        : []
+      const approvedAbsence = relevant.filter((item) => (
+        item.type === 'approved-absence' || (item.type === 'leave-request' && item.status === 'approved')
+      )).length
+      const noShow = relevant.filter((item) => item.type === 'no-show').length
+      const late = relevant.filter((item) => item.type === 'late').length
+      const checkedIn = attendanceAvailable ? Math.max(0, row.scheduled - approvedAbsence - noShow) : 0
+      return {
+        ...row,
+        attendanceAvailable,
+        checkedIn,
+        approvedAbsence,
+        noShow,
+        late,
+        readinessGap: attendanceAvailable ? Math.max(0, row.required - checkedIn) : 0,
+      }
+    })
+  }
+
+  getAttendanceExceptions(weekStart: string): AttendanceException[] {
+    const roster = this.getRoster(weekStart)
+    if (roster.status === 'draft') return []
+    return clone(roster.attendanceExceptions).sort((left, right) => {
+      if ((left.status === 'open') !== (right.status === 'open')) return left.status === 'open' ? -1 : 1
+      return right.date.localeCompare(left.date)
+    })
+  }
+
+  decideAttendanceException(
+    weekStart: string,
+    exceptionId: string,
+    decision: AttendanceDecisionAction,
+    reason: string,
+  ): WeeklyRoster {
+    const roster = this.getRoster(weekStart)
+    if (roster.status === 'draft') throw new Error('Publish the roster before deciding an attendance exception.')
+    const exception = roster.attendanceExceptions.find((item) => item.id === exceptionId)
+    if (!exception) throw new Error('Attendance exception not found in this branch.')
+    if (exception.status !== 'open') throw new Error('This attendance exception already has a recorded outcome.')
+    if (reason.trim().length < 5) throw new Error('Add a specific decision reason of at least 5 characters.')
+    const requestDecision = exception.type === 'correction' || exception.type === 'leave-request'
+    const allowed = requestDecision ? ['approve', 'reject'] : ['excuse', 'confirm']
+    if (!allowed.includes(decision)) throw new Error('This decision is not valid for the selected exception.')
+
+    const now = new Date().toISOString()
+    const statuses = { excuse: 'excused', confirm: 'confirmed', approve: 'approved', reject: 'rejected' } as const
+    exception.status = statuses[decision]
+    exception.decision = { action: decision, actor: roster.managerName, reason: reason.trim(), at: now }
+    roster.lastSavedAt = now
+    roster.audit.push({
+      id: id('audit'),
+      at: now,
+      actor: roster.managerName,
+      action: 'attendance-decision-recorded',
+      reason: `${decision}: ${reason.trim()}`,
+      assignmentId: exception.assignmentId,
+      version: roster.version,
+    })
+    return this.writeRoster(roster)
+  }
+
+  overrideAvailability(
+    weekStart: string,
+    teamMemberId: string,
+    date: string,
+    available: boolean,
+    reason: string,
+  ): WeeklyRoster {
+    const roster = this.getRoster(weekStart)
+    const member = teamMembers.find((item) => item.id === teamMemberId && item.branchId === roster.branchId)
+    if (!member?.active) throw new Error('Choose an active team member from the authorized branch.')
+    if (!weekDates(weekStart).includes(date)) throw new Error('Choose a date within the selected week.')
+    if (reason.trim().length < 5) throw new Error('Add a specific availability reason of at least 5 characters.')
+
+    const now = new Date().toISOString()
+    roster.availabilityOverrides.push({
+      id: id('availability'),
+      teamMemberId,
+      date,
+      available,
+      reason: reason.trim(),
+      actor: roster.managerName,
+      at: now,
+    })
+    roster.lastSavedAt = now
+    roster.audit.push({
+      id: id('audit'),
+      at: now,
+      actor: roster.managerName,
+      action: 'availability-overridden',
+      reason: `${member.name} marked ${available ? 'available' : 'unavailable'} on ${date}: ${reason.trim()}`,
+      version: roster.version,
+    })
+    return this.writeRoster(roster)
   }
 
   saveRequirements(
@@ -303,6 +513,8 @@ export class BrowserWorkforceService implements WorkforceService {
       'assignment-changed': 'Changed an assignment',
       'assignment-removed': 'Removed an assignment',
       'requirements-updated': 'Updated staffing requirements',
+      'attendance-decision-recorded': 'Reviewed an attendance exception',
+      'availability-overridden': 'Updated team-member availability',
       published: 'Published the schedule',
     }
     const nextAction = publicationState === 'draft-overdue'
@@ -465,7 +677,7 @@ export class BrowserWorkforceService implements WorkforceService {
       if (member.role !== item.role) {
         issues.push({ severity: 'error', code: 'role', message: `${member.name} is not eligible for ${item.role}.`, date: item.date, role: item.role })
       }
-      if (member.unavailableDates.includes(item.date)) {
+      if (isMemberUnavailable(roster, member.id, item.date)) {
         issues.push({ severity: 'error', code: 'leave', message: `${member.name} is unavailable on ${item.date}.`, date: item.date, role: item.role })
       }
       const duplicateKey = `${item.teamMemberId}:${item.date}`
@@ -493,7 +705,7 @@ export class BrowserWorkforceService implements WorkforceService {
     const roster = this.getRoster(weekStart)
     const member = teamMembers.find((candidate) => candidate.id === input.teamMemberId)
     if (!member?.active) throw new Error('Choose an active team member from this branch.')
-    if (member.unavailableDates.includes(input.date)) throw new Error('This team member is unavailable on the selected date.')
+    if (isMemberUnavailable(roster, member.id, input.date)) throw new Error('This team member is unavailable on the selected date.')
     const duplicate = roster.assignments.find(
       (item) => item.teamMemberId === input.teamMemberId && item.date === input.date && item.id !== input.id,
     )
@@ -607,6 +819,8 @@ export class BrowserWorkforceService implements WorkforceService {
     roster.requirements = previous.requirements.map((item) => ({ ...item, date: addDays(item.date, 7) }))
     roster.requirementsEffectiveFrom = weekStart
     roster.requirementVersion = 1
+    roster.attendanceExceptions = []
+    roster.availabilityOverrides = []
     roster.audit = [{
       id: id('audit'),
       at: now,

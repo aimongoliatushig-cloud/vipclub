@@ -172,4 +172,57 @@ describe('Branch Manager weekly scheduling rules', () => {
     expect(beforeThreshold.pendingAcknowledgementCount).toBe(0)
     expect(afterThreshold.pendingAcknowledgementCount).toBe(published.assignments.length)
   })
+
+  it('returns the complete branch dashboard status counts and denies another branch', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+
+    expect(service.getManagerDashboard(weekStart)).toMatchObject({
+      onShift: 6,
+      available: 2,
+      reserved: 1,
+      serving: 3,
+      break: 1,
+      late: 1,
+      absent: 1,
+      leave: 1,
+    })
+    expect(() => service.getTeamMembers('branch-west')).toThrow(/access denied/i)
+  })
+
+  it('keeps attendance unavailable for drafts and records a reasoned decision without replacing evidence', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+
+    expect(service.getAttendanceExceptions(weekStart)).toEqual([])
+    expect(service.getReadiness(weekStart).every((row) => !row.attendanceAvailable)).toBe(true)
+
+    service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
+    const leaveRequest = service.getAttendanceExceptions(weekStart).find((item) => item.type === 'leave-request')
+    expect(leaveRequest).toBeTruthy()
+    expect(() => service.decideAttendanceException(weekStart, leaveRequest!.id, 'confirm', 'Manager checked the request.')).toThrow(/not valid/i)
+    expect(() => service.decideAttendanceException(weekStart, leaveRequest!.id, 'approve', 'No')).toThrow(/at least 5/i)
+
+    const decided = service.decideAttendanceException(weekStart, leaveRequest!.id, 'approve', 'Coverage owner confirmed the approved backfill.')
+    const retained = decided.attendanceExceptions.find((item) => item.id === leaveRequest!.id)
+    expect(retained).toMatchObject({ status: 'approved', evidence: leaveRequest!.evidence })
+    expect(retained?.decision).toMatchObject({ action: 'approve', actor: 'Ariun Manager' })
+    expect(decided.audit.at(-1)).toMatchObject({ action: 'attendance-decision-recorded' })
+  })
+
+  it('requires a reason for availability overrides and recalculates effective coverage', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    const roster = service.getRoster(weekStart)
+    const assignment = roster.assignments[0]
+    const before = service.getReadiness(weekStart).find((row) => row.date === assignment.date && row.role === assignment.role)
+
+    expect(() => service.overrideAvailability(weekStart, assignment.teamMemberId, assignment.date, false, 'No')).toThrow(/at least 5/i)
+
+    const updated = service.overrideAvailability(weekStart, assignment.teamMemberId, assignment.date, false, 'Approved training conflict recorded by the manager.')
+    const after = service.getReadiness(weekStart).find((row) => row.date === assignment.date && row.role === assignment.role)
+    expect(after?.scheduled).toBe((before?.scheduled ?? 0) - 1)
+    expect(updated.availabilityOverrides.at(-1)).toMatchObject({ available: false, actor: 'Ariun Manager' })
+    expect(updated.audit.at(-1)).toMatchObject({ action: 'availability-overridden' })
+  })
 })

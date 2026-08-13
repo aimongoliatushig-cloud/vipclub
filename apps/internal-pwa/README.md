@@ -14,11 +14,15 @@ The internal VIP Club PWA serves all employees and team members through one appl
 
 The interface must never be the only access control. Every API and data request must be authorized server-side by role, branch, ownership, action, and field sensitivity.
 
-## Branch Manager scheduling prototype
+## Branch Manager workforce prototype
 
 This branch starts the first runnable Manager-facing slice directly from the approved workforce Markdown:
 
 - weekly team-member schedule grid;
+- branch manager overview with live operational-status counts and data freshness;
+- Required → Scheduled → Checked In coverage/readiness drill-down;
+- attendance exception review with preserved source evidence and audited decisions;
+- branch-only team directory, upcoming shifts, rank visibility, and reason-required availability overrides;
 - role and team-member filters;
 - draft assignment create/edit/remove;
 - active-employment, role, overlap, leave, and coverage validation;
@@ -28,6 +32,8 @@ This branch starts the first runnable Manager-facing slice directly from the app
 - manager response queue with overdue-threshold evidence and audited reminder records;
 - versioned, reason-required changes after publication;
 - browser-local mock persistence and audit events for prototype review.
+
+Rank override remains intentionally locked because `docs/entertainer-ranking-policy.md` still requires formal CEO or General Manager approval. The prototype shows rank where operationally useful but does not invent authority or thresholds.
 
 Run it with `npm install` and `npm run dev`. The browser-local service is a UI prototype only; the team-member selector is a review aid rather than identity switching. Production writes still require server-side Frappe authorization, ownership validation, idempotency, audit, and notification handling.
 

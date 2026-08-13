@@ -29,6 +29,7 @@ import {
   shiftTemplates,
   workforceRoles,
   type AssignmentInput,
+  type AttendanceDecisionAction,
   type ExecutiveFollowUpSummary,
   type RosterAuditEvent,
   type ShiftAssignment,
@@ -48,6 +49,13 @@ import {
   type WorkforceService,
 } from './workforceService'
 import { ResponseQueuePanel, TeamMemberSchedulePanel } from './ResponsePanels'
+import {
+  AttendanceReviewView,
+  CoverageReadinessView,
+  ManagerOverviewView,
+  TeamMembersView,
+  type ManagerView,
+} from './ManagerWorkspaceViews'
 
 const dayLabel = new Intl.DateTimeFormat('en', { weekday: 'short' })
 const shortDate = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' })
@@ -306,6 +314,8 @@ function auditActionLabel(action: RosterAuditEvent['action']): string {
     'assignment-acknowledged': 'Assignment acknowledged',
     'assignment-change-requested': 'Assignment change requested',
     'acknowledgement-reminder-recorded': 'Acknowledgement reminder recorded',
+    'attendance-decision-recorded': 'Attendance decision recorded',
+    'availability-overridden': 'Availability overridden',
   }
   return labels[action]
 }
@@ -405,6 +415,7 @@ export interface WeeklySchedulePageProps {
 }
 
 export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
+  const [activeView, setActiveView] = useState<ManagerView>('overview')
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()))
   const [roster, setRoster] = useState(() => service.getRoster(weekStart))
   const [selectedDay, setSelectedDay] = useState(weekStart)
@@ -437,6 +448,9 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
   const issues = useMemo(() => service.validateRoster(roster), [roster, service])
   const executiveSummary = useMemo(() => service.getExecutiveFollowUp(weekStart), [roster, service, weekStart])
   const responseQueue = useMemo(() => service.getResponseQueue(weekStart), [roster, service, weekStart])
+  const dashboard = useMemo(() => service.getManagerDashboard(weekStart), [roster, service, weekStart])
+  const readiness = useMemo(() => service.getReadiness(weekStart), [roster, service, weekStart])
+  const attendanceExceptions = useMemo(() => service.getAttendanceExceptions(weekStart), [roster, service, weekStart])
   const openGaps = coverage.reduce((sum, item) => sum + item.gap, 0)
   const required = coverage.reduce((sum, item) => sum + item.required, 0)
   const scheduled = coverage.reduce((sum, item) => sum + item.scheduled, 0)
@@ -510,7 +524,25 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
 
   function editResponseAssignment(assignment: ShiftAssignment) {
     setResponseQueueOpen(false)
+    setActiveView('schedule')
     setEditor({ assignment, teamMemberId: assignment.teamMemberId, date: assignment.date })
+  }
+
+  function navigate(view: ManagerView) {
+    setActiveView(view)
+    setMenuOpen(false)
+  }
+
+  function decideAttendance(exceptionId: string, decision: AttendanceDecisionAction, reason: string) {
+    const next = service.decideAttendanceException(weekStart, exceptionId, decision, reason)
+    setRoster(next)
+    setMessage(`Attendance decision recorded: ${decision}. Source schedule and check-in evidence were preserved.`)
+  }
+
+  function overrideAvailability(teamMemberId: string, date: string, available: boolean, reason: string) {
+    const next = service.overrideAvailability(weekStart, teamMemberId, date, available, reason)
+    setRoster(next)
+    setMessage(`Availability override recorded for ${date}. Coverage and assignment validation were recalculated.`)
   }
 
   return (
@@ -518,11 +550,11 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
       <aside className={menuOpen ? 'sidebar sidebar--open' : 'sidebar'}>
         <div className="brand"><span>V</span><div><strong>VIP Club</strong><small>Internal</small></div><button className="sidebar-close" type="button" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X size={19} /></button></div>
         <nav aria-label="Manager navigation">
-          <a href="#overview"><LayoutDashboard size={19} />Overview</a>
-          <a className="active" href="#schedule" aria-current="page"><CalendarDays size={19} />Weekly schedule</a>
-          <a href="#coverage"><CircleGauge size={19} />Coverage <b>{openGaps}</b></a>
-          <a href="#attendance"><ClipboardCheck size={19} />Attendance</a>
-          <a href="#team"><Users size={19} />Team members</a>
+          <a className={activeView === 'overview' ? 'active' : ''} href="#overview" aria-current={activeView === 'overview' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('overview') }}><LayoutDashboard size={19} />Overview</a>
+          <a className={activeView === 'schedule' ? 'active' : ''} href="#schedule" aria-current={activeView === 'schedule' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('schedule') }}><CalendarDays size={19} />Weekly schedule</a>
+          <a className={activeView === 'coverage' ? 'active' : ''} href="#coverage" aria-current={activeView === 'coverage' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('coverage') }}><CircleGauge size={19} />Coverage <b>{openGaps}</b></a>
+          <a className={activeView === 'attendance' ? 'active' : ''} href="#attendance" aria-current={activeView === 'attendance' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('attendance') }}><ClipboardCheck size={19} />Attendance</a>
+          <a className={activeView === 'team' ? 'active' : ''} href="#team" aria-current={activeView === 'team' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('team') }}><Users size={19} />Team members</a>
         </nav>
         <div className="sidebar-foot">
           <div className="avatar">AM</div>
@@ -535,10 +567,15 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
         <header className="topbar">
           <button className="icon-button mobile-menu" type="button" aria-label="Toggle navigation" onClick={() => setMenuOpen((current) => !current)}><Menu size={21} /></button>
           <div className="branch-scope"><span className="scope-mark">CB</span><div><strong>{roster.branchName}</strong><small>Authorized branch scope</small></div></div>
-          <div className="topbar-actions"><button className="icon-button" type="button" aria-label="Notifications"><Bell size={20} /><i /></button><div className="avatar avatar--small">AM</div></div>
+          <div className="topbar-actions"><button className="icon-button" type="button" aria-label={`Notifications, ${attendanceExceptions.filter((item) => item.status === 'open').length + responseQueue.length} open items`} onClick={() => navigate('attendance')}><Bell size={20} /><i /></button><div className="avatar avatar--small">AM</div></div>
         </header>
 
-        <main id="schedule">
+        <main id={activeView}>
+          {activeView === 'overview' ? <ManagerOverviewView roster={roster} dashboard={dashboard} readiness={readiness} openAttendance={attendanceExceptions.filter((item) => item.status === 'open').length} openResponses={responseQueue.length} openGaps={openGaps} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
+          {activeView === 'coverage' ? <CoverageReadinessView roster={roster} readiness={readiness} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
+          {activeView === 'attendance' ? <AttendanceReviewView roster={roster} exceptions={attendanceExceptions} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onDecision={decideAttendance} /> : null}
+          {activeView === 'team' ? <TeamMembersView roster={roster} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onOverrideAvailability={overrideAvailability} /> : null}
+          {activeView === 'schedule' ? <>
           <section className="page-heading">
             <div>
               <span className="eyebrow">Workforce planning</span>
@@ -655,6 +692,7 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
               ))}
             </div>
           </section>
+          </> : null}
         </main>
       </div>
 

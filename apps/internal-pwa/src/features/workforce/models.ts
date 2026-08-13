@@ -10,14 +10,56 @@ export const shiftTemplates = {
 export type ShiftTemplateName = keyof typeof shiftTemplates
 export type RosterStatus = 'draft' | 'published' | 'closed' | 'superseded'
 export type AssignmentResponse = 'assigned' | 'acknowledged' | 'change-requested'
+export type OperationalStatus = 'available' | 'reserved' | 'serving' | 'break' | 'late' | 'absent' | 'leave' | 'off-shift'
+export type EntertainerRank = 'Bronze' | 'Silver' | 'Gold' | 'Diamond'
 
 export interface TeamMember {
   id: string
   name: string
   initials: string
+  branchId: string
   role: WorkforceRole
   active: boolean
   unavailableDates: string[]
+  operationalStatus: OperationalStatus
+  statusUpdatedAt: string
+  rank?: EntertainerRank
+}
+
+export interface AvailabilityOverride {
+  id: string
+  teamMemberId: string
+  date: string
+  available: boolean
+  reason: string
+  actor: string
+  at: string
+}
+
+export type AttendanceExceptionType = 'late' | 'no-show' | 'approved-absence' | 'mismatch' | 'correction' | 'leave-request'
+export type AttendanceDecisionAction = 'excuse' | 'confirm' | 'approve' | 'reject'
+export type AttendanceExceptionStatus = 'open' | 'approved' | 'excused' | 'confirmed' | 'rejected'
+
+export interface AttendanceDecision {
+  action: AttendanceDecisionAction
+  actor: string
+  reason: string
+  at: string
+}
+
+export interface AttendanceException {
+  id: string
+  teamMemberId: string
+  assignmentId: string
+  date: string
+  type: AttendanceExceptionType
+  status: AttendanceExceptionStatus
+  scheduledStart: string
+  checkInAt?: string
+  lateMinutes?: number
+  requestNote?: string
+  evidence: string
+  decision?: AttendanceDecision
 }
 
 export interface ShiftAssignment {
@@ -60,6 +102,8 @@ export interface RosterAuditEvent {
     | 'assignment-acknowledged'
     | 'assignment-change-requested'
     | 'acknowledgement-reminder-recorded'
+    | 'attendance-decision-recorded'
+    | 'availability-overridden'
   reason?: string
   assignmentId?: string
   version: number
@@ -91,6 +135,8 @@ export interface WeeklyRoster {
   requirements: StaffingRequirement[]
   requirementVersion: number
   requirementsEffectiveFrom: string
+  attendanceExceptions: AttendanceException[]
+  availabilityOverrides: AvailabilityOverride[]
   executiveFollowUps: ExecutiveFollowUpRecord[]
   audit: RosterAuditEvent[]
 }
@@ -113,6 +159,27 @@ export interface ResponseQueueItem {
   assignment: ShiftAssignment
   teamMember: TeamMember
   overdue: boolean
+}
+
+export interface ReadinessRow extends CoverageRow {
+  attendanceAvailable: boolean
+  checkedIn: number
+  approvedAbsence: number
+  noShow: number
+  late: number
+  readinessGap: number
+}
+
+export interface ManagerDashboardSummary {
+  onShift: number
+  available: number
+  reserved: number
+  serving: number
+  break: number
+  late: number
+  absent: number
+  leave: number
+  dataFreshAt: string
 }
 
 export interface AssignmentInput {
