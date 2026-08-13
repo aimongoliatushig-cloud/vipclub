@@ -20,12 +20,56 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 | ID | Process | Purpose | Primary owner |
 | --- | --- | --- | --- |
 | P10 | Employee and entertainer onboarding | Create identity, branch, role, schedule, bank/contract records, and required acknowledgements. | HR |
-| P11 | Schedule and attendance | Assign shifts, record check-in/out, classify attendance, and manage corrections. | Branch manager |
+| P11 | Branch workforce planning, weekly schedule, and attendance | Maintain weekday/role minimum staffing, build and publish weekly shifts, validate coverage, record check-in/out, classify attendance, and manage corrections. | Branch manager |
 | P12 | Entertainer performance and rank evaluation | Convert verified performance events into explainable rank outcomes. | Operations / Branch manager |
 | P13 | Three-day income settlement | Calculate earnings, deductions, loan repayment, review, approve, and record settlement. | Accounting |
 | P14 | Performance-based loan | Check eligibility, obtain approval, disburse, and repay through settlements. | CEO / Accounting |
 | P15 | Customer registration and consent | Find or create customer profile and record marketing consent and channel preferences. | Host / Reception |
 | P16 | Reservation lifecycle | Request, confirm, assign, arrive, complete, cancel, and attribute revenue. | Reception / Branch manager |
+
+### P11 — Branch workforce planning, weekly schedule, and attendance
+
+**Owner:** Branch Manager for the authorized branch.
+
+**Purpose:** Ensure each operating day has an explicit minimum workforce requirement, a published weekly roster, and verified attendance that can be compared to what the branch required and planned.
+
+**Core flow:**
+
+```text
+Maintain weekday/role staffing template
+→ Build weekly roster
+→ Compare Required vs Scheduled
+→ Resolve or record shortage
+→ Publish schedule
+→ Employee attends / approved absence applies
+→ Record verified check-in/out
+→ Compare Scheduled vs Checked In
+→ Classify late / no-show / approved absence
+→ Manager reviews exceptions
+→ Publish verified attendance/readiness
+```
+
+**Key records:**
+
+- branch staffing template;
+- staffing requirement;
+- ERPNext/Frappe Shift Assignment;
+- Employee Checkin;
+- Attendance;
+- Leave Application;
+- shift coverage/readiness snapshot;
+- staffing exception;
+- attendance correction/manager excusal decision.
+
+**Key rule:** a valid published shift assignment or equivalent approved schedule record is required before a person can be classified as late or no-show for that shift.
+
+**Coverage model:**
+
+```text
+Required -> Scheduled -> Checked In
+```
+
+The process must keep planning shortages separate from attendance failures.
 
 ## Phase 2 — Workforce Task Management
 
@@ -59,7 +103,7 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 ## BPMN delivery order
 
 1. P15 Customer registration and consent
-2. P11 Schedule and attendance
+2. P11 Branch workforce planning, weekly schedule, and attendance
 3. P13 Three-day income settlement
 4. P20 Task assignment and acknowledgement
 5. P21 Task execution and completion
@@ -71,4 +115,4 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 
 ## Open design decisions
 
-Detailed BPMN work must not invent policy. The main pending decisions are membership formula and thresholds, cross-branch classification, task approval/reopening, benefit/cashback controls, and channel-provider behavior.
+Detailed BPMN work must not invent policy. The main pending decisions are membership formula and thresholds, cross-branch classification, task approval/reopening, benefit/cashback controls, channel-provider behavior, and the final weekly schedule publication/change cutoff.
