@@ -7,7 +7,7 @@ This is an evidence-based working draft derived from project discussions. Items 
 | Role | Primary responsibility |
 | --- | --- |
 | CEO | Company-wide oversight, cross-branch task assignment, and designated approvals. |
-| Branch manager | Branch operations, team management, in-branch task assignment, local configuration within approved scope, and proposing and executing monthly sales targets and action plans to improve branch sales. |
+| Branch manager | Branch operations, team management, in-branch task assignment, branch-local workforce planning and weekly scheduling within approved scope, local configuration within approved scope, and proposing and executing monthly sales targets and action plans to improve branch sales. |
 | Entertainer | Uses the workforce portal for schedule, attendance, income, rank, reservations, benefits, tasks, and communication. |
 | Lead entertainer | Oversees entertainer standards, coaching, readiness, and operational follow-up; exact approval and disciplinary authority remains to be defined. |
 | Server | Supports branch service operations and receives role-appropriate tasks, schedules, and notifications. |
@@ -33,6 +33,44 @@ A role responsibility describes what a person owns. Individual capabilities—su
 
 The final role-permission matrix must define branch scope, data visibility, approval rights, and segregation of duties for each role. Job titles do not automatically grant unrestricted financial or customer-data access.
 
+## Branch workforce planning and weekly scheduling
+
+| ID | Requirement |
+| --- | --- |
+| FR-WORKFORCE-001 | A Branch Manager must be able to configure the minimum number of team members required for each approved branch role for each weekday, Monday through Sunday, within the manager's authorized branch. |
+| FR-WORKFORCE-002 | Staffing requirements must support roles including entertainers, servers, bartenders, hosts/receptionists, security, drivers, maintenance/technical roles, and other approved branch roles. |
+| FR-WORKFORCE-003 | Staffing requirement changes must be branch-scoped, effective-dated, and auditable with actor, previous value, new value, and timestamp. |
+| FR-WORKFORCE-004 | The system must preserve separate values for Required, Scheduled, and Checked In staffing by branch, date, shift/period, and role. |
+| FR-WORKFORCE-005 | The system must calculate scheduled coverage against the active minimum staffing requirement and identify shortages by role and date. |
+| FR-WORKFORCE-006 | The system must calculate actual readiness from verified attendance and identify actual operational shortages separately from scheduling shortages. |
+| FR-WORKFORCE-007 | Approved absence and unexpected no-show must remain distinguishable in workforce-readiness reporting. |
+| FR-WORKFORCE-008 | The system must alert the authorized Branch Manager when a weekly schedule is below the minimum requirement or when a later leave/status change causes a published shift to fall below requirement. |
+| FR-WORKFORCE-009 | The system must alert the authorized Branch Manager when actual attendance creates a critical role shortage during an operating shift. |
+
+## Weekly shift scheduling
+
+| ID | Requirement |
+| --- | --- |
+| FR-SHIFT-001 | A Branch Manager must be able to create and publish a weekly shift schedule for team members in the manager's authorized branch. |
+| FR-SHIFT-002 | The weekly scheduler must support filtering team members by role and assigning eligible team members to dates and approved shift types. |
+| FR-SHIFT-003 | The manager must be able to see authorized leave/availability information needed to make a scheduling decision. |
+| FR-SHIFT-004 | Before publication, the system must compare the proposed weekly roster to the branch's active weekday/role staffing requirements and display unresolved shortages. |
+| FR-SHIFT-005 | The manager may publish a schedule with an unresolved shortage when business policy permits, but the shortage must remain visible and auditable. |
+| FR-SHIFT-006 | Changes to a published shift assignment must retain an audit trail rather than silently rewriting schedule history. |
+| FR-SHIFT-007 | Employees must be able to view their published schedule in the internal PWA according to role and branch permissions. |
+| FR-SHIFT-008 | A longer calendar view may be provided for planning, but the published weekly roster is the authoritative operational schedule for attendance classification. |
+| FR-SHIFT-009 | The system must support backfilling a shortage by assigning an eligible authorized branch team member to the affected shift. |
+
+## Attendance relationship to schedule
+
+| ID | Requirement |
+| --- | --- |
+| FR-ATT-001 | A team member must not be classified as late or no-show for a shift unless a valid published shift assignment or other approved authoritative schedule record establishes that attendance was expected. |
+| FR-ATT-002 | Late minutes must be calculated from verified clock-in time against the scheduled shift start time. |
+| FR-ATT-003 | If a scheduled team member does not attend and no approved absence applies according to policy, the system must create an unexpected/unapproved no-show record. |
+| FR-ATT-004 | Branch Managers must be able to review branch attendance exceptions including lateness, unexpected no-show, approved absence, schedule/attendance mismatch, and correction requests. |
+| FR-ATT-005 | When policy permits a manager to excuse an incident, the system must retain the original attendance evidence and record a separate audited manager decision controlling downstream penalty treatment. |
+
 ## Workforce task management
 
 | ID | Requirement |
@@ -47,7 +85,6 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-TASK-008 | A task must retain execution notes. |
 | FR-TASK-009 | Dashboards must show incomplete and completed work, deadlines, and completion statistics. |
 
-
 ## Monthly sales goal approval
 
 | ID | Requirement |
@@ -59,7 +96,6 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-GOAL-005 | The system must keep each proposal, review comment, revision, approval, and source-data summary in an audit trail. |
 | FR-GOAL-006 | The system must display actual sales against the approved target as an achievement percentage and progress bar. |
 | FR-GOAL-007 | Hermes may advise, summarize, and remind; it must not approve or silently change a sales target or action plan. |
-
 
 ## Branch setup and scalability
 
@@ -79,3 +115,5 @@ The final role-permission matrix must define branch scope, data visibility, appr
 - Which notification channels, escalation rules, and reminder timing are required?
 - What image size, retention, privacy, and access rules apply?
 - What exact dashboard metrics are required for employees, managers, and the CEO?
+- Should the business require a minimum lead time before a weekly schedule is published, and what is the cutoff for ordinary schedule changes?
+- Which approved roles, if any, may edit another branch's staffing template or weekly schedule?
