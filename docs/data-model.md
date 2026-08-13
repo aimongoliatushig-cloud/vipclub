@@ -82,25 +82,26 @@ The published Shift Assignment or equivalent approved schedule record establishe
 | Message Delivery | Per-customer message history: channel, send time, delivery state, and provider reference. | Customer, Campaign, Consent |
 | Customer Intelligence Snapshot | Calculated customer metrics such as recency, frequency, spend, visit cadence, and entertainer affinity. | Customer, Visits, Reservations |
 
-## Five-level membership, benefits, and cashback
+## Five-level membership, benefits, and approved value ledgers
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
-| Loyalty Policy Version | Five levels, threshold formula, points/value rules, expiry, downgrade, and effective dates. | Branch, Evaluation, Benefit |
-| Membership Evaluation Snapshot | Explainable result that assigns a member level using approved policy and source values. | Customer, Loyalty Policy |
+| Loyalty Policy Version | Bronze/Silver/Gold/Diamond/Black Diamond ranges, completed-eligible-visit average formula, points/value rules if approved, transition controls, and effective dates. | Branch, Evaluation, Benefit |
+| Membership Evaluation Snapshot | Explainable completed eligible visits, included/excluded spend, average per eligible visit, active branch range, calculated level, and policy version. | Customer, Loyalty Policy |
 | Membership Level Assignment | Current and historical level for a customer, branch scope, effective dates, and reason. | Customer, Membership Evaluation |
+| Membership Manager Position / CEO Decision | Manager support or retain exception followed by CEO approve, return, reject, or override with reason. | Evaluation, Assignment, Actors |
 | Benefit Definition | Configurable privilege, eligibility, limits, value, and branch scope. | Loyalty Policy, Benefit Entitlement |
 | Benefit Entitlement | A customer’s available allowance for a benefit in a period. | Customer, Benefit Definition |
 | Benefit Redemption | What benefit was used, by whom, when, where, and any reversal. | Entitlement, Branch, Operator |
-| Cashback Ledger Entry | Immutable credit, redemption, expiry, reversal, or adjustment with monetary value. | Customer, Policy, Source Record |
+| Approved Value Ledger Entry | Immutable earn, use, expire, adjust, or reverse entry for an explicitly approved points/privilege/value mechanism; no standalone balance is assumed. | Customer, Policy, Source Record |
 
 ## Performance, rank, income, and loans
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
 | Performance Event | Verified attendance, loyalty, sales, reservation, or training signal used in rank calculations. | Entertainer, Source Record |
-| Ranking Policy Version | Rank weights, thresholds, gates, benefits, and effective date. | Performance Event, Ranking Snapshot |
-| Ranking Snapshot / Rank History | Explainable evaluation and resulting rank change. | Entertainer, Ranking Policy |
+| Ranking Policy Version | Rank 1/2/3, 14-day cadence, weights, thresholds, gates, benefits, missing-data handling, and effective date. | Performance Event, Ranking Snapshot |
+| Ranking Snapshot / Rank History | Explainable 14-day evaluation, manager recommendation, CEO decision, and resulting rank change. | Entertainer, Ranking Policy |
 | Income Event | Revenue, tips, commission, bonus, adjustment, or deduction source record. | Entertainer, Branch |
 | Payout Period / Settlement | Three-day calculation period and entertainer settlement with line items. | Income Event, Loan Repayment |
 | Payout Line Item | One explained component of a settlement. | Settlement, Source Record |

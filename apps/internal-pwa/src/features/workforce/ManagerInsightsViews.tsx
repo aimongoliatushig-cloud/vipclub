@@ -31,11 +31,11 @@ import { entertainerRankLabels, formatDate, formatDateTime, formatTime } from '.
 
 const membershipLevelLabels: Record<CustomerMembershipLevel, string> = {
   provisional: 'Шинэ / түр',
-  'level-1': '1-р түвшин',
-  'level-2': '2-р түвшин',
-  'level-3': '3-р түвшин',
-  'level-4': '4-р түвшин',
-  'level-5': '5-р түвшин',
+  bronze: 'Хүрэл',
+  silver: 'Мөнгө',
+  gold: 'Алт',
+  diamond: 'Очир',
+  'black-diamond': 'Хар очир',
 }
 
 const activityLabels: Record<CustomerActivityState, string> = {
@@ -59,8 +59,10 @@ function formatMoney(value: number): string {
   return `${Math.round(value / 1_000).toLocaleString('mn-MN')} мянга ₮`
 }
 
-function rollingAverage(customer: CustomerIntelligenceRecord): number {
-  return Math.round(customer.monthlyEligibleSpend.reduce((sum, value) => sum + value, 0) / 3)
+function eligibleVisitAverage(customer: CustomerIntelligenceRecord): number {
+  return customer.completedEligibleVisits
+    ? Math.round(customer.eligibleSpendTotal / customer.completedEligibleVisits)
+    : 0
 }
 
 function CustomerScopeNotice({ branchName }: { branchName: string }) {
@@ -162,7 +164,7 @@ export function CustomerCrmView({ snapshot }: { snapshot: ManagerInsightsSnapsho
                   {(['viber', 'telegram', 'email'] as ConsentChannel[]).map((channel) => <span key={channel} data-consented={selected.consentedChannels.includes(channel)}>{selected.consentedChannels.includes(channel) ? <BadgeCheck size={14} /> : <LockKeyhole size={14} />}{consentLabels[channel]}</span>)}
                 </div>
                 <h3>Үнэнч байдлын баримт</h3>
-                <dl className="loyalty-facts"><div><dt>Ашигласан эрх</dt><dd>{selected.benefitUses90d}</dd></div><div><dt>Буцаан олголтын үлдэгдэл</dt><dd>{formatMoney(selected.cashbackBalance)}</dd></div></dl>
+                <dl className="loyalty-facts"><div><dt>Ашигласан эрх</dt><dd>{selected.benefitUses90d}</dd></div><div><dt>Бодлогын хувилбар</dt><dd>{selected.membershipPolicyVersion ?? 'Татагдаагүй'}</dd></div></dl>
               </section>
             </div>
 
@@ -173,7 +175,7 @@ export function CustomerCrmView({ snapshot }: { snapshot: ManagerInsightsSnapsho
               </div>
             </section>
 
-            <div className="policy-lock"><LockKeyhole size={17} /><span><strong>Түвшний тооцоолол, нэр, босго батлагдаагүй</strong><small>Энэ нь эх системд байгаа түвшнийг л харуулна. CL-040–CL-044 шийдэгдтэл менежер түвшин тооцох, өөрчлөх эсвэл босго засах боломжгүй.</small></span></div>
+            <div className="policy-lock"><LockKeyhole size={17} /><span><strong>Одоогийн түвшин эх системээс харагдана</strong><small>Таван нэр болон зочлолт бүрийн дундажийн суурь батлагдсан. Гэвч салбарын идэвхтэй босго, бодлогын хувилбар, тооцох зарцуулалтын нарийвчилсан дүрэм ирээгүй тул менежер эндээс түвшин тооцох, өөрчлөх эсвэл босго засах боломжгүй.</small></span></div>
           </section>
         </div>
       ) : <section className="workspace-empty"><UserRoundSearch size={28} /><strong>Тохирох харилцагч олдсонгүй</strong><span>Хайлт болон шүүлтүүрээ өөрчилнө үү.</span></section>}
@@ -198,7 +200,7 @@ export function ManagerRankingsView({ snapshot, teamMembers }: { snapshot: Manag
         <div className="freshness"><History size={15} /><span>Баримт шинэчилсэн</span><strong>{formatTime(snapshot.refreshedAt)}</strong></div>
       </section>
 
-      <section className="ranking-policy-notice"><AlertTriangle size={19} /><div><strong>Зэрэглэл харагдана, шийдвэр автоматжихгүй</strong><span>Энтертайнерын дөрвөн зэрэглэл CL-017, харилцагчийн таван түвшин CL-040–CL-044 дээр Гүйцэтгэх захирал/Ерөнхий менежерийн баталгаажуулалт хүлээж байна. Оноо, босго, дэвшүүлэх/бууруулах болон гар өөрчлөлт үүсгэхгүй.</span></div></section>
+      <section className="ranking-policy-notice"><AlertTriangle size={19} /><div><strong>Батлагдсан суурийг харуулна, шийдвэр автоматжихгүй</strong><span>Энтертайнерын 1/2/3 зэрэглэл, 14 хоногийн мөчлөг, менежерийн санал ба Гүйцэтгэх захирлын эцсийн шийдвэр; харилцагчийн таван нэр болон зочлолт бүрийн дундажийн суурь батлагдсан. Харин бодлогын идэвхтэй хувилбар, босго, тооцох зарцуулалтын бүх дүрэм ирээгүй тул энэ дэлгэц шийдвэр үүсгэхгүй.</span></div></section>
 
       <div className="segmented-control ranking-tabs" role="tablist" aria-label="Зэрэглэлийн төрөл">
         <button role="tab" aria-selected={tab === 'team'} className={tab === 'team' ? 'active' : ''} type="button" onClick={() => setTab('team')}><Sparkles size={15} />Багийн зэрэглэл</button>
@@ -225,9 +227,9 @@ export function ManagerRankingsView({ snapshot, teamMembers }: { snapshot: Manag
               <article data-tone={selectedRanking.salesTrendPercent < 0 ? 'warning' : 'healthy'}><span>Борлуулалтын хандлага</span><strong>{selectedRanking.salesTrendPercent > 0 ? '+' : ''}{selectedRanking.salesTrendPercent}%</strong><small>{selectedRanking.salesTrendPercent < 0 ? <TrendingDown size={13} /> : <TrendingUp size={13} />} Баталгаажсан эх үүсвэр</small></article>
               <article><span>Сургалт</span><strong>{selectedRanking.trainingCompleted}</strong><small>Дууссан сургалт</small></article>
               <article data-tone={selectedRanking.openComplaints ? 'warning' : 'healthy'}><span>Нээлттэй гомдол</span><strong>{selectedRanking.openComplaints}</strong><small>Шийдвэрийн баримт</small></article>
-              <article><span>Түүхийн хэмжээ</span><strong>{selectedRanking.verifiedHistoryMonths} сар</strong><small>{selectedRanking.dataQuality === 'complete' ? 'Баримт бүрэн' : 'Баримт дутуу'}</small></article>
+              <article><span>Үнэлгээний түүх</span><strong>{selectedRanking.verifiedHistoryDays} хоног</strong><small>{selectedRanking.dataQuality === 'complete' ? '14 хоног бүрэн' : 'Баримт дутуу'}</small></article>
             </div>
-            <div className="policy-lock"><LockKeyhole size={17} /><span><strong>Зэрэглэл өөрчлөх эрх түгжигдсэн</strong><small>Одоогийн зэрэглэлийг харуулж байгаа боловч жин, босго, хүлээлгийн хугацаа, хатуу шалгуур болон гар өөрчлөлтийн эрх батлагдаагүй. Эндээс зэрэглэл өөрчлөх үйлдэл хийхгүй.</small></span></div>
+            <div className="policy-lock"><LockKeyhole size={17} /><span><strong>Зэрэглэл өөрчлөх эрх түгжигдсэн</strong><small>{selectedRanking.evaluationCadenceDays} хоногийн мөчлөг батлагдсан боловч идэвхтэй бодлогын хувилбар, жин, босго болон хатуу шалгуур энэ туршилтын эхэд ирээгүй. Менежерийн санал ба Гүйцэтгэх захирлын шийдвэрийг зөвхөн хамгаалагдсан серверийн урсгалаар үүсгэнэ.</small></span></div>
           </section>
         </div>
       ) : null}
@@ -242,11 +244,11 @@ export function ManagerRankingsView({ snapshot, teamMembers }: { snapshot: Manag
           <section className="workspace-panel ranking-detail" aria-label="Харилцагчийн түвшний баримт">
             <header className="ranking-detail-header"><div><span className="avatar avatar--large">{selectedCustomer.displayName.slice(0, 2)}</span><span><h2>{selectedCustomer.displayName}</h2><p>{selectedCustomer.levelSource}</p></span></div><span className="membership-badge" data-level={selectedCustomer.membershipLevel}><Gem size={15} />{membershipLevelLabels[selectedCustomer.membershipLevel]}</span></header>
             <div className="membership-evidence">
-              <header><div><CircleDollarSign size={20} /><span><strong>Санал болгосон 3 сарын тайлбар</strong><small>Түвшин тогтоохгүй, зөвхөн эх зарцуулалтыг тайлбарлана</small></span></div><b>{formatMoney(rollingAverage(selectedCustomer))}</b></header>
-              <div>{selectedCustomer.monthlyEligibleSpend.map((amount, index) => <article key={index}><span>{index === 0 ? '2 сарын өмнө' : index === 1 ? 'Өмнөх сар' : 'Одоогийн сар'}</span><strong>{formatMoney(amount)}</strong></article>)}</div>
+              <header><div><CircleDollarSign size={20} /><span><strong>Зочлолт бүрийн дундажийн тайлбар</strong><small>Түвшин тогтоохгүй, зөвхөн тулгасан эх зарцуулалтыг тайлбарлана</small></span></div><b>{formatMoney(eligibleVisitAverage(selectedCustomer))}</b></header>
+              <div><article><span>Дууссан эрх бүхий зочлолт</span><strong>{selectedCustomer.completedEligibleVisits}</strong></article><article><span>Тооцоонд орсон зарцуулалт</span><strong>{formatMoney(selectedCustomer.eligibleSpendTotal)}</strong></article><article><span>Тооцооноос хасагдсан</span><strong>{formatMoney(selectedCustomer.excludedSpendTotal)}</strong></article></div>
             </div>
             <div className="customer-rank-facts"><article><span>Гишүүн болсон</span><strong>{formatDate(selectedCustomer.memberSince)}</strong></article><article><span>Сүүлийн зочлолт</span><strong>{formatDateTime(selectedCustomer.lastVisitAt)}</strong></article><article><span>90 хоногийн зочлолт</span><strong>{selectedCustomer.visits90d}</strong></article><article><span>Нийт үнэ цэнэ</span><strong>{formatMoney(selectedCustomer.lifetimeValue)}</strong></article></div>
-            <div className="policy-lock"><LockKeyhole size={17} /><span><strong>Гишүүнчлэлийн түвшин автоматаар өөрчлөгдөхгүй</strong><small>3 сарын дундажийн мөчлөг нь санал төдий. Түвшний нэр, тооцох зарцуулалт, босго, салбар хоорондын дүрэм, бууруулах хүлээлгийн хугацаа болон эрхүүд батлагдсаны дараа л бодлогын хувилбараар тооцоолно.</small></span></div>
+            <div className="policy-lock"><LockKeyhole size={17} /><span><strong>Гишүүнчлэлийн түвшин автоматаар өөрчлөгдөхгүй</strong><small>Хүрэл, Мөнгө, Алт, Очир, Хар очир нэр болон дууссан эрх бүхий зочлолт бүрийн дундажийн суурь батлагдсан. Яг ямар зарцуулалт орох, буцаалт/хөнгөлөлтийн нөлөө, олон салбарын ангилал, идэвхтэй босго ба бодлогын хувилбар ирсний дараа л сервер санал тооцно.</small></span></div>
           </section>
         </div>
       ) : null}

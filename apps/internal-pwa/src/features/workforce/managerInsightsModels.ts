@@ -1,6 +1,6 @@
 import type { EntertainerRank } from './models'
 
-export type CustomerMembershipLevel = 'provisional' | 'level-1' | 'level-2' | 'level-3' | 'level-4' | 'level-5'
+export type CustomerMembershipLevel = 'provisional' | 'bronze' | 'silver' | 'gold' | 'diamond' | 'black-diamond'
 export type CustomerActivityState = 'recent' | 'watch' | 'lapsed'
 export type ConsentChannel = 'viber' | 'telegram' | 'email'
 
@@ -35,10 +35,12 @@ export interface CustomerIntelligenceRecord {
   minimumSpend: number
   maximumSpend: number
   lifetimeValue: number
-  monthlyEligibleSpend: [number, number, number]
+  completedEligibleVisits: number
+  eligibleSpendTotal: number
+  excludedSpendTotal: number
+  membershipPolicyVersion?: string
   preferredVisitWindow: string
   benefitUses90d: number
-  cashbackBalance: number
   consentedChannels: ConsentChannel[]
   affinities: EntertainerAffinity[]
   recentVisits: CustomerVisitSummary[]
@@ -59,7 +61,9 @@ export interface EntertainerRankingEvidence {
   salesTrendPercent: number
   trainingCompleted: number
   openComplaints: number
-  verifiedHistoryMonths: number
+  verifiedHistoryDays: number
+  evaluationCadenceDays: 14
+  rankPolicyVersion?: string
   dataQuality: 'complete' | 'partial'
   dataFreshAt: string
 }

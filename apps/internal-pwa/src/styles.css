@@ -509,15 +509,14 @@ main { width: min(100%, 1640px); margin: 0 auto; padding: 28px 30px 50px; }
 .crm-directory button small, .ranking-list button small { margin-top: 3px; overflow: hidden; color: #8a94a4; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
 .crm-directory button b, .ranking-list button b, .membership-badge, .rank-badge { padding: 5px 7px; color: #566177; background: #f0f2f5; border-radius: 999px; font-size: 7px; white-space: nowrap; }
 [data-level='provisional'] { color: #835317 !important; background: var(--amber-soft) !important; }
-[data-level='level-1'] { color: #6c5d4e !important; background: #f3f0ed !important; }
-[data-level='level-2'] { color: #5e6875 !important; background: #eef1f4 !important; }
-[data-level='level-3'] { color: #996321 !important; background: #fff3df !important; }
-[data-level='level-4'] { color: #405ba5 !important; background: #edf2ff !important; }
-[data-level='level-5'] { color: #6f50a2 !important; background: #f3effc !important; }
-[data-rank='Bronze'] { color: #8c592b !important; background: #fff1e4 !important; }
-[data-rank='Silver'] { color: #5e6875 !important; background: #eef1f4 !important; }
-[data-rank='Gold'] { color: #996321 !important; background: #fff3df !important; }
-[data-rank='Diamond'] { color: #405ba5 !important; background: #edf2ff !important; }
+[data-level='bronze'] { color: #6c5d4e !important; background: #f3f0ed !important; }
+[data-level='silver'] { color: #5e6875 !important; background: #eef1f4 !important; }
+[data-level='gold'] { color: #996321 !important; background: #fff3df !important; }
+[data-level='diamond'] { color: #405ba5 !important; background: #edf2ff !important; }
+[data-level='black-diamond'] { color: #6f50a2 !important; background: #f3effc !important; }
+[data-rank='Rank1'] { color: #8c592b !important; background: #fff1e4 !important; }
+[data-rank='Rank2'] { color: #5e6875 !important; background: #eef1f4 !important; }
+[data-rank='Rank3'] { color: #405ba5 !important; background: #edf2ff !important; }
 
 .crm-detail, .ranking-detail { overflow: hidden; }
 .crm-detail-header, .ranking-detail-header { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 17px 18px; border-bottom: 1px solid #edf0f4; }

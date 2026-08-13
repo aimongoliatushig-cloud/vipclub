@@ -13,7 +13,7 @@ This is an evidence-based working draft derived from project discussions. Items 
 | Server | Supports branch service operations and receives role-appropriate tasks, schedules, and notifications. |
 | Bartender | Supports beverage/service operations and receives role-appropriate tasks, schedules, and notifications. |
 | Host or receptionist | Finds or creates customer profiles, manages customer onboarding and consent, and supports reservations. |
-| VIP customer | Has a member profile, consent preferences, reservations, loyalty level, benefits, cashback, and communications. |
+| VIP customer | Has a member profile, consent preferences, reservations, membership level, approved benefits/points, and communications. |
 | Marketing and content manager | Creates approved customer segments, campaigns, content, and marketing reporting. |
 | General accountant | Oversees accounting records, reconciliations, financial controls, and approved reporting. |
 | Transaction accountant | Records and reconciles operating transactions, settlements, and supporting financial evidence. |

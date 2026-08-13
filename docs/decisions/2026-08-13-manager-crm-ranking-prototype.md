@@ -21,8 +21,9 @@ The source review included:
 - `docs/08-ux/INTERNAL_PWA.md`;
 - `docs/07-integrations/POS_API_REQUIREMENTS_FOR_PROVIDER.md`;
 - `docs/stakeholder-clarification-register.md`.
+- `docs/decisions/2026-08-11-vip-club-business-logic-reconciliation.md` and its Linear sources BAT-75, BAT-83, BAT-84, and BAT-96.
 
-The documents support manager search and filtering, customer visit/spend intelligence, entertainer affinity, current membership-level visibility, and explainable rank evidence. They do not yet approve complete customer field visibility, cross-branch customer access, final membership names or thresholds, the membership formula, entertainer score weights, promotion/demotion rules, or manual override authority.
+The reconciled baseline supports manager search and filtering, customer visit/spend intelligence, entertainer affinity, current membership-level visibility, five named customer levels calculated from average eligible expenditure per completed eligible visit, and Rank 1/2/3 entertainer reviews on a 14-day cadence. Complete customer field visibility, cross-branch access, exact branch ranges, eligible-spend treatment, entertainer metric weights/thresholds, and manual-adjustment details remain open.
 
 ## Decision
 
@@ -35,22 +36,22 @@ The browser-local Manager UI may provide two new read-oriented surfaces for the 
    - average/minimum/maximum spend and lifetime value;
    - reservation-derived entertainer affinity;
    - consented channel indicators;
-   - benefit-use and cashback balance evidence;
+   - verified benefit-use and policy-version evidence without inventing a standalone cashback balance;
    - recent reconciled visit records and data freshness.
 2. **Ranking review**
    - current source entertainer rank;
    - separate verified evidence for attendance, unresolved no-show, reservations, repeat customers, sales trend, training, complaints, and history completeness;
    - current source customer membership level;
-   - a clearly labelled three-month spend explanation that does not calculate or assign a level.
+   - a clearly labelled eligible-expenditure-per-completed-visit explanation that does not assign a level without the active branch range and policy version.
 
-The UI must remain Mongolian-first, branch-scoped, and privacy-minimized. It must not expose full phone numbers, identity documents, private notes, unrestricted exports, campaign sending, threshold editing, rank editing, membership reassignment, benefit changes, or cashback transactions.
+The UI must remain Mongolian-first, branch-scoped, and privacy-minimized. It must not expose full phone numbers, identity documents, private notes, unrestricted exports, campaign sending, threshold editing, rank editing, membership reassignment, benefit changes, or financial-value transactions.
 
 ## Consequences
 
 - Managers can review useful branch customer and ranking evidence without waiting for every policy decision.
 - The UI does not convert proposed policies into hidden production rules.
 - Membership and ranking displays remain informational until the corresponding source assignments and policy versions are provided by secure server APIs.
-- Production release remains blocked on customer field-level permission approval, POS/reservation reconciliation, privacy/retention controls, CL-017, and CL-030 through CL-047 as applicable.
+- Production release remains blocked on customer field-level permission approval, POS/reservation reconciliation, privacy/retention controls, the remaining BAT-83/BAT-96 policy parameters, and CL-030 through CL-047 as applicable.
 - Future write actions must be implemented as server-authorized, effective-dated, audited workflows rather than client-side controls.
 
 ## Follow-up functions after approval
@@ -60,5 +61,5 @@ The UI must remain Mongolian-first, branch-scoped, and privacy-minimized. It mus
 - versioned membership policy and branch threshold editor;
 - membership evaluation, grace, review, and adjustment workflow;
 - versioned entertainer ranking evaluation, appeal, and authorized override workflow;
-- benefit entitlement/redemption and cashback ledger integration;
+- approved benefit/points entitlement and source-linked ledger integration;
 - consent-aware segmentation/campaign workflow with approval and delivery evidence.

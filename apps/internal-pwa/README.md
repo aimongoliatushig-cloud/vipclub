@@ -33,15 +33,15 @@ This branch starts the first runnable Manager-facing slice directly from the app
 - versioned, reason-required changes after publication;
 - browser-local mock persistence and audit events for prototype review.
 
-Rank override remains intentionally locked because `docs/entertainer-ranking-policy.md` still requires formal CEO or General Manager approval. The prototype shows rank where operationally useful but does not invent authority or thresholds.
+Rank changes remain intentionally locked. The approved Rank 1/2/3 and 14-day baseline is visible, but the prototype does not invent an effective policy version, thresholds, manager recommendation submission, or CEO decision authority.
 
 ## Branch Manager customer and ranking prototype
 
 The same Manager workspace now includes:
 
-- a branch-only, masked customer intelligence view with search, membership/activity filters, visits, spend, entertainer affinity, consent indicators, benefit use, cashback balance, and source freshness;
+- a branch-only, masked customer intelligence view with search, membership/activity filters, visits, spend, entertainer affinity, consent indicators, verified benefit use, policy-version state, and source freshness;
 - an explainable entertainer-ranking evidence view using current source rank plus separate attendance, no-show, reservation, repeat-customer, sales-trend, training, complaint, and history signals;
-- a customer membership-evidence view that keeps the current source level separate from the proposed three-month spend explanation;
+- a customer membership-evidence view that keeps the current source level separate from eligible expenditure per completed eligible visit;
 - explicit policy locks for all unapproved membership and ranking calculations or overrides.
 
 See `docs/decisions/2026-08-13-manager-crm-ranking-prototype.md` for the source reconciliation, privacy boundary, and follow-up production functions.

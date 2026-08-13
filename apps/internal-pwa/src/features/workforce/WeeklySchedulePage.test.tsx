@@ -204,7 +204,7 @@ describe('WeeklySchedulePage', () => {
     expect(screen.getAllByText(/•••• 4821/).length).toBeGreaterThan(0)
     expect(screen.getByText(/Иргэний үнэмлэх, бүтэн утас/)).toBeInTheDocument()
 
-    await user.selectOptions(screen.getByLabelText('Гишүүнчлэлийн түвшнээр шүүх'), 'level-4')
+    await user.selectOptions(screen.getByLabelText('Гишүүнчлэлийн түвшнээр шүүх'), 'diamond')
     expect(screen.getByRole('button', { name: /Тэмүүлэн Б\./ })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /Саруул Н\./ })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: /экспорт/i })).not.toBeInTheDocument()
@@ -216,7 +216,7 @@ describe('WeeklySchedulePage', () => {
     await user.click(screen.getByRole('link', { name: 'Зэрэглэл' }))
 
     expect(screen.getByRole('heading', { name: 'Зэрэглэлийн хяналт' })).toBeInTheDocument()
-    expect(screen.getByText(/Зэрэглэл харагдана, шийдвэр автоматжихгүй/)).toBeInTheDocument()
+    expect(screen.getByText(/Батлагдсан суурийг харуулна, шийдвэр автоматжихгүй/)).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Мөнх Нараа/ }))
     expect(screen.getByText('Шийдэгдээгүй ирээгүй тохиолдол')).toBeInTheDocument()
     expect(screen.getByText('Зэрэглэл өөрчлөх эрх түгжигдсэн')).toBeInTheDocument()
@@ -225,6 +225,8 @@ describe('WeeklySchedulePage', () => {
     await user.click(screen.getByRole('tab', { name: 'Харилцагчийн түвшин' }))
     await user.click(screen.getByRole('button', { name: /Оюун Э\./ }))
     expect(screen.getAllByText('Шинэ / түр').length).toBeGreaterThan(0)
+    expect(screen.getByText('Зочлолт бүрийн дундажийн тайлбар')).toBeInTheDocument()
     expect(screen.getByText('Гишүүнчлэлийн түвшин автоматаар өөрчлөгдөхгүй')).toBeInTheDocument()
+    expect(screen.queryByText(/буцаан олголтын үлдэгдэл/i)).not.toBeInTheDocument()
   })
 })

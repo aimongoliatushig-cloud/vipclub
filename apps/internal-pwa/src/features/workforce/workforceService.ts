@@ -112,10 +112,10 @@ const demoWeekStart = startOfWeek(new Date())
 const demoStatusAt = new Date().toISOString()
 
 const teamMembers: TeamMember[] = [
-  { id: 'tm-anu', name: 'Бат Ану', initials: 'БА', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt, rank: 'Gold' },
-  { id: 'tm-bolor', name: 'Эрдэнэ Болор', initials: 'ЭБ', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'reserved', statusUpdatedAt: demoStatusAt, rank: 'Silver' },
-  { id: 'tm-naraa', name: 'Мөнх Нараа', initials: 'МН', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'break', statusUpdatedAt: demoStatusAt, rank: 'Bronze' },
-  { id: 'tm-solongo', name: 'Цэрэн Солонго', initials: 'ЦС', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [addDays(demoWeekStart, 3)], operationalStatus: 'late', statusUpdatedAt: demoStatusAt, rank: 'Diamond' },
+  { id: 'tm-anu', name: 'Бат Ану', initials: 'БА', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt, rank: 'Rank3' },
+  { id: 'tm-bolor', name: 'Эрдэнэ Болор', initials: 'ЭБ', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'reserved', statusUpdatedAt: demoStatusAt, rank: 'Rank2' },
+  { id: 'tm-naraa', name: 'Мөнх Нараа', initials: 'МН', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'break', statusUpdatedAt: demoStatusAt, rank: 'Rank1' },
+  { id: 'tm-solongo', name: 'Цэрэн Солонго', initials: 'ЦС', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [addDays(demoWeekStart, 3)], operationalStatus: 'late', statusUpdatedAt: demoStatusAt, rank: 'Rank3' },
   { id: 'tm-temuulen', name: 'Баатар Тэмүүлэн', initials: 'БТ', branchId: AUTHORIZED_BRANCH_ID, role: 'Server', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt },
   { id: 'tm-bilguun', name: 'Дорж Билгүүн', initials: 'ДБ', branchId: AUTHORIZED_BRANCH_ID, role: 'Server', active: true, unavailableDates: [addDays(demoWeekStart, 4)], operationalStatus: 'absent', statusUpdatedAt: demoStatusAt },
   { id: 'tm-sarnai', name: 'Ган Сарнай', initials: 'ГС', branchId: AUTHORIZED_BRANCH_ID, role: 'Bartender', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },

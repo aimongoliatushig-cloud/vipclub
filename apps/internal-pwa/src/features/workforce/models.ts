@@ -11,7 +11,7 @@ export type ShiftTemplateName = keyof typeof shiftTemplates
 export type RosterStatus = 'draft' | 'published' | 'closed' | 'superseded'
 export type AssignmentResponse = 'assigned' | 'acknowledged' | 'change-requested'
 export type OperationalStatus = 'available' | 'reserved' | 'serving' | 'break' | 'late' | 'absent' | 'leave' | 'off-shift'
-export type EntertainerRank = 'Bronze' | 'Silver' | 'Gold' | 'Diamond'
+export type EntertainerRank = 'Rank1' | 'Rank2' | 'Rank3'
 
 export interface TeamMember {
   id: string

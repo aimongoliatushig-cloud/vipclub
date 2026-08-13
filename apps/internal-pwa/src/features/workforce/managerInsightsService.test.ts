@@ -9,6 +9,9 @@ describe('Manager customer and ranking insight boundaries', () => {
     expect(snapshot.customers.every((customer) => customer.branchId === snapshot.branchId)).toBe(true)
     expect(snapshot.entertainerRankings.every((ranking) => ranking.branchId === snapshot.branchId)).toBe(true)
     expect(snapshot.customers.every((customer) => /^•••• \d{4}$/.test(customer.maskedPhone))).toBe(true)
+    expect(snapshot.entertainerRankings.every((ranking) => ['Rank1', 'Rank2', 'Rank3'].includes(ranking.currentRank))).toBe(true)
+    expect(snapshot.customers.every((customer) => !('cashbackBalance' in customer))).toBe(true)
+    expect(snapshot.customers.every((customer) => customer.eligibleSpendTotal / customer.completedEligibleVisits === customer.averageSpend)).toBe(true)
   })
 
   it('denies another branch instead of returning unscoped CRM records', () => {

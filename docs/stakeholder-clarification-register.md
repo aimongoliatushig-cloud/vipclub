@@ -30,7 +30,7 @@ Use this register to collect decisions and missing data from the CEO, branch man
 | CL-014 | Confirm which verified sales records and share rates determine entertainer three-day settlements. | General accountant / Branch managers | High | Open |
 | CL-015 | Confirm whether every employment type is loan-eligible and define minimum tenure, income history, maximum amount, repayment range, and departure treatment. | CEO / HR / General accountant | High | Open |
 | CL-016 | Confirm loan approval authority, bank/payment evidence requirements, and adjustment or reversal process. | CEO / Payment accountant | High | Open |
-| CL-017 | **CEO or General Manager confirmation required:** approve the selected entertainer ranking lifecycle—four levels, rolling evaluation, repeated no-show hard gate/benefit suspension, sustained sales-decline demotion, grace rule, benefits, and appeal process. | CEO / General Manager / Lead entertainer | High | Open |
+| CL-017 | **Approved baseline (2026-08-11):** Rank 1/2/3, 14-day cadence, Branch Manager recommendation, and CEO final decision. BAT-96 must still publish the effective metric weights, thresholds, hard gates, benefits, missing-data treatment, and appeal/manual-adjustment rules. | CEO / General Manager / Lead entertainer | High | Approved baseline; parameters open |
 
 ## 3. Tasks, maintenance, and management goals
 
@@ -53,19 +53,19 @@ Use this register to collect decisions and missing data from the CEO, branch man
 | CL-034 | Confirm what customer information, reservations, and entertainer-affinity insight each role may view. | CEO / Legal adviser | High | Open |
 | CL-035 | Confirm whether eligible VIP transport is a loyalty benefit, its qualification rules, booking process, and privacy safeguards. | CEO / Branch managers | Medium | Open |
 
-## 5. Membership, benefits, and cashback
+## 5. Membership, benefits, and points
 
 | ID | Question or data needed | Decision owner | Risk | Status |
 | --- | --- | --- | --- | ---|
-| CL-040 | Confirm the five membership-level names, entry level, and customer-facing descriptions. | CEO / Marketing | High | Open |
-| CL-040A | Approve the proposed membership lifecycle: New/Provisional status, rolling three-month average, inactive months counted as zero, and a controlled downgrade grace rule. | CEO / General Manager | High | Open |
-| CL-041 | Choose the membership calculation: rolling 12-month spend, active-month average, lifetime average, lifetime spend, or another approved formula. | CEO / General accountant / Marketing | High | Open |
+| CL-040 | **Approved baseline (2026-08-11):** Bronze, Silver, Gold, Diamond, and Black Diamond. Customer-facing descriptions and provisional entry presentation still require content approval. | CEO / Marketing | High | Approved baseline; content open |
+| CL-040A | The rolling three-month/inactive-month-zero proposal is superseded by the completed-eligible-visit average in CL-041. | CEO / General Manager | High | Superseded |
+| CL-041 | **Approved baseline (2026-08-11):** average eligible expenditure per completed eligible visit, compared with the active branch-specific range. Exact eligible-spend treatment remains in CL-042. | CEO / General accountant / Marketing | High | Approved baseline |
 | CL-042 | Define what counts as eligible spend and how refunds, cancellations, discounts, complimentary items, and corrections affect it. | General accountant / CEO | High | Open |
 | CL-043 | Confirm branch-specific thresholds, who can change them, effective dates, audit rule, and how multi-branch customers are classified. | CEO / Branch managers | High | Open |
 | CL-044 | Confirm membership-evaluation frequency, upgrade/downgrade, grace period, manual override, and review process. | CEO / Marketing | High | Open |
 | CL-045 | Define benefits for each level, including free-entry allowances, VIP transport, reservation priority, and branch scope. | CEO / Branch managers / Marketing | High | Open |
-| CL-046 | Confirm cashback monetary value, credit sources, eligible redemptions, expiry, balance limits, fraud controls, approvals, and reversal process. | CEO / General accountant | High | Open |
-| CL-047 | Confirm how benefit use and cashback redemption are verified at the branch and reconciled with sales/POS records. | Branch managers / Transaction accountant | High | Open |
+| CL-046 | A standalone cashback balance is not approved. Confirm whether any points, privilege, or monetary-value ledger will launch and define earn/use/expire/adjust/reverse, limits, fraud controls, approvals, and financial treatment. | CEO / General accountant | High | Open |
+| CL-047 | Confirm how benefit or approved ledger use is verified at the branch and reconciled with sales/POS records. | Branch managers / Transaction accountant | High | Open |
 
 ## 6. Integrations, security, and implementation
 

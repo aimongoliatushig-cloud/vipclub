@@ -57,10 +57,9 @@ export const operationalStatusLabels: Record<OperationalStatus, string> = {
 }
 
 export const entertainerRankLabels: Record<EntertainerRank, string> = {
-  Bronze: 'Хүрэл',
-  Silver: 'Мөнгө',
-  Gold: 'Алт',
-  Diamond: 'Очир',
+  Rank1: '1-р зэрэглэл',
+  Rank2: '2-р зэрэглэл',
+  Rank3: '3-р зэрэглэл',
 }
 
 export const attendanceExceptionLabels: Record<AttendanceExceptionType, string> = {
