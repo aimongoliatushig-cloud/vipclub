@@ -10,6 +10,7 @@ import {
   Clock3,
   Copy,
   FileClock,
+  Inbox,
   LayoutDashboard,
   ListChecks,
   Menu,
@@ -46,6 +47,7 @@ import {
   weekDates,
   type WorkforceService,
 } from './workforceService'
+import { ResponseQueuePanel, TeamMemberSchedulePanel } from './ResponsePanels'
 
 const dayLabel = new Intl.DateTimeFormat('en', { weekday: 'short' })
 const shortDate = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' })
@@ -301,6 +303,9 @@ function auditActionLabel(action: RosterAuditEvent['action']): string {
     'requirements-updated': 'Staffing requirements updated',
     'manager-messaged': 'Branch Manager messaged',
     'follow-up-created': 'CEO follow-up task created',
+    'assignment-acknowledged': 'Assignment acknowledged',
+    'assignment-change-requested': 'Assignment change requested',
+    'acknowledgement-reminder-recorded': 'Acknowledgement reminder recorded',
   }
   return labels[action]
 }
@@ -368,7 +373,7 @@ function ExecutiveFollowUpPanel({ roster, summary, onClose, onRecord }: Executiv
         </div>
         <div className="executive-signals">
           <article><span>Coverage gap</span><strong>{summary.coverageGapCount}</strong><small>Uncovered role-shifts</small></article>
-          <article><span>Pending response</span><strong>{summary.pendingAcknowledgementCount}</strong><small>Published assignments</small></article>
+          <article><span>Overdue response</span><strong>{summary.pendingAcknowledgementCount}</strong><small>Past reminder threshold</small></article>
           <article><span>Change requests</span><strong>{summary.changeRequestCount}</strong><small>Team-member requests</small></article>
         </div>
         <div className="manager-evidence">
@@ -410,6 +415,8 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
   const [requirementsOpen, setRequirementsOpen] = useState(false)
   const [auditOpen, setAuditOpen] = useState(false)
   const [executiveOpen, setExecutiveOpen] = useState(false)
+  const [responseQueueOpen, setResponseQueueOpen] = useState(false)
+  const [memberPreviewOpen, setMemberPreviewOpen] = useState(false)
   const [message, setMessage] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const teamMembers = useMemo(() => service.getTeamMembers(), [service])
@@ -421,12 +428,15 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
     setRequirementsOpen(false)
     setAuditOpen(false)
     setExecutiveOpen(false)
+    setResponseQueueOpen(false)
+    setMemberPreviewOpen(false)
   }, [service, weekStart])
 
   const dates = weekDates(weekStart)
   const coverage = useMemo(() => getCoverage(roster), [roster])
   const issues = useMemo(() => service.validateRoster(roster), [roster, service])
   const executiveSummary = useMemo(() => service.getExecutiveFollowUp(weekStart), [roster, service, weekStart])
+  const responseQueue = useMemo(() => service.getResponseQueue(weekStart), [roster, service, weekStart])
   const openGaps = coverage.reduce((sum, item) => sum + item.gap, 0)
   const required = coverage.reduce((sum, item) => sum + item.required, 0)
   const scheduled = coverage.reduce((sum, item) => sum + item.scheduled, 0)
@@ -459,7 +469,7 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
     const next = service.publishRoster(weekStart, reason)
     setRoster(next)
     setPublishOpen(false)
-    setMessage(`Roster version ${next.version} published. ${next.assignments.length} team-member notifications are ready.`)
+    setMessage(`Roster version ${next.version} published. ${next.assignments.length} assignment responses are now pending.`)
   }
 
   function copyPrevious() {
@@ -479,6 +489,28 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
     const next = service.recordExecutiveFollowUp(weekStart, action, note, dueDate)
     setRoster(next)
     setMessage(action === 'message' ? 'Manager message recorded in the audit trail.' : `CEO follow-up task recorded for ${dueDate}.`)
+  }
+
+  function respondToAssignment(
+    teamMemberId: string,
+    assignmentId: string,
+    response: 'acknowledged' | 'change-requested',
+    note?: string,
+  ) {
+    const next = service.respondToAssignment(weekStart, teamMemberId, assignmentId, response, note)
+    setRoster(next)
+    setMessage(response === 'acknowledged' ? 'Assignment receipt acknowledged.' : 'Schedule change request added to the Branch Manager queue.')
+  }
+
+  function recordResponseReminder(assignmentId: string) {
+    const next = service.recordResponseReminder(weekStart, assignmentId)
+    setRoster(next)
+    setMessage('Reminder evidence recorded. No notification was sent by this prototype.')
+  }
+
+  function editResponseAssignment(assignment: ShiftAssignment) {
+    setResponseQueueOpen(false)
+    setEditor({ assignment, teamMemberId: assignment.teamMemberId, date: assignment.date })
   }
 
   return (
@@ -534,6 +566,7 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
 
           <section className="planning-actions" aria-label="Planning and accountability tools">
             <button type="button" onClick={() => setRequirementsOpen(true)}><span className="planning-action-icon"><Settings2 size={19} /></span><span><strong>Staffing requirements</strong><small>Template v{roster.requirementVersion} · effective {shortDate.format(dateAtNoon(roster.requirementsEffectiveFrom))}</small></span><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setResponseQueueOpen(true)} data-tone={responseQueue.some((item) => item.assignment.response === 'change-requested' || item.overdue) ? 'attention' : 'neutral'}><span className="planning-action-icon"><Inbox size={19} /></span><span><strong>Response queue</strong><small>{roster.status === 'published' ? `${responseQueue.length} unresolved · ${roster.assignments.length - responseQueue.length} acknowledged` : 'Available after publication'}</small></span><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setAuditOpen(true)}><span className="planning-action-icon"><FileClock size={19} /></span><span><strong>Audit evidence</strong><small>{roster.audit.length} recorded schedule events</small></span><ChevronRight size={18} /></button>
             <button type="button" onClick={() => setExecutiveOpen(true)} data-tone={executiveSummary.publicationState === 'draft-overdue' || openGaps ? 'attention' : 'neutral'}><span className="planning-action-icon"><CircleGauge size={19} /></span><span><strong>CEO follow-up</strong><small>{executiveSummary.publicationLabel}</small></span><ChevronRight size={18} /></button>
           </section>
@@ -630,6 +663,8 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
       {requirementsOpen ? <StaffingRequirementsEditor roster={roster} onClose={() => setRequirementsOpen(false)} onSave={saveRequirements} /> : null}
       {auditOpen ? <AuditTrailPanel roster={roster} onClose={() => setAuditOpen(false)} /> : null}
       {executiveOpen ? <ExecutiveFollowUpPanel roster={roster} summary={executiveSummary} onClose={() => setExecutiveOpen(false)} onRecord={recordExecutiveFollowUp} /> : null}
+      {responseQueueOpen ? <ResponseQueuePanel roster={roster} queue={responseQueue} onClose={() => setResponseQueueOpen(false)} onEdit={editResponseAssignment} onReminder={recordResponseReminder} onOpenMemberPreview={() => { setResponseQueueOpen(false); setMemberPreviewOpen(true) }} /> : null}
+      {memberPreviewOpen ? <TeamMemberSchedulePanel roster={roster} teamMembers={teamMembers} onClose={() => setMemberPreviewOpen(false)} onRespond={respondToAssignment} /> : null}
     </div>
   )
 }

@@ -65,4 +65,53 @@ describe('WeeklySchedulePage', () => {
     expect(screen.getByRole('status')).toHaveTextContent('CEO follow-up task recorded')
     expect(dialog).toHaveTextContent('Latest: task due')
   })
+
+  it('keeps draft assignments private from the team-member preview', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('button', { name: /Response queue/ }))
+    expect(screen.getByRole('dialog', { name: 'Assignment responses' })).toHaveTextContent('Responses begin after publication')
+    await user.click(screen.getByRole('button', { name: 'Open team-member preview' }))
+    expect(screen.getByRole('dialog', { name: 'My published schedule' })).toHaveTextContent('No published schedule yet')
+  })
+
+  it('routes a team-member change request into the manager response queue', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('button', { name: 'Review & publish' }))
+    await user.type(screen.getByLabelText(/Reason for publishing below minimum/), 'Two approved gaps are being backfilled.')
+    await user.click(screen.getByRole('button', { name: 'Publish roster' }))
+    await user.click(screen.getByRole('button', { name: /Response queue/ }))
+    expect(screen.getByRole('dialog', { name: 'Assignment responses' })).toHaveTextContent('42')
+    await user.click(screen.getByRole('button', { name: 'Open team-member preview' }))
+    await user.click(screen.getAllByRole('button', { name: 'Request change' })[0])
+    await user.type(screen.getByLabelText('Why do you need a change?'), 'Class ends after this shift starts.')
+    await user.click(screen.getByRole('button', { name: 'Submit request' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('change request added')
+    await user.click(screen.getByRole('button', { name: 'Close team-member schedule preview' }))
+    await user.click(screen.getByRole('button', { name: /Response queue/ }))
+    const queue = screen.getByRole('dialog', { name: 'Assignment responses' })
+    expect(queue).toHaveTextContent('Change requested')
+    expect(queue).toHaveTextContent('Class ends after this shift starts.')
+  })
+
+  it('records acknowledgement and reminder evidence without changing roster version', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('button', { name: 'Review & publish' }))
+    await user.type(screen.getByLabelText(/Reason for publishing below minimum/), 'Two approved gaps are being backfilled.')
+    await user.click(screen.getByRole('button', { name: 'Publish roster' }))
+    await user.click(screen.getByRole('button', { name: /Response queue/ }))
+    await user.click(screen.getAllByRole('button', { name: 'Record reminder' })[0])
+    expect(screen.getByRole('status')).toHaveTextContent('No notification was sent')
+    expect(screen.getByRole('dialog', { name: 'Assignment responses' })).toHaveTextContent('1 total')
+    await user.click(screen.getByRole('button', { name: 'Open team-member preview' }))
+    await user.click(screen.getAllByRole('button', { name: 'Acknowledge' })[0])
+    expect(screen.getByRole('status')).toHaveTextContent('receipt acknowledged')
+    expect(screen.getByText('Published v1')).toBeInTheDocument()
+  })
 })

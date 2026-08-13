@@ -4,6 +4,7 @@ import {
   type AssignmentInput,
   type CoverageRow,
   type ExecutiveFollowUpSummary,
+  type ResponseQueueItem,
   type ShiftAssignment,
   type StaffingRequirement,
   type TeamMember,
@@ -14,6 +15,7 @@ import {
 
 const STORAGE_KEY = 'vipclub.workforce.manager-prototype.v1'
 const DAY_MS = 86_400_000
+const ACKNOWLEDGEMENT_WINDOW_MS = DAY_MS
 
 export function toDateKey(date: Date): string {
   const year = date.getFullYear()
@@ -70,6 +72,15 @@ export interface WorkforceService {
     note: string,
     dueDate?: string,
   ): WeeklyRoster
+  getResponseQueue(weekStart: string, now?: Date): ResponseQueueItem[]
+  respondToAssignment(
+    weekStart: string,
+    teamMemberId: string,
+    assignmentId: string,
+    response: 'acknowledged' | 'change-requested',
+    note?: string,
+  ): WeeklyRoster
+  recordResponseReminder(weekStart: string, assignmentId: string): WeeklyRoster
   validateRoster(roster: WeeklyRoster): ValidationIssue[]
 }
 
@@ -201,9 +212,19 @@ export class BrowserWorkforceService implements WorkforceService {
     const existing = this.readState().rosters[weekStart]
     if (!existing) return this.writeRoster(createSeedRoster(weekStart))
 
-    const needsMigration = !('requirementVersion' in existing) || !('executiveFollowUps' in existing)
+    const responseDueAt = existing.publishedAt
+      ? new Date(new Date(existing.publishedAt).getTime() + ACKNOWLEDGEMENT_WINDOW_MS).toISOString()
+      : undefined
+    const assignments = existing.assignments.map((item) => (
+      item.response === 'assigned' && existing.status === 'published' && !item.responseDueAt
+        ? { ...item, responseDueAt }
+        : item
+    ))
+    const needsResponseMigration = assignments.some((item, index) => item !== existing.assignments[index])
+    const needsMigration = !('requirementVersion' in existing) || !('executiveFollowUps' in existing) || needsResponseMigration
     const roster = {
       ...existing,
+      assignments,
       requirementVersion: existing.requirementVersion ?? 1,
       requirementsEffectiveFrom: existing.requirementsEffectiveFrom ?? existing.weekStart,
       executiveFollowUps: existing.executiveFollowUps ?? [],
@@ -268,7 +289,9 @@ export class BrowserWorkforceService implements WorkforceService {
     }
     const coverageGapCount = getCoverage(roster).reduce((total, row) => total + row.gap, 0)
     const pendingAcknowledgementCount = hasPublication
-      ? roster.assignments.filter((item) => item.response === 'assigned').length
+      ? roster.assignments.filter((item) => (
+          item.response === 'assigned' && Boolean(item.responseDueAt && new Date(item.responseDueAt) < now)
+        )).length
       : 0
     const changeRequestCount = roster.assignments.filter((item) => item.response === 'change-requested').length
     const managerEvents = roster.audit.filter((event) => event.actor === roster.managerName)
@@ -286,10 +309,10 @@ export class BrowserWorkforceService implements WorkforceService {
       ? 'Contact the Branch Manager and create a due-dated publication follow-up.'
       : coverageGapCount > 0
         ? `Confirm mitigation for ${coverageGapCount} uncovered role-shift${coverageGapCount === 1 ? '' : 's'}.`
-        : pendingAcknowledgementCount > 0
-          ? `Ask the Branch Manager to resolve ${pendingAcknowledgementCount} pending acknowledgement${pendingAcknowledgementCount === 1 ? '' : 's'}.`
-          : changeRequestCount > 0
-            ? `Review ${changeRequestCount} team-member change request${changeRequestCount === 1 ? '' : 's'}.`
+        : changeRequestCount > 0
+          ? `Review ${changeRequestCount} team-member change request${changeRequestCount === 1 ? '' : 's'}.`
+          : pendingAcknowledgementCount > 0
+            ? `Ask the Branch Manager to resolve ${pendingAcknowledgementCount} overdue acknowledgement${pendingAcknowledgementCount === 1 ? '' : 's'}.`
             : 'No follow-up is currently required.'
 
     return {
@@ -336,6 +359,94 @@ export class BrowserWorkforceService implements WorkforceService {
       actor: 'CEO Demo',
       action: action === 'message' ? 'manager-messaged' : 'follow-up-created',
       reason: note.trim(),
+      version: roster.version,
+    })
+    return this.writeRoster(roster)
+  }
+
+  getResponseQueue(weekStart: string, now = new Date()): ResponseQueueItem[] {
+    const roster = this.getRoster(weekStart)
+    if (roster.status !== 'published') return []
+
+    const memberById = new Map(teamMembers.map((member) => [member.id, member]))
+    return roster.assignments
+      .filter((item) => item.response !== 'acknowledged')
+      .flatMap((item) => {
+        const member = memberById.get(item.teamMemberId)
+        if (!member) return []
+        return [{
+          assignment: item,
+          teamMember: member,
+          overdue: item.response === 'assigned' && Boolean(item.responseDueAt && new Date(item.responseDueAt) < now),
+        }]
+      })
+      .sort((left, right) => {
+        if (left.assignment.response !== right.assignment.response) {
+          return left.assignment.response === 'change-requested' ? -1 : 1
+        }
+        if (left.overdue !== right.overdue) return left.overdue ? -1 : 1
+        return left.assignment.date.localeCompare(right.assignment.date)
+      })
+  }
+
+  respondToAssignment(
+    weekStart: string,
+    teamMemberId: string,
+    assignmentId: string,
+    response: 'acknowledged' | 'change-requested',
+    note?: string,
+  ): WeeklyRoster {
+    const roster = this.getRoster(weekStart)
+    if (roster.status !== 'published') throw new Error('Only published assignments can receive a team-member response.')
+    const assignment = roster.assignments.find((item) => item.id === assignmentId)
+    if (!assignment || assignment.teamMemberId !== teamMemberId) {
+      throw new Error('You can respond only to your own published assignment.')
+    }
+    const member = teamMembers.find((item) => item.id === teamMemberId)
+    if (!member?.active) throw new Error('This team member is not active in the branch.')
+    if (response === 'change-requested' && (note?.trim().length ?? 0) < 5) {
+      throw new Error('Add a specific change-request reason of at least 5 characters.')
+    }
+
+    const now = new Date().toISOString()
+    assignment.response = response
+    assignment.respondedAt = now
+    assignment.respondedBy = member.name
+    assignment.responseNote = response === 'change-requested' ? note?.trim() : undefined
+    roster.lastSavedAt = now
+    roster.audit.push({
+      id: id('audit'),
+      at: now,
+      actor: member.name,
+      action: response === 'acknowledged' ? 'assignment-acknowledged' : 'assignment-change-requested',
+      reason: assignment.responseNote,
+      assignmentId,
+      version: roster.version,
+    })
+    return this.writeRoster(roster)
+  }
+
+  recordResponseReminder(weekStart: string, assignmentId: string): WeeklyRoster {
+    const roster = this.getRoster(weekStart)
+    if (roster.status !== 'published') throw new Error('Publish the roster before recording an acknowledgement reminder.')
+    const assignment = roster.assignments.find((item) => item.id === assignmentId)
+    if (!assignment || assignment.response !== 'assigned') {
+      throw new Error('A reminder can be recorded only for a pending acknowledgement.')
+    }
+    const member = teamMembers.find((item) => item.id === assignment.teamMemberId)
+    if (!member) throw new Error('The assigned team member is no longer available.')
+
+    const now = new Date().toISOString()
+    assignment.lastReminderAt = now
+    assignment.reminderCount = (assignment.reminderCount ?? 0) + 1
+    roster.lastSavedAt = now
+    roster.audit.push({
+      id: id('audit'),
+      at: now,
+      actor: roster.managerName,
+      action: 'acknowledgement-reminder-recorded',
+      reason: `Reminder evidence recorded for ${member.name}. No message was sent by this prototype.`,
+      assignmentId,
       version: roster.version,
     })
     return this.writeRoster(roster)
@@ -400,6 +511,9 @@ export class BrowserWorkforceService implements WorkforceService {
       shift: input.shift,
       ...shiftTemplates[input.shift],
       response: 'assigned',
+      responseDueAt: roster.status === 'published'
+        ? new Date(Date.now() + ACKNOWLEDGEMENT_WINDOW_MS).toISOString()
+        : undefined,
     }
     if (existingIndex >= 0) roster.assignments[existingIndex] = nextAssignment
     else roster.assignments.push(nextAssignment)
@@ -452,7 +566,17 @@ export class BrowserWorkforceService implements WorkforceService {
     roster.status = 'published'
     roster.publishedAt = now
     roster.lastSavedAt = now
-    roster.assignments = roster.assignments.map((item) => ({ ...item, response: 'assigned' }))
+    const responseDueAt = new Date(new Date(now).getTime() + ACKNOWLEDGEMENT_WINDOW_MS).toISOString()
+    roster.assignments = roster.assignments.map((item) => ({
+      ...item,
+      response: 'assigned',
+      responseDueAt,
+      respondedAt: undefined,
+      respondedBy: undefined,
+      responseNote: undefined,
+      lastReminderAt: undefined,
+      reminderCount: 0,
+    }))
     roster.audit.push({
       id: id('audit'),
       at: now,
@@ -473,6 +597,12 @@ export class BrowserWorkforceService implements WorkforceService {
       id: id('shift'),
       date: addDays(item.date, 7),
       response: 'assigned',
+      responseDueAt: undefined,
+      respondedAt: undefined,
+      respondedBy: undefined,
+      responseNote: undefined,
+      lastReminderAt: undefined,
+      reminderCount: 0,
     }))
     roster.requirements = previous.requirements.map((item) => ({ ...item, date: addDays(item.date, 7) }))
     roster.requirementsEffectiveFrom = weekStart

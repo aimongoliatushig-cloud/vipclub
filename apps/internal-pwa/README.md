@@ -24,10 +24,12 @@ This branch starts the first runnable Manager-facing slice directly from the app
 - active-employment, role, overlap, leave, and coverage validation;
 - publication review with a required reason for permitted shortages;
 - assignment acknowledgement visibility;
+- team-member own-assignment acknowledgement and reason-required change-request preview;
+- manager response queue with overdue-threshold evidence and audited reminder records;
 - versioned, reason-required changes after publication;
 - browser-local mock persistence and audit events for prototype review.
 
-Run it with `npm install` and `npm run dev`. The browser-local service is a UI prototype only; production writes still require server-side Frappe authorization, validation, idempotency, audit, and notification handling.
+Run it with `npm install` and `npm run dev`. The browser-local service is a UI prototype only; the team-member selector is a review aid rather than identity switching. Production writes still require server-side Frappe authorization, ownership validation, idempotency, audit, and notification handling.
 
 ## Relationship to Frappe
 

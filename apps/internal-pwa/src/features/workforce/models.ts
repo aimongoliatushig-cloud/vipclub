@@ -29,6 +29,12 @@ export interface ShiftAssignment {
   start: string
   end: string
   response: AssignmentResponse
+  responseDueAt?: string
+  respondedAt?: string
+  responseNote?: string
+  respondedBy?: string
+  lastReminderAt?: string
+  reminderCount?: number
 }
 
 export interface StaffingRequirement {
@@ -51,6 +57,9 @@ export interface RosterAuditEvent {
     | 'requirements-updated'
     | 'manager-messaged'
     | 'follow-up-created'
+    | 'assignment-acknowledged'
+    | 'assignment-change-requested'
+    | 'acknowledgement-reminder-recorded'
   reason?: string
   assignmentId?: string
   version: number
@@ -98,6 +107,12 @@ export interface ExecutiveFollowUpSummary {
   nextAction: string
   dueDate: string
   latestFollowUp?: ExecutiveFollowUpRecord
+}
+
+export interface ResponseQueueItem {
+  assignment: ShiftAssignment
+  teamMember: TeamMember
+  overdue: boolean
 }
 
 export interface AssignmentInput {

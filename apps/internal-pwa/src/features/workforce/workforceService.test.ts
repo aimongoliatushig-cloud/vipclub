@@ -111,4 +111,65 @@ describe('Branch Manager weekly scheduling rules', () => {
     expect(updated.executiveFollowUps.at(-1)).toMatchObject({ action: 'task', status: 'open', dueDate: '2026-08-14' })
     expect(updated.audit.at(-1)).toMatchObject({ actor: 'CEO Demo', action: 'follow-up-created' })
   })
+
+  it('accepts assignment responses only after publication and only from the assigned member', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    const draft = service.getRoster(weekStart)
+    const assignment = draft.assignments[0]
+
+    expect(() => service.respondToAssignment(weekStart, assignment.teamMemberId, assignment.id, 'acknowledged')).toThrow(/published/i)
+
+    const published = service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
+    const publishedAssignment = published.assignments[0]
+    expect(publishedAssignment.responseDueAt).toBeTruthy()
+    expect(() => service.respondToAssignment(weekStart, 'tm-bolor', publishedAssignment.id, 'acknowledged')).toThrow(/own published assignment/i)
+
+    const acknowledged = service.respondToAssignment(weekStart, publishedAssignment.teamMemberId, publishedAssignment.id, 'acknowledged')
+    expect(acknowledged.version).toBe(1)
+    expect(acknowledged.assignments[0]).toMatchObject({ response: 'acknowledged', respondedBy: 'Anu Bat' })
+    expect(acknowledged.audit.at(-1)).toMatchObject({ actor: 'Anu Bat', action: 'assignment-acknowledged' })
+  })
+
+  it('requires a specific change reason and prioritizes the request in the manager queue', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    const published = service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
+    const assignment = published.assignments[0]
+
+    expect(() => service.respondToAssignment(weekStart, assignment.teamMemberId, assignment.id, 'change-requested', 'No')).toThrow(/at least 5/i)
+
+    service.respondToAssignment(weekStart, assignment.teamMemberId, assignment.id, 'change-requested', 'Class ends after this shift starts.')
+    const queue = service.getResponseQueue(weekStart)
+    expect(queue[0].assignment).toMatchObject({
+      id: assignment.id,
+      response: 'change-requested',
+      responseNote: 'Class ends after this shift starts.',
+    })
+  })
+
+  it('records reminder evidence without claiming notification delivery', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    const published = service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
+    const assignment = published.assignments[0]
+
+    const reminded = service.recordResponseReminder(weekStart, assignment.id)
+    expect(reminded.assignments[0]).toMatchObject({ reminderCount: 1 })
+    expect(reminded.audit.at(-1)).toMatchObject({ action: 'acknowledgement-reminder-recorded' })
+    expect(reminded.audit.at(-1)?.reason).toMatch(/No message was sent/i)
+  })
+
+  it('escalates only acknowledgements past the configured reminder threshold', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    const published = service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
+    const responseDueAt = published.assignments[0].responseDueAt as string
+
+    const beforeThreshold = service.getExecutiveFollowUp(weekStart, new Date(new Date(responseDueAt).getTime() - 1))
+    const afterThreshold = service.getExecutiveFollowUp(weekStart, new Date(new Date(responseDueAt).getTime() + 1))
+
+    expect(beforeThreshold.pendingAcknowledgementCount).toBe(0)
+    expect(afterThreshold.pendingAcknowledgementCount).toBe(published.assignments.length)
+  })
 })
