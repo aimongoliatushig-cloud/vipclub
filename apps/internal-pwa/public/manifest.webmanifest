@@ -1,0 +1,9 @@
+{
+  "name": "VIP Club Internal",
+  "short_name": "VIP Club",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#111927",
+  "icons": []
+}

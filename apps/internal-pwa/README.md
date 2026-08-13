@@ -14,6 +14,21 @@ The internal VIP Club PWA serves all employees and team members through one appl
 
 The interface must never be the only access control. Every API and data request must be authorized server-side by role, branch, ownership, action, and field sensitivity.
 
+## Branch Manager scheduling prototype
+
+This branch starts the first runnable Manager-facing slice directly from the approved workforce Markdown:
+
+- weekly team-member schedule grid;
+- role and team-member filters;
+- draft assignment create/edit/remove;
+- active-employment, role, overlap, leave, and coverage validation;
+- publication review with a required reason for permitted shortages;
+- assignment acknowledgement visibility;
+- versioned, reason-required changes after publication;
+- browser-local mock persistence and audit events for prototype review.
+
+Run it with `npm install` and `npm run dev`. The browser-local service is a UI prototype only; production writes still require server-side Frappe authorization, validation, idempotency, audit, and notification handling.
+
 ## Relationship to Frappe
 
 This PWA will consume approved Frappe/ERPNext APIs from the VIP Club custom app. Framework, build tooling, and deployment details are intentionally pending the repository and VPS audit.

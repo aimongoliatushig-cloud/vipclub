@@ -30,6 +30,8 @@ This document currently records the approved workforce-planning and scheduling p
 | Create/edit unpublished weekly shift assignments | No routine operational ownership; override only where separately authorized | Yes, own authorized branch | Only if separately authorized | No |
 | Publish weekly schedule | No routine operational ownership; override only where separately authorized | Yes, own authorized branch | Only if separately authorized | No |
 | Change published schedule | Executive override where authorized | Yes, own branch with audit trail | HR intervention where authorized | No |
+| Acknowledge published assignment | No | Own assignment only if separately assigned a shift | Own assignment only if separately assigned a shift | Yes, own assignment |
+| Request change to published assignment | No | Own assignment only if separately assigned a shift | Own assignment only if separately assigned a shift | Yes, own assignment |
 | View coverage/readiness | All authorized branches | Own authorized branch | All authorized branches | Own shift status only |
 | Review daily attendance exceptions | Oversight/drill-down | Yes, own authorized branch | HR review/escalation according to policy | Own attendance and correction request |
 | Excuse attendance incident | Only where executive policy permits | Yes where policy permits, own branch | Yes where HR policy permits | No |
@@ -63,6 +65,8 @@ HR owns formal personnel lifecycle and company-wide HR policy. HR must be able t
 ## CEO-level oversight
 
 CEO-level users may view company-wide staffing readiness and workforce risks according to executive authorization. CEO-level access should support oversight, escalation, and approved override without making the CEO the routine weekly scheduler.
+
+Executive oversight may expose roster deadlines, publication timestamps, version history, unresolved gaps, overdue acknowledgements/change requests, the accountable manager, last action, next action, and due date. An executive may message the Branch Manager or create a tracked follow-up task. Subjective inactivity labels are not authorized without a defined measurable breach.
 
 ## Team-member scope
 

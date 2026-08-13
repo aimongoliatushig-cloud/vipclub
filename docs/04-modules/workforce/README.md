@@ -85,6 +85,22 @@ The manager can:
 
 A month or longer calendar view may be provided for planning, but the published weekly roster is the authoritative operational schedule.
 
+### Roster and assignment states
+
+The weekly roster state is `Draft`, `Published`, `Closed`, or `Superseded`. Published changes create a new version with a reason and audit event; they do not silently replace history.
+
+Each team-member assignment separately records `Assigned`, `Acknowledged`, or `Change requested`. Acknowledgement means the person received the schedule. Attendance is still established only by verified check-in/out or another approved attendance record.
+
+Publication checks must cover:
+
+- authorized branch and active employment;
+- role and shift eligibility;
+- approved leave/availability conflicts;
+- duplicate or overlapping assignments;
+- active weekday/role minimum coverage.
+
+Where policy allows publication below minimum coverage, the manager must record a reason and the staffing exception remains open.
+
 ## Coverage and readiness
 
 For every branch/date/role, show at least:
@@ -185,6 +201,8 @@ Persist enough history to distinguish:
 - unexpected shortage.
 
 These records may feed Branch Health, manager KPI, workforce forecasting, and Hermes recommendations.
+
+CEO-level oversight should connect each exception to observable management workflow evidence: publication deadline and time, schedule version, unresolved gaps, pending acknowledgements, open change/leave requests, the accountable manager, last action, next action, and due date. Executive users may drill down, message the manager, or create a follow-up task without becoming the routine schedule owner.
 
 ## Audit
 

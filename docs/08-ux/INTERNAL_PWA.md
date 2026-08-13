@@ -57,6 +57,8 @@ The scheduler should support:
 - publish action;
 - audited post-publication changes.
 
+The manager should be able to scan team members as rows and operating days as columns on desktop, with a compact day-by-day view on mobile. Each assignment should show shift time and acknowledgement state. Publishing opens a review that lists validation problems and coverage gaps; a policy-permitted gap requires a reason.
+
 A monthly/calendar overview may be offered for planning, but weekly scheduling is the authoritative operational workflow.
 
 ### 3. Coverage / Readiness
@@ -146,6 +148,18 @@ Notify the Branch Manager about material workforce exceptions, including:
 - unresolved scheduling shortage approaching the affected day.
 
 Notify the affected employee when a published schedule is created or materially changed according to notification policy.
+
+### Executive workforce follow-up
+
+The CEO-level view should surface schedule-management exceptions using objective evidence:
+
+- late or missing weekly publication;
+- unresolved coverage gaps;
+- pending acknowledgements past the reminder threshold;
+- open leave/change requests that affect coverage;
+- accountable manager, latest action, next action, and due date.
+
+Each exception should link to its schedule version and evidence, with actions to message the manager or create a tracked follow-up task. Do not present a subjective "manager doing nothing" label.
 
 ## Responsive behavior
 

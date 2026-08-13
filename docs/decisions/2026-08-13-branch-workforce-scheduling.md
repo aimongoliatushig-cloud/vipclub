@@ -71,6 +71,25 @@ The manager must be able to:
 
 A longer calendar view may be provided for planning, but the authoritative operational roster is the published weekly schedule.
 
+### Schedule lifecycle
+
+The weekly roster uses an explicit lifecycle:
+
+```text
+Draft -> Published -> Closed
+          |
+          -> Audited revision -> Published (new version)
+```
+
+- **Draft** may be changed by the authorized Branch Manager and is not an attendance expectation.
+- **Published** is visible to affected team members and becomes the authoritative attendance expectation.
+- A material change to a published assignment creates a new version, records the manager's reason, and returns the affected assignment to acknowledgement pending.
+- **Closed** preserves the final roster and attendance relationship after the operating week; it is not silently editable.
+
+Each assignment records `Assigned`, `Acknowledged`, or `Change requested` as the team-member response. Acknowledgement confirms receipt only; it does not replace attendance evidence or turn a schedule into an employee approval workflow.
+
+Before publication the system must validate branch scope, active employment, role eligibility, approved leave/availability, duplicate or overlapping shifts, and minimum coverage. A roster with a permitted shortage requires a manager reason and keeps the shortage open for follow-up.
+
 ## 3. Coverage model
 
 The system must distinguish three values:
@@ -231,6 +250,20 @@ These values may later feed:
 - Branch Manager KPI;
 - workforce-risk forecasting;
 - Hermes recommendations.
+
+### CEO oversight and the management-action link
+
+CEO-level oversight must show objective workflow evidence rather than infer that a manager is inactive. At minimum, the executive view should expose:
+
+- roster publication due date and actual publication time;
+- draft, published, revised, or closed state and version;
+- unresolved coverage gaps by branch, date, and role;
+- team-member acknowledgements still pending after the configured reminder threshold;
+- open leave/change requests affecting published coverage;
+- the accountable Branch Manager, last schedule action, next action, and due date;
+- shortage resolution notes or an explicitly recorded decision to operate with a permitted gap.
+
+The CEO can drill into evidence, message the manager, or create an accountable follow-up task. The CEO is not the routine weekly scheduler, and the system must not label a manager as "doing nothing" without an approved, measurable breach such as late publication or an overdue unresolved exception.
 
 ## 12. Audit requirements
 

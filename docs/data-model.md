@@ -28,6 +28,8 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 | Branch Staffing Template | Effective-dated recurring staffing policy for one branch, defining required headcount by weekday and approved role. | Club Branch, Staffing Requirement, Policy Version |
 | Staffing Requirement | Minimum headcount for a specific branch, weekday, role, and effective period. | Branch Staffing Template, Role |
 | Weekly Schedule Period | Operational weekly roster window and publication state used to group Shift Assignments for a branch. | Club Branch, Shift Assignment, Manager |
+| Schedule Publication | Immutable publication/version event with validation result, shortage reason where allowed, actor, and timestamp. | Weekly Schedule Period, Manager, Staffing Exception |
+| Shift Assignment Response | Team-member receipt state: Assigned, Acknowledged, or Change requested, with time and optional request reference. | Shift Assignment, Employee, Schedule Publication |
 | Shift Coverage Snapshot | Time-bound comparison of Required, Scheduled, Checked In, approved absence, unexpected no-show, and shortage by branch/date/role. | Staffing Requirement, Shift Assignment, Attendance Evidence Event |
 | Staffing Exception | Records a planning or attendance shortage, severity, cause, manager action, and resolution where available. | Shift Coverage Snapshot, Club Branch, Role |
 | Operational Task | Assigned work with deadline, state, evidence, blockers, comments, and approval. | Assignee, Branch, Task Evidence |
@@ -55,6 +57,8 @@ Branch Staffing Template
 ```
 
 The published Shift Assignment or equivalent approved schedule record establishes the operational attendance expectation for lateness and no-show classification.
+
+`Weekly Schedule Period` retains status (`Draft`, `Published`, `Closed`, `Superseded`), version, publication deadline, published timestamp, published-by actor, last material change, and branch scope. Published changes append a `Schedule Publication` version rather than overwriting prior schedule history. Assignment acknowledgement is receipt evidence and remains separate from attendance evidence.
 
 ## Customers, visits, reservations, and consent
 

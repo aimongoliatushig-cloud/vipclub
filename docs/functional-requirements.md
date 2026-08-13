@@ -46,6 +46,8 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-WORKFORCE-007 | Approved absence and unexpected no-show must remain distinguishable in workforce-readiness reporting. |
 | FR-WORKFORCE-008 | The system must alert the authorized Branch Manager when a weekly schedule is below the minimum requirement or when a later leave/status change causes a published shift to fall below requirement. |
 | FR-WORKFORCE-009 | The system must alert the authorized Branch Manager when actual attendance creates a critical role shortage during an operating shift. |
+| FR-WORKFORCE-010 | CEO-level workforce oversight must show publication timing, schedule version, unresolved gaps, overdue acknowledgements or change requests, the accountable manager, last action, next action, and due date using traceable workflow evidence. |
+| FR-WORKFORCE-011 | The system must support an executive drill-down to schedule evidence and an authorized message or tracked follow-up task without making the CEO the routine weekly schedule owner. |
 
 ## Weekly shift scheduling
 
@@ -60,6 +62,11 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-SHIFT-007 | Employees must be able to view their published schedule in the internal PWA according to role and branch permissions. |
 | FR-SHIFT-008 | A longer calendar view may be provided for planning, but the published weekly roster is the authoritative operational schedule for attendance classification. |
 | FR-SHIFT-009 | The system must support backfilling a shortage by assigning an eligible authorized branch team member to the affected shift. |
+| FR-SHIFT-010 | Weekly rosters must use explicit Draft, Published, Closed, and Superseded states; a draft does not create an attendance expectation. |
+| FR-SHIFT-011 | Publishing must validate branch scope, active employment, role eligibility, approved leave/availability, duplicate or overlapping shifts, and active minimum coverage. |
+| FR-SHIFT-012 | A policy-permitted publication below minimum coverage must require a manager reason and retain an open staffing exception. |
+| FR-SHIFT-013 | A material change to a published assignment must create an audited roster version, record a reason, notify the affected team member, and return the assignment to acknowledgement pending. |
+| FR-SHIFT-014 | Each published assignment must record Assigned, Acknowledged, or Change requested independently from attendance status. |
 
 ## Attendance relationship to schedule
 
