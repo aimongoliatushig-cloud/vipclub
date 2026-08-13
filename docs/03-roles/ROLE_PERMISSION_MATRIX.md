@@ -42,6 +42,21 @@ This document currently records the approved workforce-planning and scheduling p
 | Create/terminate employment record | No routine action unless separately delegated | No | Yes, according to HR authority | No |
 | Change employment type/contract | No routine action unless separately delegated | No | Yes, according to HR authority | No |
 
+## Sales-goal and customer-intelligence visibility
+
+| Capability | CEO-level | Branch Manager | Marketing / CRM role | Team Member |
+| --- | --- | --- | --- | --- |
+| View active monthly sales target and progress | All authorized branches | Own authorized branch only | As separately granted | No |
+| Propose branch monthly target/action plan | Review/return/approve; not routine proposal owner | Own authorized branch | No unless separately assigned as branch sales manager | No |
+| Approve or activate monthly sales target | Yes, with decision evidence | No | No | No |
+| View customer membership level | Authorized company/branch scope | Own authorized branch, read-only | Authorized customer scope | Own level only where customer self-service permits |
+| Search customer by phone | Authorized projected search | Own branch; masked result only | Authorized projected search | No |
+| View customer total/average expenditure | Authorized analytical scope | Own branch, operationally necessary fields only | Authorized analytical scope | Own history only where separately permitted |
+| Edit membership level or branch ranges | CEO approval/override according to policy | Propose/support only | Propose according to policy | No |
+| Export full customer/contact data | Only if separately granted | No from manager role alone | Only if separately granted and consent/privacy controls pass | No |
+
+A full phone number may be accepted by an authorized production search endpoint for normalized matching, but it must not be returned to or retained in the Branch Manager browser projection. The browser-local prototype therefore searches the visible last four digits only.
+
 ## Branch Manager workforce authority
 
 A Branch Manager may, for the manager's authorized branch:

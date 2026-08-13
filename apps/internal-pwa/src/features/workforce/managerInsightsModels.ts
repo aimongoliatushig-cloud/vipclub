@@ -68,10 +68,28 @@ export interface EntertainerRankingEvidence {
   dataFreshAt: string
 }
 
+export type SalesGoalState = 'draft' | 'submitted' | 'ceo-review' | 'revision-requested' | 'approved' | 'active' | 'rejected' | 'closed'
+
+export interface BranchSalesGoalProgress {
+  id: string
+  branchId: string
+  month: string
+  state: SalesGoalState
+  approvedTargetAmount: number
+  actualSales: number
+  targetVersion: number
+  approvedBy: string
+  approvedAt: string
+  actualSource: string
+  dataFreshAt: string
+  sourceState: 'reconciled' | 'delayed'
+}
+
 export interface ManagerInsightsSnapshot {
   branchId: string
   branchName: string
   refreshedAt: string
+  salesGoal?: BranchSalesGoalProgress
   customers: CustomerIntelligenceRecord[]
   entertainerRankings: EntertainerRankingEvidence[]
 }

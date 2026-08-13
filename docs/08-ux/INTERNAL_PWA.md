@@ -12,6 +12,35 @@ Define role-aware internal PWA user journeys, workspaces, navigation, and notifi
 
 The application is one role-aware internal PWA. Server-side permissions determine available data and actions.
 
+## Branch Manager default overview
+
+The default page for a Branch Manager is the manager overview for the authenticated manager's authorized branch. The first business panel must show the current active monthly sales goal before operational workforce cards:
+
+- month and branch;
+- CEO-approved state and target version;
+- approved target amount;
+- reconciled actual sales;
+- remaining amount or amount above target;
+- numeric achievement percentage and progress bar;
+- actual-sales source, reconciliation state, and refresh time;
+- a direct path to the branch customer-level and CRM view.
+
+Do not show a company-wide target, other branches, or an unapproved proposal as the manager's active goal. If approval or reconciled sales evidence is missing, show a clear pending/unavailable state rather than a misleading zero.
+
+### Manager CRM discovery
+
+The branch customer view should support fast lookup by customer name or the permitted phone identifier. The browser shows masked phone data; a production full-number lookup is performed and normalized server-side, then returns only masked authorized fields.
+
+The customer directory should expose, without opening every record:
+
+- current source membership level;
+- total confirmed expenditure;
+- average eligible expenditure per completed eligible visit;
+- last visit;
+- ordering by membership level, total expenditure, average expenditure, and latest visit.
+
+Opening a customer preserves the detailed visit, spend range, affinity, consent, benefit-use, and policy evidence already defined for the manager CRM. Search and sorting do not grant membership editing, approval, export, or cross-branch access.
+
 ## Branch Manager workforce workspace
 
 The Branch Manager must have a Workforce area for the manager's authorized branch.

@@ -166,3 +166,12 @@ export function formatTime(value: string | Date): string {
   const date = typeof value === 'string' ? new Date(value) : value
   return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
+
+export function formatMoney(value: number): string {
+  if (value >= 1_000_000) {
+    const amount = value / 1_000_000
+    const digits = Number.isInteger(amount) ? 0 : 1
+    return `${amount.toLocaleString('mn-MN', { minimumFractionDigits: digits, maximumFractionDigits: digits })} сая ₮`
+  }
+  return `${Math.round(value / 1_000).toLocaleString('mn-MN')} мянга ₮`
+}

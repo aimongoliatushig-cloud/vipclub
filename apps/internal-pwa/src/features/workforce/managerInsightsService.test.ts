@@ -6,6 +6,10 @@ describe('Manager customer and ranking insight boundaries', () => {
     const snapshot = new BrowserManagerInsightsService().getSnapshot()
 
     expect(snapshot.branchId).toBe('branch-central')
+    expect(snapshot.salesGoal!.branchId).toBe(snapshot.branchId)
+    expect(snapshot.salesGoal!.state).toBe('active')
+    expect(snapshot.salesGoal!.approvedBy).toBe('Гүйцэтгэх захирал')
+    expect(Math.round((snapshot.salesGoal!.actualSales / snapshot.salesGoal!.approvedTargetAmount) * 100)).toBe(67)
     expect(snapshot.customers.every((customer) => customer.branchId === snapshot.branchId)).toBe(true)
     expect(snapshot.entertainerRankings.every((ranking) => ranking.branchId === snapshot.branchId)).toBe(true)
     expect(snapshot.customers.every((customer) => /^•••• \d{4}$/.test(customer.maskedPhone))).toBe(true)
@@ -22,7 +26,9 @@ describe('Manager customer and ranking insight boundaries', () => {
     const service = new BrowserManagerInsightsService()
     const first = service.getSnapshot()
     first.customers[0].visits90d = 999
+    first.salesGoal!.actualSales = 999
 
     expect(service.getSnapshot().customers[0].visits90d).toBe(14)
+    expect(service.getSnapshot().salesGoal!.actualSales).toBe(214_000_000)
   })
 })

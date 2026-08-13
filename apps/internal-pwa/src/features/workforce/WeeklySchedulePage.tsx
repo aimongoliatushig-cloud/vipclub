@@ -579,7 +579,7 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
         </header>
 
         <main id={activeView}>
-          {activeView === 'overview' ? <ManagerOverviewView roster={roster} dashboard={dashboard} readiness={readiness} openAttendance={attendanceExceptions.filter((item) => item.status === 'open').length + pendingLeaveRequests} openResponses={responseQueue.length} openGaps={openGaps} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
+          {activeView === 'overview' ? <ManagerOverviewView roster={roster} dashboard={dashboard} salesGoal={managerInsights.salesGoal} readiness={readiness} openAttendance={attendanceExceptions.filter((item) => item.status === 'open').length + pendingLeaveRequests} openResponses={responseQueue.length} openGaps={openGaps} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
           {activeView === 'coverage' ? <CoverageReadinessView roster={roster} readiness={readiness} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
           {activeView === 'attendance' ? <AttendanceReviewView roster={roster} exceptions={attendanceExceptions} leaveRequests={leaveRequests} penaltyReviews={penaltyReviews} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onDecision={decideAttendance} onLeaveDecision={decideLeaveRequest} /> : null}
           {activeView === 'team' ? <TeamMembersView roster={roster} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onOverrideAvailability={overrideAvailability} /> : null}

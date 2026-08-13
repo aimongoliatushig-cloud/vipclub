@@ -9,7 +9,6 @@ import {
   HeartHandshake,
   History,
   LockKeyhole,
-  MessageCircleMore,
   Search,
   ShieldCheck,
   Sparkles,
@@ -27,7 +26,7 @@ import type {
   ManagerInsightsSnapshot,
 } from './managerInsightsModels'
 import type { TeamMember } from './models'
-import { entertainerRankLabels, formatDate, formatDateTime, formatTime } from './localization'
+import { entertainerRankLabels, formatDate, formatDateTime, formatMoney, formatTime } from './localization'
 
 const membershipLevelLabels: Record<CustomerMembershipLevel, string> = {
   provisional: 'Шинэ / түр',
@@ -50,13 +49,15 @@ const consentLabels: Record<ConsentChannel, string> = {
   email: 'И-мэйл',
 }
 
-function formatMoney(value: number): string {
-  if (value >= 1_000_000) {
-    const amount = value / 1_000_000
-    const digits = amount >= 10 || Number.isInteger(amount) ? 0 : 1
-    return `${amount.toLocaleString('mn-MN', { minimumFractionDigits: digits, maximumFractionDigits: digits })} сая ₮`
-  }
-  return `${Math.round(value / 1_000).toLocaleString('mn-MN')} мянга ₮`
+type CustomerSort = 'membership' | 'total-spend' | 'average-spend' | 'last-visit'
+
+const membershipLevelOrder: Record<CustomerMembershipLevel, number> = {
+  provisional: 0,
+  bronze: 1,
+  silver: 2,
+  gold: 3,
+  diamond: 4,
+  'black-diamond': 5,
 }
 
 function eligibleVisitAverage(customer: CustomerIntelligenceRecord): number {
@@ -81,22 +82,38 @@ export function CustomerCrmView({ snapshot }: { snapshot: ManagerInsightsSnapsho
   const [search, setSearch] = useState('')
   const [level, setLevel] = useState<'all' | CustomerMembershipLevel>('all')
   const [activity, setActivity] = useState<'all' | CustomerActivityState>('all')
+  const [sort, setSort] = useState<CustomerSort>('membership')
   const [selectedId, setSelectedId] = useState(snapshot.customers[0]?.id ?? '')
-  const filtered = snapshot.customers.filter((customer) => {
+  const filtered = useMemo(() => {
     const query = search.trim().toLowerCase()
-    return (level === 'all' || customer.membershipLevel === level)
-      && (activity === 'all' || customer.activityState === activity)
-      && (!query || customer.displayName.toLowerCase().includes(query) || customer.maskedPhone.includes(query))
-  })
+    const phoneDigits = query.replace(/\D/g, '')
+    const matches = snapshot.customers.filter((customer) => {
+      const searchablePhoneDigits = customer.maskedPhone.replace(/\D/g, '')
+      const matchesSearch = !query
+        || customer.displayName.toLowerCase().includes(query)
+        || Boolean(phoneDigits && searchablePhoneDigits.includes(phoneDigits))
+      return (level === 'all' || customer.membershipLevel === level)
+        && (activity === 'all' || customer.activityState === activity)
+        && matchesSearch
+    })
+
+    return [...matches].sort((left, right) => {
+      if (sort === 'total-spend') return right.lifetimeValue - left.lifetimeValue
+      if (sort === 'average-spend') return right.averageSpend - left.averageSpend
+      if (sort === 'last-visit') return right.lastVisitAt.localeCompare(left.lastVisitAt)
+      return membershipLevelOrder[right.membershipLevel] - membershipLevelOrder[left.membershipLevel]
+        || right.lifetimeValue - left.lifetimeValue
+    })
+  }, [activity, level, search, snapshot.customers, sort])
   const selected = filtered.find((customer) => customer.id === selectedId) ?? filtered[0]
   const recentCount = snapshot.customers.filter((customer) => customer.activityState === 'recent').length
-  const consentedCount = snapshot.customers.filter((customer) => customer.consentedChannels.length > 0).length
   const totalVisits = snapshot.customers.reduce((sum, customer) => sum + customer.visits90d, 0)
+  const totalCustomerSpend = snapshot.customers.reduce((sum, customer) => sum + customer.lifetimeValue, 0)
 
   return (
     <>
       <section className="page-heading manager-view-heading">
-        <div><span className="eyebrow">Харилцагчийн мэдээлэл</span><h1>Харилцагчийн удирдлага</h1><p>Төв салбарын зочлолт, зарцуулалт, зөвшөөрөл болон энтертайнерын хамаарлыг нэг дор шалгана.</p></div>
+        <div><span className="eyebrow">Харилцагчийн мэдээлэл</span><h1>Харилцагчийн удирдлага</h1><p>Нэр эсвэл утасны сүүлийн 4 орноор хайж, түвшин, нийт болон дундаж зарцуулалтыг нэг дор шалгана.</p></div>
         <div className="freshness"><DatabaseZap size={15} /><span>Борлуулалтын баримт шинэчилсэн</span><strong>{formatTime(snapshot.refreshedAt)}</strong></div>
       </section>
 
@@ -106,11 +123,11 @@ export function CustomerCrmView({ snapshot }: { snapshot: ManagerInsightsSnapsho
         <article><Users size={19} /><span>Харагдах харилцагч</span><strong>{snapshot.customers.length}</strong><small>Зөвхөн энэ салбар</small></article>
         <article><HeartHandshake size={19} /><span>Саяхан идэвхтэй</span><strong>{recentCount}</strong><small>Үйлчилгээний дохио</small></article>
         <article><CalendarClock size={19} /><span>90 хоногийн зочлолт</span><strong>{totalVisits}</strong><small>Баталгаажсан зочлолт</small></article>
-        <article><MessageCircleMore size={19} /><span>Суваг зөвшөөрсөн</span><strong>{consentedCount}</strong><small>Илгээх эрх биш</small></article>
+        <article><CircleDollarSign size={19} /><span>Нийт баталгаажсан зарцуулалт</span><strong>{formatMoney(totalCustomerSpend)}</strong><small>Харагдах харилцагчдын нийт</small></article>
       </section>
 
       <section className="insight-filter-bar" aria-label="Харилцагчийн шүүлтүүр">
-        <label className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Харилцагч хайх" aria-label="Харилцагч хайх" /></label>
+        <label className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Нэр эсвэл утасны сүүлийн 4 орон" aria-label="Нэр эсвэл утасны сүүлийн 4 орноор харилцагч хайх" /></label>
         <select value={level} onChange={(event) => setLevel(event.target.value as 'all' | CustomerMembershipLevel)} aria-label="Гишүүнчлэлийн түвшнээр шүүх">
           <option value="all">Бүх түвшин</option>
           {Object.entries(membershipLevelLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
@@ -119,17 +136,23 @@ export function CustomerCrmView({ snapshot }: { snapshot: ManagerInsightsSnapsho
           <option value="all">Бүх идэвх</option>
           {Object.entries(activityLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
         </select>
+        <select value={sort} onChange={(event) => setSort(event.target.value as CustomerSort)} aria-label="Харилцагчийг эрэмбэлэх">
+          <option value="membership">Түвшин өндөрөөс</option>
+          <option value="total-spend">Нийт зарцуулалт өндөрөөс</option>
+          <option value="average-spend">Дундаж зарцуулалт өндөрөөс</option>
+          <option value="last-visit">Сүүлд зочилсноор</option>
+        </select>
       </section>
 
       {selected ? (
         <div className="crm-layout">
           <section className="workspace-panel crm-directory" aria-label="Харилцагчийн жагсаалт">
-            <header className="card-header"><div><h2>Салбарын харилцагчид</h2><p>{filtered.length} масклсан бүртгэл харагдаж байна</p></div><UserRoundSearch size={20} /></header>
+            <header className="card-header"><div><h2>Салбарын харилцагчид</h2><p>{filtered.length} масклсан бүртгэл · түвшин, нийт ба дундаж зарцуулалтаар эрэмбэлнэ</p></div><UserRoundSearch size={20} /></header>
             <div>
               {filtered.map((customer) => (
                 <button key={customer.id} className={selected.id === customer.id ? 'selected' : ''} type="button" onClick={() => setSelectedId(customer.id)}>
                   <span className="avatar avatar--member">{customer.displayName.slice(0, 2)}</span>
-                  <span><strong>{customer.displayName}</strong><small>{customer.maskedPhone} · {formatDate(customer.lastVisitAt, { month: 'short', day: 'numeric' })}</small></span>
+                  <span><strong>{customer.displayName}</strong><small>{customer.maskedPhone} · {formatDate(customer.lastVisitAt, { month: 'short', day: 'numeric' })}</small><em>{formatMoney(customer.lifetimeValue)} нийт · {formatMoney(customer.averageSpend)} дундаж</em></span>
                   <b data-level={customer.membershipLevel}>{membershipLevelLabels[customer.membershipLevel]}</b>
                 </button>
               ))}
@@ -144,9 +167,9 @@ export function CustomerCrmView({ snapshot }: { snapshot: ManagerInsightsSnapsho
 
             <div className="crm-facts">
               <article><span>90 хоногийн зочлолт</span><strong>{selected.visits90d}</strong></article>
-              <article><span>Дундаж зарцуулалт</span><strong>{formatMoney(selected.averageSpend)}</strong></article>
+              <article><span>Нэг зочлолтын дундаж зарцуулалт</span><strong>{formatMoney(selected.averageSpend)}</strong></article>
               <article><span>Зарцуулалтын хүрээ</span><strong>{formatMoney(selected.minimumSpend)} – {formatMoney(selected.maximumSpend)}</strong></article>
-              <article><span>Нийт баталгаажсан үнэ цэнэ</span><strong>{formatMoney(selected.lifetimeValue)}</strong></article>
+              <article><span>Нийт баталгаажсан зарцуулалт</span><strong>{formatMoney(selected.lifetimeValue)}</strong></article>
             </div>
 
             <div className="crm-detail-grid">

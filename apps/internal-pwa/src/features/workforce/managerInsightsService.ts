@@ -6,6 +6,20 @@ const snapshot: ManagerInsightsSnapshot = {
   branchId: AUTHORIZED_BRANCH_ID,
   branchName: 'Төв салбар',
   refreshedAt: '2026-08-13T13:08:00+08:00',
+  salesGoal: {
+    id: 'sales-goal-central-2026-08',
+    branchId: AUTHORIZED_BRANCH_ID,
+    month: '2026-08',
+    state: 'active',
+    approvedTargetAmount: 320_000_000,
+    actualSales: 214_000_000,
+    targetVersion: 2,
+    approvedBy: 'Гүйцэтгэх захирал',
+    approvedAt: '2026-07-29T16:30:00+08:00',
+    actualSource: 'POS борлуулалтын тулгалт',
+    dataFreshAt: '2026-08-13T13:08:00+08:00',
+    sourceState: 'reconciled',
+  },
   customers: [
     {
       id: 'customer-1', displayName: 'Саруул Н.', maskedPhone: '•••• 4821', branchId: AUTHORIZED_BRANCH_ID,

@@ -117,6 +117,19 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-GOAL-005 | The system must keep each proposal, review comment, revision, approval, and source-data summary in an audit trail. |
 | FR-GOAL-006 | The system must display actual sales against the approved target as an achievement percentage and progress bar. |
 | FR-GOAL-007 | Hermes may advise, summarize, and remind; it must not approve or silently change a sales target or action plan. |
+| FR-GOAL-008 | The Branch Manager's default landing page must show the active CEO-approved monthly target, reconciled actual sales, remaining amount, achievement percentage, approval version, and source freshness for the manager's authorized branch only. |
+| FR-GOAL-009 | A draft, submitted, rejected, missing, or expired target must not be presented as an active sales goal or silently compared with actual sales. |
+| FR-GOAL-010 | The Branch Manager must not receive company-wide or another branch's target or sales progress unless separately granted an explicit cross-branch permission. |
+
+## Branch Manager customer intelligence
+
+| ID | Requirement |
+| --- | --- |
+| FR-MCRM-001 | A Branch Manager must be able to search own-branch customer records by name or a permitted phone identifier while the result remains masked and field-projected. |
+| FR-MCRM-002 | The manager CRM must show the current source membership level, total confirmed expenditure, average eligible expenditure per completed eligible visit, latest visit, and data freshness. |
+| FR-MCRM-003 | The customer directory must support ordering by membership level, total expenditure, average expenditure, and latest visit. |
+| FR-MCRM-004 | Full phone numbers must not be included in the browser read model; production full-number lookup must normalize and match server-side, then return only authorized masked fields. |
+| FR-MCRM-005 | Search, filtering, sorting, and customer detail access must remain restricted to the manager's authorized branch and must not grant membership-level editing or approval authority. |
 
 ## Branch setup and scalability
 

@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { WeeklySchedulePage } from './WeeklySchedulePage'
 import { formatDate, formatDateTime } from './localization'
+import { BrowserManagerInsightsService } from './managerInsightsService'
 import { BrowserWorkforceService, resetWorkforcePrototype } from './workforceService'
 
 describe('WeeklySchedulePage', () => {
@@ -21,6 +22,32 @@ describe('WeeklySchedulePage', () => {
     expect(navigation).toHaveTextContent('Зэрэглэл')
     expect(screen.queryByText('Manager overview')).not.toBeInTheDocument()
     expect(screen.queryByText('Weekly schedule')).not.toBeInTheDocument()
+  })
+
+  it('opens on the manager branch sales goal with CEO approval and CRM access', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    expect(screen.getByRole('heading', { name: 'Менежерийн тойм' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: '2026 оны 8-р сар' })).toBeInTheDocument()
+    expect(screen.getByText('Гүйцэтгэх захирал баталсан · хувилбар 2')).toBeInTheDocument()
+    expect(screen.getByText('67%')).toBeInTheDocument()
+    expect(screen.getByText('214 сая ₮')).toBeInTheDocument()
+    expect(screen.getByText('320 сая ₮')).toBeInTheDocument()
+    expect(screen.getByRole('progressbar', { name: 'Борлуулалтын зорилгын биелэлт' })).toHaveAttribute('aria-valuenow', '67')
+
+    await user.click(screen.getByRole('button', { name: /Харилцагчийн түвшин ба CRM/ }))
+    expect(screen.getByRole('heading', { name: 'Харилцагчийн удирдлага' })).toBeInTheDocument()
+  })
+
+  it('does not present an unapproved sales proposal as an active goal', () => {
+    const snapshot = new BrowserManagerInsightsService().getSnapshot()
+    snapshot.salesGoal!.state = 'submitted'
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} insightsService={{ getSnapshot: () => snapshot }} />)
+
+    expect(screen.getByRole('heading', { name: 'Идэвхтэй зорилго хүлээгдэж байна' })).toBeInTheDocument()
+    expect(screen.getByText('Гүйцэтгэх захирлын баталгаа хүлээгдэж байна')).toBeInTheDocument()
+    expect(screen.queryByRole('progressbar', { name: 'Борлуулалтын зорилгын биелэлт' })).not.toBeInTheDocument()
   })
 
   it('formats dates and times without English locale fallbacks', () => {
@@ -246,6 +273,16 @@ describe('WeeklySchedulePage', () => {
     expect(screen.getByText('Төв салбар · нууцлалтай харилцагчийн харагдац')).toBeInTheDocument()
     expect(screen.getAllByText(/•••• 4821/).length).toBeGreaterThan(0)
     expect(screen.getByText(/Иргэний үнэмлэх, бүтэн утас/)).toBeInTheDocument()
+
+    const phoneSearch = screen.getByLabelText('Нэр эсвэл утасны сүүлийн 4 орноор харилцагч хайх')
+    await user.type(phoneSearch, '4821')
+    expect(screen.getByRole('button', { name: /Саруул Н\./ })).toHaveTextContent('68.4 сая ₮ нийт')
+    expect(screen.getByRole('button', { name: /Саруул Н\./ })).toHaveTextContent('2.9 сая ₮ дундаж')
+    expect(screen.queryByRole('button', { name: /Тэмүүлэн Б\./ })).not.toBeInTheDocument()
+    await user.clear(phoneSearch)
+
+    await user.selectOptions(screen.getByLabelText('Харилцагчийг эрэмбэлэх'), 'total-spend')
+    expect(screen.getByLabelText('Харилцагчийг эрэмбэлэх')).toHaveValue('total-spend')
 
     await user.selectOptions(screen.getByLabelText('Гишүүнчлэлийн түвшнээр шүүх'), 'diamond')
     expect(screen.getByRole('button', { name: /Тэмүүлэн Б\./ })).toBeInTheDocument()

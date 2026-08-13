@@ -118,6 +118,7 @@ The published Shift Assignment or equivalent approved schedule record establishe
 | Branch Sales History | Reconciled historical monthly sales for a branch, including period, gross/net amount, source system, import status, and reconciliation evidence. | Branch, Goal Cycle, Source System |
 | Sales Target Policy Version | Effective-dated default and branch-specific improvement percentage, baseline method, override authority, and formula. | Branch, Goal Cycle, Branch Sales History |
 | Goal Cycle / Proposal / Action | Monthly branch target, proposal, owner actions, progress, and review. | Branch, Manager, KPI Snapshot, Branch Sales History, Sales Target Policy |
+| Goal Progress Snapshot | Branch/month projection of the active approved target, reconciled actual sales, remaining/above-target amount, achievement percentage, approval version, source state, and refresh time. | Branch, Goal Cycle, CEO Decision, Branch Sales History |
 | KPI / Reporting Snapshot | Time-bound calculated management metric with traceable source values. | Branch, Customer, Employee |
 | Notification | In-app or external delivery request, state, priority, and deep link. | Recipient, Source Entity |
 | Integration Cursor | Synchronization position, success/failure, retry, and reconciliation details. | External System |

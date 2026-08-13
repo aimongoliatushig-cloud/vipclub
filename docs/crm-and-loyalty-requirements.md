@@ -20,12 +20,14 @@ This working draft captures the Phase 3 direction from project discussions.
 
 Managers need a searchable and filterable view of members, including:
 
+- Search by name or a permitted phone identifier; full-number matching occurs server-side and returns a masked result.
 - Current membership level.
 - Visit frequency and visitation pattern, such as visits per month.
-- Average, minimum, and maximum expenditure.
+- Total confirmed expenditure plus average, minimum, and maximum expenditure.
 - Days or periods when the member visits.
 - Entertainers the member reserves most often or shows loyalty toward.
 - Member-level and aggregate statistical insights.
+- Ordering by membership level, total expenditure, average expenditure, and most recent visit.
 
 ## Confirmed requirements
 
@@ -40,6 +42,10 @@ Managers need a searchable and filterable view of members, including:
 | FR-CRM-007 | Managers must be able to filter members by membership level. |
 | FR-CRM-008 | The system must show member visitation and expenditure statistics. |
 | FR-CRM-009 | The system must provide entertainer-preference insights from reservation history. |
+| FR-CRM-017 | A Branch Manager must be able to search own-branch customer records by name or permitted phone identifier while returned phone data remains masked. |
+| FR-CRM-018 | The customer directory must support ordering by current membership level, total confirmed expenditure, average eligible expenditure, and latest visit. |
+| FR-CRM-019 | Customer detail must show total confirmed expenditure and average eligible expenditure as separate values with source freshness. |
+| FR-CRM-020 | A browser client must not receive a full phone number merely to support search; production full-number lookup must normalize and match on a secure server-side projection. |
 
 ## Approved membership evaluation baseline
 

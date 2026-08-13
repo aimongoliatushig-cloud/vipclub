@@ -6,6 +6,7 @@ import {
   CalendarClock,
   Check,
   CircleGauge,
+  CircleDollarSign,
   Clock3,
   FileCheck2,
   LockKeyhole,
@@ -29,6 +30,7 @@ import type {
   WeeklyRoster,
   WorkforceRole,
 } from './models'
+import type { BranchSalesGoalProgress } from './managerInsightsModels'
 import {
   attendanceDecisionLabels,
   attendanceExceptionLabels,
@@ -36,6 +38,7 @@ import {
   entertainerRankLabels,
   formatDate,
   formatDateTime,
+  formatMoney,
   formatTime,
   operationalStatusLabels,
   leaveRequestStatusLabels,
@@ -60,9 +63,70 @@ function Notice({ message, onDismiss }: { message: string; onDismiss: () => void
   return message ? <div className="status-message manager-view-notice" role="status"><Check size={18} /><span>{message}</span><button type="button" aria-label="Мэдэгдлийг хаах" onClick={onDismiss}><X size={17} /></button></div> : null
 }
 
+function SalesGoalSpotlight({ goal, branchName, onNavigate }: { goal?: BranchSalesGoalProgress; branchName: string; onNavigate: (view: ManagerView) => void }) {
+  if (!goal || goal.state !== 'active') {
+    return (
+      <section className="workspace-panel sales-goal-spotlight" aria-labelledby="sales-goal-title">
+        <header className="sales-goal-header">
+          <div>
+            <span className="eyebrow">Энэ сарын борлуулалтын зорилго</span>
+            <h2 id="sales-goal-title">Идэвхтэй зорилго хүлээгдэж байна</h2>
+            <p>{branchName}-ын зорилгыг Гүйцэтгэх захирал баталсны дараа биелэлтийг тооцно.</p>
+          </div>
+          <span className="sales-goal-approval sales-goal-approval--pending"><Clock3 size={16} />Гүйцэтгэх захирлын баталгаа хүлээгдэж байна</span>
+        </header>
+        <footer className="sales-goal-footer">
+          <span>Батлагдаагүй зорилго болон тулгагдаагүй борлуулалтыг тэг гэж үзэхгүй.</span>
+          <button className="button button--secondary" type="button" onClick={() => onNavigate('customers')}>Харилцагчийн түвшин ба CRM<ArrowRight size={16} /></button>
+        </footer>
+      </section>
+    )
+  }
+
+  const achievementPercent = goal.approvedTargetAmount > 0
+    ? Math.round((goal.actualSales / goal.approvedTargetAmount) * 100)
+    : 0
+  const goalDelta = goal.approvedTargetAmount - goal.actualSales
+  const goalDeltaLabel = goalDelta > 0 ? 'Зорилгод хүрэхэд' : goalDelta < 0 ? 'Зорилгоос давсан' : 'Зорилго биелсэн'
+  const progressWidth = Math.min(achievementPercent, 100)
+
+  return (
+    <section className="workspace-panel sales-goal-spotlight" aria-labelledby="sales-goal-title">
+      <header className="sales-goal-header">
+        <div>
+          <span className="eyebrow">Энэ сарын борлуулалтын зорилго</span>
+          <h2 id="sales-goal-title">{formatDate(`${goal.month}-01`, { year: 'numeric', month: 'long' })}</h2>
+          <p>{branchName}-ын батлагдсан зорилго ба тулгагдсан бодит борлуулалт.</p>
+        </div>
+        <span className="sales-goal-approval"><BadgeCheck size={16} />Гүйцэтгэх захирал баталсан · хувилбар {goal.targetVersion}</span>
+      </header>
+
+      <div className="sales-goal-summary">
+        <div className="sales-goal-highlight">
+          <CircleDollarSign size={22} />
+          <span><strong>{achievementPercent}%</strong><small>зорилгын биелэлт</small></span>
+        </div>
+        <article><span>Бодит борлуулалт</span><strong>{formatMoney(goal.actualSales)}</strong></article>
+        <article><span>Батлагдсан зорилго</span><strong>{formatMoney(goal.approvedTargetAmount)}</strong></article>
+        <article><span>{goalDeltaLabel}</span><strong>{formatMoney(Math.abs(goalDelta))}</strong></article>
+      </div>
+
+      <div className="sales-goal-progress" role="progressbar" aria-label="Борлуулалтын зорилгын биелэлт" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.min(achievementPercent, 100)}>
+        <span style={{ width: `${progressWidth}%` }} />
+      </div>
+
+      <footer className="sales-goal-footer">
+        <span><strong>{goal.actualSource}</strong> · {goal.sourceState === 'reconciled' ? 'Тулгалттай' : 'Шинэчлэлт хоцорсон'} · {formatDateTime(goal.dataFreshAt)}</span>
+        <button className="button button--secondary" type="button" onClick={() => onNavigate('customers')}>Харилцагчийн түвшин ба CRM<ArrowRight size={16} /></button>
+      </footer>
+    </section>
+  )
+}
+
 interface OverviewProps {
   roster: WeeklyRoster
   dashboard: ManagerDashboardSummary
+  salesGoal?: BranchSalesGoalProgress
   readiness: ReadinessRow[]
   openAttendance: number
   openResponses: number
@@ -72,7 +136,7 @@ interface OverviewProps {
   onNavigate: (view: ManagerView) => void
 }
 
-export function ManagerOverviewView({ roster, dashboard, readiness, openAttendance, openResponses, openGaps, message, onDismissMessage, onNavigate }: OverviewProps) {
+export function ManagerOverviewView({ roster, dashboard, salesGoal, readiness, openAttendance, openResponses, openGaps, message, onDismissMessage, onNavigate }: OverviewProps) {
   const today = weekDates(roster.weekStart).find((date) => date === new Date().toISOString().slice(0, 10)) ?? roster.weekStart
   const todayRows = readiness.filter((item) => item.date === today)
   const required = todayRows.reduce((sum, item) => sum + item.required, 0)
@@ -96,6 +160,8 @@ export function ManagerOverviewView({ roster, dashboard, readiness, openAttendan
       <div className="freshness"><Clock3 size={15} /><span>Мэдээлэл шинэчилсэн</span><strong>{formatTime(dashboard.dataFreshAt)}</strong></div>
     </section>
     <Notice message={message} onDismiss={onDismissMessage} />
+
+    <SalesGoalSpotlight goal={salesGoal} branchName={roster.branchName} onNavigate={onNavigate} />
 
     <section className="operations-metrics" aria-label="Салбарын ажиллах хүчний одоогийн төлөв">
       {statusMetrics.map(([label, value, tone]) => <article key={label} data-tone={tone}><span>{label}</span><strong>{value}</strong></article>)}
