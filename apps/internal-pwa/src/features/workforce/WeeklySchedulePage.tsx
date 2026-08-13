@@ -8,6 +8,7 @@ import {
   CircleGauge,
   ClipboardCheck,
   Clock3,
+  ContactRound,
   Copy,
   FileClock,
   Inbox,
@@ -15,6 +16,7 @@ import {
   ListChecks,
   Menu,
   MessageSquare,
+  Gem,
   MoreHorizontal,
   Plus,
   Search,
@@ -48,6 +50,8 @@ import {
   type WorkforceService,
 } from './workforceService'
 import { ResponseQueuePanel, TeamMemberSchedulePanel } from './ResponsePanels'
+import { CustomerCrmView, ManagerRankingsView } from './ManagerInsightsViews'
+import { BrowserManagerInsightsService, type ManagerInsightsService } from './managerInsightsService'
 import {
   AttendanceReviewView,
   CoverageReadinessView,
@@ -392,9 +396,12 @@ function ExecutiveFollowUpPanel({ roster, summary, onClose, onRecord }: Executiv
 
 export interface WeeklySchedulePageProps {
   service: WorkforceService
+  insightsService?: ManagerInsightsService
 }
 
-export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
+const defaultInsightsService = new BrowserManagerInsightsService()
+
+export function WeeklySchedulePage({ service, insightsService = defaultInsightsService }: WeeklySchedulePageProps) {
   const [activeView, setActiveView] = useState<ManagerView>('overview')
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()))
   const [roster, setRoster] = useState(() => service.getRoster(weekStart))
@@ -411,6 +418,7 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
   const [message, setMessage] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const teamMembers = useMemo(() => service.getTeamMembers(), [service])
+  const managerInsights = useMemo(() => insightsService.getSnapshot(), [insightsService])
 
   useEffect(() => {
     setRoster(service.getRoster(weekStart))
@@ -535,6 +543,8 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
           <a className={activeView === 'coverage' ? 'active' : ''} href="#coverage" aria-current={activeView === 'coverage' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('coverage') }}><CircleGauge size={19} />Хангалт <b>{openGaps}</b></a>
           <a className={activeView === 'attendance' ? 'active' : ''} href="#attendance" aria-current={activeView === 'attendance' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('attendance') }}><ClipboardCheck size={19} />Ирц</a>
           <a className={activeView === 'team' ? 'active' : ''} href="#team" aria-current={activeView === 'team' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('team') }}><Users size={19} />Багийн гишүүд</a>
+          <a className={activeView === 'customers' ? 'active' : ''} href="#customers" aria-current={activeView === 'customers' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('customers') }}><ContactRound size={19} />Харилцагч</a>
+          <a className={activeView === 'rankings' ? 'active' : ''} href="#rankings" aria-current={activeView === 'rankings' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('rankings') }}><Gem size={19} />Зэрэглэл</a>
         </nav>
         <div className="sidebar-foot">
           <div className="avatar">АМ</div>
@@ -555,6 +565,8 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
           {activeView === 'coverage' ? <CoverageReadinessView roster={roster} readiness={readiness} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
           {activeView === 'attendance' ? <AttendanceReviewView roster={roster} exceptions={attendanceExceptions} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onDecision={decideAttendance} /> : null}
           {activeView === 'team' ? <TeamMembersView roster={roster} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onOverrideAvailability={overrideAvailability} /> : null}
+          {activeView === 'customers' ? <CustomerCrmView snapshot={managerInsights} /> : null}
+          {activeView === 'rankings' ? <ManagerRankingsView snapshot={managerInsights} teamMembers={teamMembers} /> : null}
           {activeView === 'schedule' ? <>
           <section className="page-heading">
             <div>

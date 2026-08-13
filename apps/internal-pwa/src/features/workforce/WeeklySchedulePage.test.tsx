@@ -17,11 +17,14 @@ describe('WeeklySchedulePage', () => {
     expect(navigation).toHaveTextContent('Хангалт')
     expect(navigation).toHaveTextContent('Ирц')
     expect(navigation).toHaveTextContent('Багийн гишүүд')
+    expect(navigation).toHaveTextContent('Харилцагч')
+    expect(navigation).toHaveTextContent('Зэрэглэл')
     expect(screen.queryByText('Manager overview')).not.toBeInTheDocument()
     expect(screen.queryByText('Weekly schedule')).not.toBeInTheDocument()
   })
 
   it('formats dates and times without English locale fallbacks', () => {
+    expect(formatDate('2026-08-10T23:15:00+08:00', { month: 'short', day: 'numeric' })).toBe('8-р сарын 10')
     expect(formatDate('2026-08-13', { weekday: 'long', month: 'long', day: 'numeric' })).toBe('Пүрэв гараг, 8-р сарын 13')
     expect(formatDateTime(new Date(2026, 7, 13, 13, 6))).toBe('2026 оны 8-р сарын 13, 13:06')
   })
@@ -189,5 +192,39 @@ describe('WeeklySchedulePage', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('ажиллах боломжийн өөрчлөлтийг тэмдэглэлээ')
     expect(screen.getByText(/Сүүлийн өөрчлөлт: боломжгүй/)).toBeInTheDocument()
+  })
+
+  it('shows a masked branch-only customer intelligence view with working filters', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+    await user.click(screen.getByRole('link', { name: 'Харилцагч' }))
+
+    expect(screen.getByRole('heading', { name: 'Харилцагчийн удирдлага' })).toBeInTheDocument()
+    expect(screen.getByText('Төв салбар · нууцлалтай харилцагчийн харагдац')).toBeInTheDocument()
+    expect(screen.getAllByText(/•••• 4821/).length).toBeGreaterThan(0)
+    expect(screen.getByText(/Иргэний үнэмлэх, бүтэн утас/)).toBeInTheDocument()
+
+    await user.selectOptions(screen.getByLabelText('Гишүүнчлэлийн түвшнээр шүүх'), 'level-4')
+    expect(screen.getByRole('button', { name: /Тэмүүлэн Б\./ })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Саруул Н\./ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /экспорт/i })).not.toBeInTheDocument()
+  })
+
+  it('shows explainable team and customer ranking evidence without override actions', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+    await user.click(screen.getByRole('link', { name: 'Зэрэглэл' }))
+
+    expect(screen.getByRole('heading', { name: 'Зэрэглэлийн хяналт' })).toBeInTheDocument()
+    expect(screen.getByText(/Зэрэглэл харагдана, шийдвэр автоматжихгүй/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Мөнх Нараа/ }))
+    expect(screen.getByText('Шийдэгдээгүй ирээгүй тохиолдол')).toBeInTheDocument()
+    expect(screen.getByText('Зэрэглэл өөрчлөх эрх түгжигдсэн')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /зэрэглэл өөрчлөх/i })).not.toBeInTheDocument()
+
+    await user.click(screen.getByRole('tab', { name: 'Харилцагчийн түвшин' }))
+    await user.click(screen.getByRole('button', { name: /Оюун Э\./ }))
+    expect(screen.getAllByText('Шинэ / түр').length).toBeGreaterThan(0)
+    expect(screen.getByText('Гишүүнчлэлийн түвшин автоматаар өөрчлөгдөхгүй')).toBeInTheDocument()
   })
 })

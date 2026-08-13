@@ -112,7 +112,9 @@ export function formatDate(
   value: string | Date,
   options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' },
 ): string {
-  const date = typeof value === 'string' ? dateAtNoon(value) : value
+  const date = typeof value === 'string'
+    ? value.includes('T') ? new Date(value) : dateAtNoon(value)
+    : value
   const parts: string[] = []
   const weekdayStyle = options.weekday === 'long' ? 'long' : 'short'
   if (options.weekday) parts.push(weekdayLabels[weekdayStyle][date.getDay()])

@@ -35,6 +35,17 @@ This branch starts the first runnable Manager-facing slice directly from the app
 
 Rank override remains intentionally locked because `docs/entertainer-ranking-policy.md` still requires formal CEO or General Manager approval. The prototype shows rank where operationally useful but does not invent authority or thresholds.
 
+## Branch Manager customer and ranking prototype
+
+The same Manager workspace now includes:
+
+- a branch-only, masked customer intelligence view with search, membership/activity filters, visits, spend, entertainer affinity, consent indicators, benefit use, cashback balance, and source freshness;
+- an explainable entertainer-ranking evidence view using current source rank plus separate attendance, no-show, reservation, repeat-customer, sales-trend, training, complaint, and history signals;
+- a customer membership-evidence view that keeps the current source level separate from the proposed three-month spend explanation;
+- explicit policy locks for all unapproved membership and ranking calculations or overrides.
+
+See `docs/decisions/2026-08-13-manager-crm-ranking-prototype.md` for the source reconciliation, privacy boundary, and follow-up production functions.
+
 Run it with `npm install` and `npm run dev`. The browser-local service is a UI prototype only; the team-member selector is a review aid rather than identity switching. Production writes still require server-side Frappe authorization, ownership validation, idempotency, audit, and notification handling.
 
 ## Relationship to Frappe

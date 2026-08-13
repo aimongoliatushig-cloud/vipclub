@@ -39,7 +39,7 @@ import {
 } from './localization'
 import { weekDates } from './workforceService'
 
-export type ManagerView = 'overview' | 'schedule' | 'coverage' | 'attendance' | 'team'
+export type ManagerView = 'overview' | 'schedule' | 'coverage' | 'attendance' | 'team' | 'customers' | 'rankings'
 
 function statusLabel(status: OperationalStatus): string {
   return operationalStatusLabels[status]
