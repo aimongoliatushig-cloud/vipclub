@@ -25,11 +25,36 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 | --- | --- | --- |
 | Employee / Entertainer Profile | Identity, branch, status, bank verification, rank, and privacy profile. | Employee, User, Club Branch |
 | Employee Lifecycle Event | Onboarding, change, suspension, resignation, or offboarding history. | Employee |
+| Branch Staffing Template | Effective-dated recurring staffing policy for one branch, defining required headcount by weekday and approved role. | Club Branch, Staffing Requirement, Policy Version |
+| Staffing Requirement | Minimum headcount for a specific branch, weekday, role, and effective period. | Branch Staffing Template, Role |
+| Weekly Schedule Period | Operational weekly roster window and publication state used to group Shift Assignments for a branch. | Club Branch, Shift Assignment, Manager |
+| Shift Coverage Snapshot | Time-bound comparison of Required, Scheduled, Checked In, approved absence, unexpected no-show, and shortage by branch/date/role. | Staffing Requirement, Shift Assignment, Attendance Evidence Event |
+| Staffing Exception | Records a planning or attendance shortage, severity, cause, manager action, and resolution where available. | Shift Coverage Snapshot, Club Branch, Role |
 | Operational Task | Assigned work with deadline, state, evidence, blockers, comments, and approval. | Assignee, Branch, Task Evidence |
 | Task Comment / Evidence | Conversation, result notes, images, or other completion proof. | Operational Task |
 | Attendance Evidence Event | Check-in/out or attendance signal with source and original time. | Employee, Shift |
 | Attendance Correction Request | Evidence-backed correction, decision, and adjustment reference. | Attendance Event |
 | Maintenance Request | Branch issue, urgency, assignee, due date, and completion evidence. | Club Branch, Task |
+
+### ERPNext/Frappe workforce reuse
+
+Reuse ERPNext/Frappe Employee, Shift Type, Shift Assignment, Employee Checkin, Attendance, and Leave Application where they satisfy the requirement.
+
+The VIP Club custom workforce model should add branch-specific staffing requirements, weekly publication/coverage semantics, readiness snapshots, and shortage/audit records rather than duplicating ERPNext core HR records.
+
+### Workforce relationship flow
+
+```text
+Branch Staffing Template
+→ Staffing Requirement by weekday/role
+→ Weekly Schedule Period
+→ ERPNext Shift Assignments
+→ Employee Checkin / Attendance / Leave
+→ Shift Coverage Snapshot
+→ Staffing Exception / manager action
+```
+
+The published Shift Assignment or equivalent approved schedule record establishes the operational attendance expectation for lateness and no-show classification.
 
 ## Customers, visits, reservations, and consent
 
@@ -109,3 +134,4 @@ CEO or Manager → Operational Task → Comment / Evidence → Review / Completi
 - Source of truth and reconciliation method for POS sales, attendance, reservations, and messaging delivery.
 - Customer and entertainer privacy, retention, masking, and role visibility.
 - Final ERPNext reuse versus custom DocType mapping after repository audit.
+- Final publication cutoff and ordinary post-publication schedule-change policy for weekly rosters.
