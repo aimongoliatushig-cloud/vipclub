@@ -31,7 +31,6 @@ import {
   type AssignmentInput,
   type AttendanceDecisionAction,
   type ExecutiveFollowUpSummary,
-  type RosterAuditEvent,
   type ShiftAssignment,
   type StaffingRequirement,
   type ShiftTemplateName,
@@ -56,28 +55,29 @@ import {
   TeamMembersView,
   type ManagerView,
 } from './ManagerWorkspaceViews'
-
-const dayLabel = new Intl.DateTimeFormat('en', { weekday: 'short' })
-const shortDate = new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' })
-const longDate = new Intl.DateTimeFormat('en', { weekday: 'long', month: 'short', day: 'numeric' })
-
-function dateAtNoon(value: string): Date {
-  return new Date(`${value}T12:00:00`)
-}
+import {
+  attendanceDecisionLabels,
+  auditActionLabels,
+  assignmentResponseLabels,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  roleLabels,
+  rosterStatusLabels,
+  shiftLabels,
+} from './localization'
 
 function formatWeek(weekStart: string): string {
   const end = addDays(weekStart, 6)
-  return `${shortDate.format(dateAtNoon(weekStart))} – ${shortDate.format(dateAtNoon(end))}`
+  return `${formatDate(weekStart, { month: 'short', day: 'numeric' })} – ${formatDate(end, { month: 'short', day: 'numeric' })}`
 }
 
 function statusText(roster: WeeklyRoster): string {
-  return roster.status === 'published' ? `Published · v${roster.version}` : `Draft · v${roster.version}`
+  return `${rosterStatusLabels[roster.status]} · хувилбар ${roster.version}`
 }
 
 function responseText(response: ShiftAssignment['response']): string {
-  if (response === 'acknowledged') return 'Acknowledged'
-  if (response === 'change-requested') return 'Change requested'
-  return 'Pending'
+  return assignmentResponseLabels[response]
 }
 
 interface EditorState {
@@ -107,7 +107,7 @@ function AssignmentEditor({ state, roster, teamMembers, onClose, onSave, onRemov
     try {
       onSave({ id: state.assignment?.id, teamMemberId, date: state.date, shift, reason })
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to save this shift.')
+      setError(caught instanceof Error ? caught.message : 'Энэ ээлжийг хадгалж чадсангүй.')
     }
   }
 
@@ -116,7 +116,7 @@ function AssignmentEditor({ state, roster, teamMembers, onClose, onSave, onRemov
     try {
       onRemove(state.assignment.id, reason)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to remove this shift.')
+      setError(caught instanceof Error ? caught.message : 'Энэ ээлжийг хасаж чадсангүй.')
     }
   }
 
@@ -125,41 +125,41 @@ function AssignmentEditor({ state, roster, teamMembers, onClose, onSave, onRemov
       <section className="modal-card" role="dialog" aria-modal="true" aria-labelledby="shift-editor-title">
         <header className="modal-header">
           <div>
-            <span className="eyebrow">{state.assignment ? 'Edit assignment' : 'New assignment'}</span>
-            <h2 id="shift-editor-title">{longDate.format(dateAtNoon(state.date))}</h2>
+            <span className="eyebrow">{state.assignment ? 'Ээлж засах' : 'Шинэ ээлж'}</span>
+            <h2 id="shift-editor-title">{formatDate(state.date, { weekday: 'long', month: 'short', day: 'numeric' })}</h2>
           </div>
-          <button className="icon-button" type="button" aria-label="Close shift editor" onClick={onClose}><X size={20} /></button>
+          <button className="icon-button" type="button" aria-label="Ээлж засварлагчийг хаах" onClick={onClose}><X size={20} /></button>
         </header>
 
         <form className="editor-form" onSubmit={submit}>
           <label>
-            <span>Team member</span>
+            <span>Багийн гишүүн</span>
             <select value={teamMemberId} onChange={(event) => setTeamMemberId(event.target.value)}>
               {teamMembers.filter((member) => member.active).map((member) => (
-                <option key={member.id} value={member.id}>{member.name} · {member.role}</option>
+                <option key={member.id} value={member.id}>{member.name} · {roleLabels[member.role]}</option>
               ))}
             </select>
           </label>
           <label>
-            <span>Shift</span>
+            <span>Ээлж</span>
             <select value={shift} onChange={(event) => setShift(event.target.value as ShiftTemplateName)}>
               {Object.entries(shiftTemplates).map(([name, times]) => (
-                <option key={name} value={name}>{name} · {times.start}–{times.end}</option>
+                <option key={name} value={name}>{shiftLabels[name as ShiftTemplateName]} · {times.start}–{times.end}</option>
               ))}
             </select>
           </label>
           {isPublished ? (
             <label>
-              <span>Reason for published change <b>Required</b></span>
-              <textarea value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Example: approved leave requires backfill" rows={3} />
+              <span>Нийтэлсэн хуваарийг өөрчлөх шалтгаан <b>Заавал</b></span>
+              <textarea value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Жишээ: зөвшөөрсөн чөлөөг нөхөн хуваарилах шаардлагатай" rows={3} />
             </label>
           ) : null}
           {error ? <p className="form-error" role="alert">{error}</p> : null}
           <div className="modal-actions">
-            {state.assignment ? <button className="button button--danger" type="button" onClick={remove}>Remove shift</button> : <span />}
+            {state.assignment ? <button className="button button--danger" type="button" onClick={remove}>Ээлж хасах</button> : <span />}
             <div>
-              <button className="button button--ghost" type="button" onClick={onClose}>Cancel</button>
-              <button className="button button--primary" type="submit"><Check size={17} />Save shift</button>
+              <button className="button button--ghost" type="button" onClick={onClose}>Цуцлах</button>
+              <button className="button button--primary" type="submit"><Check size={17} />Ээлж хадгалах</button>
             </div>
           </div>
         </form>
@@ -185,7 +185,7 @@ function PublishReview({ roster, issues, onClose, onPublish }: PublishReviewProp
     try {
       onPublish(reason)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to publish this roster.')
+      setError(caught instanceof Error ? caught.message : 'Энэ хуваарийг нийтэлж чадсангүй.')
     }
   }
 
@@ -194,37 +194,37 @@ function PublishReview({ roster, issues, onClose, onPublish }: PublishReviewProp
       <section className="modal-card modal-card--review" role="dialog" aria-modal="true" aria-labelledby="publish-review-title">
         <header className="modal-header">
           <div>
-            <span className="eyebrow">Publication review</span>
-            <h2 id="publish-review-title">Week of {formatWeek(roster.weekStart)}</h2>
+            <span className="eyebrow">Нийтлэхийн өмнөх хяналт</span>
+            <h2 id="publish-review-title">{formatWeek(roster.weekStart)}-ны долоо хоног</h2>
           </div>
-          <button className="icon-button" type="button" aria-label="Close publication review" onClick={onClose}><X size={20} /></button>
+          <button className="icon-button" type="button" aria-label="Нийтлэхийн өмнөх хяналтыг хаах" onClick={onClose}><X size={20} /></button>
         </header>
         <div className="review-summary">
-          <article><Check size={18} /><div><strong>{roster.assignments.length} assignments</strong><span>Active branch team only</span></div></article>
-          <article data-tone={blockers.length ? 'danger' : 'healthy'}><ShieldCheck size={18} /><div><strong>{blockers.length} blockers</strong><span>Eligibility and overlap checks</span></div></article>
-          <article data-tone={gaps.length ? 'warning' : 'healthy'}><AlertTriangle size={18} /><div><strong>{gaps.length} coverage gaps</strong><span>Required vs scheduled</span></div></article>
+          <article><Check size={18} /><div><strong>{roster.assignments.length} ээлж</strong><span>Зөвхөн идэвхтэй салбарын баг</span></div></article>
+          <article data-tone={blockers.length ? 'danger' : 'healthy'}><ShieldCheck size={18} /><div><strong>{blockers.length} саад</strong><span>Эрх болон давхцлын шалгалт</span></div></article>
+          <article data-tone={gaps.length ? 'warning' : 'healthy'}><AlertTriangle size={18} /><div><strong>{gaps.length} хангалтын дутагдал</strong><span>Шаардлагатай ба хуваарилсан</span></div></article>
         </div>
 
         {issues.length ? (
-          <div className="issue-list" aria-label="Publication issues">
+          <div className="issue-list" aria-label="Нийтлэхэд саад болж буй асуудлууд">
             {issues.map((issue, index) => (
               <div key={`${issue.code}-${issue.date}-${issue.role}-${index}`} data-tone={issue.severity === 'error' ? 'danger' : 'warning'}>
                 <AlertTriangle size={17} /><span>{issue.message}</span>
               </div>
             ))}
           </div>
-        ) : <div className="all-clear"><Check size={18} />All publication checks passed.</div>}
+        ) : <div className="all-clear"><Check size={18} />Нийтлэх бүх шалгалтыг давлаа.</div>}
 
         {gaps.length ? (
           <label className="review-reason">
-            <span>Reason for publishing below minimum <b>Required</b></span>
-            <textarea value={reason} onChange={(event) => setReason(event.target.value)} rows={3} placeholder="Record the operating decision and planned backfill action" />
+            <span>Доод хэмжээнээс дутуугаар нийтлэх шалтгаан <b>Заавал</b></span>
+            <textarea value={reason} onChange={(event) => setReason(event.target.value)} rows={3} placeholder="Үйл ажиллагааны шийдвэр болон нөхөн бүрдүүлэх төлөвлөгөөг бичнэ үү" />
           </label>
         ) : null}
         {error ? <p className="form-error" role="alert">{error}</p> : null}
         <div className="modal-actions modal-actions--end">
-          <button className="button button--ghost" type="button" onClick={onClose}>Keep editing</button>
-          <button className="button button--primary" type="button" disabled={blockers.length > 0} onClick={publish}><Send size={17} />Publish roster</button>
+          <button className="button button--ghost" type="button" onClick={onClose}>Үргэлжлүүлэн засах</button>
+          <button className="button button--primary" type="button" disabled={blockers.length > 0} onClick={publish}><Send size={17} />Хуваарь нийтлэх</button>
         </div>
       </section>
     </div>
@@ -254,7 +254,7 @@ function StaffingRequirementsEditor({ roster, onClose, onSave }: StaffingRequire
     try {
       onSave(requirements, effectiveFrom, reason)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to save staffing requirements.')
+      setError(caught instanceof Error ? caught.message : 'Хүний нөөцийн шаардлагыг хадгалж чадсангүй.')
     }
   }
 
@@ -263,61 +263,41 @@ function StaffingRequirementsEditor({ roster, onClose, onSave }: StaffingRequire
       <section className="modal-card modal-card--requirements" role="dialog" aria-modal="true" aria-labelledby="requirements-title">
         <header className="modal-header">
           <div>
-            <span className="eyebrow">Staffing template · version {roster.requirementVersion}</span>
-            <h2 id="requirements-title">Minimum people required</h2>
-            <p>Set the operating minimum for every role and day. Changes are effective-dated and recorded.</p>
+            <span className="eyebrow">Хүний нөөцийн загвар · хувилбар {roster.requirementVersion}</span>
+            <h2 id="requirements-title">Шаардлагатай хүний доод тоо</h2>
+            <p>Өдөр болон үүрэг тус бүрийн үйл ажиллагааны доод хэмжээг тогтооно. Өөрчлөлт хэрэгжих огноотой, бүртгэлтэй байна.</p>
           </div>
-          <button className="icon-button" type="button" aria-label="Close staffing requirements" onClick={onClose}><X size={20} /></button>
+          <button className="icon-button" type="button" aria-label="Хүний нөөцийн шаардлагыг хаах" onClick={onClose}><X size={20} /></button>
         </header>
         <form className="requirements-form" onSubmit={submit}>
           <div className="requirements-scroll">
             <div className="requirements-grid">
-              <strong className="requirements-corner">Role</strong>
-              {dates.map((date) => <span className="requirements-day" key={date}>{dayLabel.format(dateAtNoon(date))}<small>{dateAtNoon(date).getDate()}</small></span>)}
+              <strong className="requirements-corner">Үүрэг</strong>
+              {dates.map((date) => <span className="requirements-day" key={date}>{formatDate(date, { weekday: 'short' })}<small>{new Date(`${date}T12:00:00`).getDate()}</small></span>)}
               {workforceRoles.map((itemRole) => (
                 <div className="requirements-row" key={itemRole}>
-                  <strong>{itemRole}</strong>
+                  <strong>{roleLabels[itemRole]}</strong>
                   {dates.map((date) => {
                     const requirement = requirements.find((item) => item.date === date && item.role === itemRole)
-                    return <input key={date} type="number" min="0" max="99" step="1" required value={requirement?.required ?? 0} aria-label={`${itemRole} required on ${date}`} onChange={(event) => updateRequired(date, itemRole, event.target.value)} />
+                    return <input key={date} type="number" min="0" max="99" step="1" required value={requirement?.required ?? 0} aria-label={`${date}-нд ${roleLabels[itemRole]} үүрэгт шаардлагатай хүний тоо`} onChange={(event) => updateRequired(date, itemRole, event.target.value)} />
                   })}
                 </div>
               ))}
             </div>
           </div>
           <div className="requirements-meta">
-            <label><span>Effective from</span><input type="date" required value={effectiveFrom} onChange={(event) => setEffectiveFrom(event.target.value)} /></label>
-            <label className="requirements-reason"><span>Reason for change <b>Required</b></span><input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Example: Friday event needs higher floor coverage" /></label>
+            <label><span>Хэрэгжих огноо</span><input type="date" required value={effectiveFrom} onChange={(event) => setEffectiveFrom(event.target.value)} /></label>
+            <label className="requirements-reason"><span>Өөрчлөх шалтгаан <b>Заавал</b></span><input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Жишээ: Баасан гарагийн арга хэмжээнд илүү олон үйлчилгээний ажилтан хэрэгтэй" /></label>
           </div>
           {error ? <p className="form-error" role="alert">{error}</p> : null}
           <div className="modal-actions modal-actions--end">
-            <button className="button button--ghost" type="button" onClick={onClose}>Cancel</button>
-            <button className="button button--primary" type="submit"><Check size={17} />Save requirements</button>
+            <button className="button button--ghost" type="button" onClick={onClose}>Цуцлах</button>
+            <button className="button button--primary" type="submit"><Check size={17} />Шаардлага хадгалах</button>
           </div>
         </form>
       </section>
     </div>
   )
-}
-
-function auditActionLabel(action: RosterAuditEvent['action']): string {
-  const labels: Record<RosterAuditEvent['action'], string> = {
-    created: 'Weekly draft created',
-    copied: 'Previous week copied',
-    'assignment-added': 'Assignment added',
-    'assignment-changed': 'Assignment changed',
-    'assignment-removed': 'Assignment removed',
-    published: 'Schedule published',
-    'requirements-updated': 'Staffing requirements updated',
-    'manager-messaged': 'Branch Manager messaged',
-    'follow-up-created': 'CEO follow-up task created',
-    'assignment-acknowledged': 'Assignment acknowledged',
-    'assignment-change-requested': 'Assignment change requested',
-    'acknowledgement-reminder-recorded': 'Acknowledgement reminder recorded',
-    'attendance-decision-recorded': 'Attendance decision recorded',
-    'availability-overridden': 'Availability overridden',
-  }
-  return labels[action]
 }
 
 interface AuditTrailPanelProps {
@@ -330,15 +310,15 @@ function AuditTrailPanel({ roster, onClose }: AuditTrailPanelProps) {
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="modal-card modal-card--audit" role="dialog" aria-modal="true" aria-labelledby="audit-title">
         <header className="modal-header">
-          <div><span className="eyebrow">Schedule evidence</span><h2 id="audit-title">Complete audit trail</h2><p>Who changed what, when, and why for roster version {roster.version}.</p></div>
-          <button className="icon-button" type="button" aria-label="Close audit trail" onClick={onClose}><X size={20} /></button>
+          <div><span className="eyebrow">Хуваарийн баримт</span><h2 id="audit-title">Аудитын бүрэн түүх</h2><p>Хуваарийн {roster.version}-р хувилбарт хэн, юуг, хэзээ, яагаад өөрчилснийг харуулна.</p></div>
+          <button className="icon-button" type="button" aria-label="Аудитын түүхийг хаах" onClick={onClose}><X size={20} /></button>
         </header>
         <div className="audit-list">
           {[...roster.audit].reverse().map((event) => (
             <article key={event.id}>
               <span className="audit-icon"><FileClock size={18} /></span>
-              <div><strong>{auditActionLabel(event.action)}</strong><span>{event.actor} · roster v{event.version}{event.requirementVersion ? ` · requirement v${event.requirementVersion}` : ''}</span>{event.reason ? <p>{event.reason}</p> : null}</div>
-              <time dateTime={event.at}>{new Date(event.at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</time>
+              <div><strong>{auditActionLabels[event.action]}</strong><span>{event.actor} · хуваарь {event.version}-р хувилбар{event.requirementVersion ? ` · шаардлага ${event.requirementVersion}-р хувилбар` : ''}</span>{event.reason ? <p>{event.reason}</p> : null}</div>
+              <time dateTime={event.at}>{formatDateTime(event.at)}</time>
             </article>
           ))}
         </div>
@@ -366,7 +346,7 @@ function ExecutiveFollowUpPanel({ roster, summary, onClose, onRecord }: Executiv
     try {
       onRecord(action, note, action === 'task' ? dueDate : undefined)
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to record this follow-up.')
+      setError(caught instanceof Error ? caught.message : 'Энэ хяналтын үйлдлийг тэмдэглэж чадсангүй.')
     }
   }
 
@@ -374,35 +354,35 @@ function ExecutiveFollowUpPanel({ roster, summary, onClose, onRecord }: Executiv
     <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
       <section className="modal-card modal-card--executive" role="dialog" aria-modal="true" aria-labelledby="executive-title">
         <header className="modal-header">
-          <div><span className="eyebrow">Prototype · CEO evidence view</span><h2 id="executive-title">Branch follow-up</h2><p>Objective schedule signals for {roster.branchName}. This does not infer effort from missing activity.</p></div>
-          <button className="icon-button" type="button" aria-label="Close CEO follow-up" onClick={onClose}><X size={20} /></button>
+          <div><span className="eyebrow">Туршилтын хувилбар · Гүйцэтгэх захирлын баримтын харагдац</span><h2 id="executive-title">Салбарын хяналт</h2><p>{roster.branchName}-ын хуваарийн бодит баримтыг харуулна. Үйлдэл бүртгэгдээгүйгээс ажлын хүчин чармайлтыг таамаглахгүй.</p></div>
+          <button className="icon-button" type="button" aria-label="Гүйцэтгэх захирлын хяналтыг хаах" onClick={onClose}><X size={20} /></button>
         </header>
         <div className="executive-owner">
-          <div className="avatar">AM</div><div><span>Accountable Branch Manager</span><strong>{summary.accountableManager}</strong></div>
-          <span className="evidence-state" data-state={summary.publicationState}>{summary.publicationLabel} · deadline {new Date(summary.dueDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+          <div className="avatar">АМ</div><div><span>Хариуцсан салбарын менежер</span><strong>{summary.accountableManager}</strong></div>
+          <span className="evidence-state" data-state={summary.publicationState}>{summary.publicationLabel} · эцсийн хугацаа {formatDateTime(summary.dueDate)}</span>
         </div>
         <div className="executive-signals">
-          <article><span>Coverage gap</span><strong>{summary.coverageGapCount}</strong><small>Uncovered role-shifts</small></article>
-          <article><span>Overdue response</span><strong>{summary.pendingAcknowledgementCount}</strong><small>Past reminder threshold</small></article>
-          <article><span>Change requests</span><strong>{summary.changeRequestCount}</strong><small>Team-member requests</small></article>
+          <article><span>Хангалтын дутагдал</span><strong>{summary.coverageGapCount}</strong><small>Хүн дутуу үүрэг-ээлж</small></article>
+          <article><span>Хугацаа хэтэрсэн хариу</span><strong>{summary.pendingAcknowledgementCount}</strong><small>Сануулах хугацаа өнгөрсөн</small></article>
+          <article><span>Өөрчлөх хүсэлт</span><strong>{summary.changeRequestCount}</strong><small>Багийн гишүүдийн хүсэлт</small></article>
         </div>
         <div className="manager-evidence">
-          <ListChecks size={19} /><div><span>Last recorded manager action</span><strong>{summary.lastManagerAction}</strong><small>{new Date(summary.lastManagerActionAt).toLocaleString()}</small></div>
+          <ListChecks size={19} /><div><span>Менежерийн хамгийн сүүлд бүртгэсэн үйлдэл</span><strong>{summary.lastManagerAction}</strong><small>{formatDateTime(summary.lastManagerActionAt)}</small></div>
         </div>
-        <div className="recommended-action"><strong>Recommended next action</strong><p>{summary.nextAction}</p></div>
-        {summary.latestFollowUp ? <div className="latest-follow-up"><Check size={17} /><span>Latest: {summary.latestFollowUp.action === 'message' ? 'message recorded' : `task due ${summary.latestFollowUp.dueDate}`} · {summary.latestFollowUp.note}</span></div> : null}
-        <div className="integration-note"><ShieldCheck size={16} /><span>This prototype records outreach evidence only. Slack delivery requires the secure notification integration.</span></div>
+        <div className="recommended-action"><strong>Санал болгож буй дараагийн алхам</strong><p>{summary.nextAction}</p></div>
+        {summary.latestFollowUp ? <div className="latest-follow-up"><Check size={17} /><span>Сүүлийнх: {summary.latestFollowUp.action === 'message' ? 'мэдэгдлийн баримт тэмдэглэсэн' : `даалгаврын хугацаа ${summary.latestFollowUp.dueDate}`} · {summary.latestFollowUp.note}</span></div> : null}
+        <div className="integration-note"><ShieldCheck size={16} /><span>Энэ туршилтын хувилбар зөвхөн холбогдсон баримтыг тэмдэглэнэ. Slack-аар илгээхийн тулд аюулгүй мэдэгдлийн интеграц шаардлагатай.</span></div>
         <form className="follow-up-form" onSubmit={submit}>
-          <div className="action-toggle" aria-label="Follow-up type">
-            <button type="button" className={action === 'message' ? 'active' : ''} onClick={() => setAction('message')}><MessageSquare size={17} />Message manager</button>
-            <button type="button" className={action === 'task' ? 'active' : ''} onClick={() => setAction('task')}><ClipboardCheck size={17} />Create follow-up task</button>
+          <div className="action-toggle" aria-label="Хяналтын төрөл">
+            <button type="button" className={action === 'message' ? 'active' : ''} onClick={() => setAction('message')}><MessageSquare size={17} />Менежерт мэдэгдэл тэмдэглэх</button>
+            <button type="button" className={action === 'task' ? 'active' : ''} onClick={() => setAction('task')}><ClipboardCheck size={17} />Хяналтын даалгавар үүсгэх</button>
           </div>
-          <label><span>Specific follow-up note</span><textarea rows={3} value={note} onChange={(event) => setNote(event.target.value)} /></label>
-          {action === 'task' ? <label className="follow-up-due"><span>Due date</span><input type="date" min={today} required value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></label> : null}
+          <label><span>Хяналтын тодорхой тайлбар</span><textarea rows={3} value={note} onChange={(event) => setNote(event.target.value)} /></label>
+          {action === 'task' ? <label className="follow-up-due"><span>Дуусах огноо</span><input type="date" min={today} required value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></label> : null}
           {error ? <p className="form-error" role="alert">{error}</p> : null}
           <div className="modal-actions modal-actions--end">
-            <button className="button button--ghost" type="button" onClick={onClose}>Cancel</button>
-            <button className="button button--primary" type="submit">{action === 'message' ? <MessageSquare size={17} /> : <ClipboardCheck size={17} />}{action === 'message' ? 'Record message' : 'Create task'}</button>
+            <button className="button button--ghost" type="button" onClick={onClose}>Цуцлах</button>
+            <button className="button button--primary" type="submit">{action === 'message' ? <MessageSquare size={17} /> : <ClipboardCheck size={17} />}{action === 'message' ? 'Мэдэгдэл тэмдэглэх' : 'Даалгавар үүсгэх'}</button>
           </div>
         </form>
       </section>
@@ -461,7 +441,7 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
   const filteredMembers = teamMembers.filter((member) => {
     const matchesRole = role === 'All' || member.role === role
     const query = search.trim().toLowerCase()
-    return matchesRole && (!query || member.name.toLowerCase().includes(query) || member.role.toLowerCase().includes(query))
+    return matchesRole && (!query || member.name.toLowerCase().includes(query) || roleLabels[member.role].toLowerCase().includes(query))
   })
   const selectedCoverage = coverage.filter((item) => item.date === selectedDay)
 
@@ -469,40 +449,40 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
     const next = service.upsertAssignment(weekStart, input)
     setRoster(next)
     setEditor(null)
-    setMessage(next.status === 'published' ? `Published roster updated to version ${next.version}. The affected assignment is pending acknowledgement.` : 'Draft shift saved.')
+    setMessage(next.status === 'published' ? `Нийтэлсэн хуваарь ${next.version}-р хувилбар болж шинэчлэгдлээ. Өөрчилсөн ээлж баталгаажуулалт хүлээж байна.` : 'Ноорог ээлж хадгалагдлаа.')
   }
 
   function removeAssignment(assignmentId: string, reason?: string) {
     const next = service.removeAssignment(weekStart, assignmentId, reason)
     setRoster(next)
     setEditor(null)
-    setMessage(next.status === 'published' ? `Published roster updated to version ${next.version}.` : 'Draft shift removed.')
+    setMessage(next.status === 'published' ? `Нийтэлсэн хуваарь ${next.version}-р хувилбар болж шинэчлэгдлээ.` : 'Ноорог ээлж хасагдлаа.')
   }
 
   function publish(reason?: string) {
     const next = service.publishRoster(weekStart, reason)
     setRoster(next)
     setPublishOpen(false)
-    setMessage(`Roster version ${next.version} published. ${next.assignments.length} assignment responses are now pending.`)
+    setMessage(`Хуваарийн ${next.version}-р хувилбарыг нийтэллээ. ${next.assignments.length} ээлжийн хариу хүлээгдэж байна.`)
   }
 
   function copyPrevious() {
     const next = service.copyPreviousWeek(weekStart)
     setRoster(next)
-    setMessage('Previous week copied into a new draft. Review leave, eligibility, and coverage before publishing.')
+    setMessage('Өмнөх долоо хоногийг шинэ ноорогт хууллаа. Нийтлэхийн өмнө чөлөө, эрх, хангалтыг шалгана уу.')
   }
 
   function saveRequirements(requirements: StaffingRequirement[], effectiveFrom: string, reason: string) {
     const next = service.saveRequirements(weekStart, requirements, effectiveFrom, reason)
     setRoster(next)
     setRequirementsOpen(false)
-    setMessage(`Staffing requirements saved as version ${next.requirementVersion}. Coverage has been recalculated.`)
+    setMessage(`Хүний нөөцийн шаардлагыг ${next.requirementVersion}-р хувилбараар хадгаллаа. Хангалтыг дахин тооцоолов.`)
   }
 
   function recordExecutiveFollowUp(action: 'message' | 'task', note: string, dueDate?: string) {
     const next = service.recordExecutiveFollowUp(weekStart, action, note, dueDate)
     setRoster(next)
-    setMessage(action === 'message' ? 'Manager message recorded in the audit trail.' : `CEO follow-up task recorded for ${dueDate}.`)
+    setMessage(action === 'message' ? 'Менежерт хүргэх мэдэгдлийн баримтыг аудитын түүхэнд тэмдэглэлээ.' : `Гүйцэтгэх захирлын хяналтын даалгаврыг ${dueDate}-нд дуусахаар тэмдэглэлээ.`)
   }
 
   function respondToAssignment(
@@ -513,13 +493,13 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
   ) {
     const next = service.respondToAssignment(weekStart, teamMemberId, assignmentId, response, note)
     setRoster(next)
-    setMessage(response === 'acknowledged' ? 'Assignment receipt acknowledged.' : 'Schedule change request added to the Branch Manager queue.')
+    setMessage(response === 'acknowledged' ? 'Ээлж хүлээн авснаа баталгаажууллаа.' : 'Хуваарь өөрчлөх хүсэлтийг салбарын менежерийн жагсаалтад нэмлээ.')
   }
 
   function recordResponseReminder(assignmentId: string) {
     const next = service.recordResponseReminder(weekStart, assignmentId)
     setRoster(next)
-    setMessage('Reminder evidence recorded. No notification was sent by this prototype.')
+    setMessage('Сануулгын баримтыг тэмдэглэлээ. Энэ туршилтын хувилбараас мэдэгдэл илгээгээгүй.')
   }
 
   function editResponseAssignment(assignment: ShiftAssignment) {
@@ -536,38 +516,38 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
   function decideAttendance(exceptionId: string, decision: AttendanceDecisionAction, reason: string) {
     const next = service.decideAttendanceException(weekStart, exceptionId, decision, reason)
     setRoster(next)
-    setMessage(`Attendance decision recorded: ${decision}. Source schedule and check-in evidence were preserved.`)
+    setMessage(`Ирцийн “${attendanceDecisionLabels[decision]}” шийдвэрийг тэмдэглэлээ. Эх хуваарь болон ирсэн баримтыг хэвээр хадгалав.`)
   }
 
   function overrideAvailability(teamMemberId: string, date: string, available: boolean, reason: string) {
     const next = service.overrideAvailability(weekStart, teamMemberId, date, available, reason)
     setRoster(next)
-    setMessage(`Availability override recorded for ${date}. Coverage and assignment validation were recalculated.`)
+    setMessage(`${formatDate(date)}-ны ажиллах боломжийн өөрчлөлтийг тэмдэглэлээ. Хангалт болон ээлжийн шалгалтыг дахин тооцоолов.`)
   }
 
   return (
     <div className="app-shell">
       <aside className={menuOpen ? 'sidebar sidebar--open' : 'sidebar'}>
-        <div className="brand"><span>V</span><div><strong>VIP Club</strong><small>Internal</small></div><button className="sidebar-close" type="button" aria-label="Close navigation" onClick={() => setMenuOpen(false)}><X size={19} /></button></div>
-        <nav aria-label="Manager navigation">
-          <a className={activeView === 'overview' ? 'active' : ''} href="#overview" aria-current={activeView === 'overview' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('overview') }}><LayoutDashboard size={19} />Overview</a>
-          <a className={activeView === 'schedule' ? 'active' : ''} href="#schedule" aria-current={activeView === 'schedule' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('schedule') }}><CalendarDays size={19} />Weekly schedule</a>
-          <a className={activeView === 'coverage' ? 'active' : ''} href="#coverage" aria-current={activeView === 'coverage' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('coverage') }}><CircleGauge size={19} />Coverage <b>{openGaps}</b></a>
-          <a className={activeView === 'attendance' ? 'active' : ''} href="#attendance" aria-current={activeView === 'attendance' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('attendance') }}><ClipboardCheck size={19} />Attendance</a>
-          <a className={activeView === 'team' ? 'active' : ''} href="#team" aria-current={activeView === 'team' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('team') }}><Users size={19} />Team members</a>
+        <div className="brand"><span>V</span><div><strong>VIP Club</strong><small>Дотоод</small></div><button className="sidebar-close" type="button" aria-label="Навигацыг хаах" onClick={() => setMenuOpen(false)}><X size={19} /></button></div>
+        <nav aria-label="Менежерийн навигац">
+          <a className={activeView === 'overview' ? 'active' : ''} href="#overview" aria-current={activeView === 'overview' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('overview') }}><LayoutDashboard size={19} />Тойм</a>
+          <a className={activeView === 'schedule' ? 'active' : ''} href="#schedule" aria-current={activeView === 'schedule' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('schedule') }}><CalendarDays size={19} />Долоо хоногийн хуваарь</a>
+          <a className={activeView === 'coverage' ? 'active' : ''} href="#coverage" aria-current={activeView === 'coverage' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('coverage') }}><CircleGauge size={19} />Хангалт <b>{openGaps}</b></a>
+          <a className={activeView === 'attendance' ? 'active' : ''} href="#attendance" aria-current={activeView === 'attendance' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('attendance') }}><ClipboardCheck size={19} />Ирц</a>
+          <a className={activeView === 'team' ? 'active' : ''} href="#team" aria-current={activeView === 'team' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('team') }}><Users size={19} />Багийн гишүүд</a>
         </nav>
         <div className="sidebar-foot">
-          <div className="avatar">AM</div>
-          <div><strong>{roster.managerName}</strong><span>Branch Manager</span></div>
+          <div className="avatar">АМ</div>
+          <div><strong>{roster.managerName}</strong><span>Салбарын менежер</span></div>
           <MoreHorizontal size={18} />
         </div>
       </aside>
 
       <div className="workspace">
         <header className="topbar">
-          <button className="icon-button mobile-menu" type="button" aria-label="Toggle navigation" onClick={() => setMenuOpen((current) => !current)}><Menu size={21} /></button>
-          <div className="branch-scope"><span className="scope-mark">CB</span><div><strong>{roster.branchName}</strong><small>Authorized branch scope</small></div></div>
-          <div className="topbar-actions"><button className="icon-button" type="button" aria-label={`Notifications, ${attendanceExceptions.filter((item) => item.status === 'open').length + responseQueue.length} open items`} onClick={() => navigate('attendance')}><Bell size={20} /><i /></button><div className="avatar avatar--small">AM</div></div>
+          <button className="icon-button mobile-menu" type="button" aria-label="Навигацыг нээх эсвэл хаах" onClick={() => setMenuOpen((current) => !current)}><Menu size={21} /></button>
+          <div className="branch-scope"><span className="scope-mark">ТС</span><div><strong>{roster.branchName}</strong><small>Зөвшөөрөгдсөн салбарын хүрээ</small></div></div>
+          <div className="topbar-actions"><button className="icon-button" type="button" aria-label={`${attendanceExceptions.filter((item) => item.status === 'open').length + responseQueue.length} нээлттэй мэдэгдэл`} onClick={() => navigate('attendance')}><Bell size={20} /><i /></button><div className="avatar avatar--small">АМ</div></div>
         </header>
 
         <main id={activeView}>
@@ -578,69 +558,69 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
           {activeView === 'schedule' ? <>
           <section className="page-heading">
             <div>
-              <span className="eyebrow">Workforce planning</span>
-              <h1>Weekly schedule</h1>
-              <p>Assign every team member, confirm minimum coverage, then publish one authoritative roster.</p>
+              <span className="eyebrow">Ажиллах хүчний төлөвлөлт</span>
+              <h1>Долоо хоногийн хуваарь</h1>
+              <p>Багийн гишүүдийг ээлжид хуваарилж, доод хангалтыг шалгасны дараа нэг албан ёсны хуваарь нийтэлнэ.</p>
             </div>
             <div className="heading-actions">
-              <button className="button button--secondary" type="button" onClick={copyPrevious}><Copy size={17} />Copy previous week</button>
+              <button className="button button--secondary" type="button" onClick={copyPrevious}><Copy size={17} />Өмнөх долоо хоногийг хуулах</button>
               {roster.status === 'published'
-                ? <span className="published-button"><Check size={17} />Published v{roster.version}</span>
-                : <button className="button button--primary" type="button" onClick={() => setPublishOpen(true)}><Send size={17} />Review & publish</button>}
+                ? <span className="published-button"><Check size={17} />Нийтэлсэн · хувилбар {roster.version}</span>
+                : <button className="button button--primary" type="button" onClick={() => setPublishOpen(true)}><Send size={17} />Хянаж нийтлэх</button>}
             </div>
           </section>
 
-          <section className="control-bar" aria-label="Schedule controls">
+          <section className="control-bar" aria-label="Хуваарийн удирдлага">
             <div className="week-picker">
-              <button className="icon-button" type="button" aria-label="Previous week" onClick={() => setWeekStart(addDays(weekStart, -7))}><ChevronLeft size={19} /></button>
+              <button className="icon-button" type="button" aria-label="Өмнөх долоо хоног" onClick={() => setWeekStart(addDays(weekStart, -7))}><ChevronLeft size={19} /></button>
               <div><CalendarDays size={18} /><strong>{formatWeek(weekStart)}</strong><span>2026</span></div>
-              <button className="icon-button" type="button" aria-label="Next week" onClick={() => setWeekStart(addDays(weekStart, 7))}><ChevronRight size={19} /></button>
+              <button className="icon-button" type="button" aria-label="Дараагийн долоо хоног" onClick={() => setWeekStart(addDays(weekStart, 7))}><ChevronRight size={19} /></button>
             </div>
-            <div className="roster-state" data-status={roster.status}><span>{statusText(roster)}</span><small>Due {shortDate.format(new Date(roster.publicationDue))}, 18:00</small></div>
+            <div className="roster-state" data-status={roster.status}><span>{statusText(roster)}</span><small>Эцсийн хугацаа {formatDate(new Date(roster.publicationDue), { month: 'short', day: 'numeric' })}, 18:00</small></div>
           </section>
 
-          {message ? <div className="status-message" role="status"><Check size={18} /><span>{message}</span><button type="button" aria-label="Dismiss message" onClick={() => setMessage('')}><X size={17} /></button></div> : null}
+          {message ? <div className="status-message" role="status"><Check size={18} /><span>{message}</span><button type="button" aria-label="Мэдэгдлийг хаах" onClick={() => setMessage('')}><X size={17} /></button></div> : null}
 
-          <section className="planning-actions" aria-label="Planning and accountability tools">
-            <button type="button" onClick={() => setRequirementsOpen(true)}><span className="planning-action-icon"><Settings2 size={19} /></span><span><strong>Staffing requirements</strong><small>Template v{roster.requirementVersion} · effective {shortDate.format(dateAtNoon(roster.requirementsEffectiveFrom))}</small></span><ChevronRight size={18} /></button>
-            <button type="button" onClick={() => setResponseQueueOpen(true)} data-tone={responseQueue.some((item) => item.assignment.response === 'change-requested' || item.overdue) ? 'attention' : 'neutral'}><span className="planning-action-icon"><Inbox size={19} /></span><span><strong>Response queue</strong><small>{roster.status === 'published' ? `${responseQueue.length} unresolved · ${roster.assignments.length - responseQueue.length} acknowledged` : 'Available after publication'}</small></span><ChevronRight size={18} /></button>
-            <button type="button" onClick={() => setAuditOpen(true)}><span className="planning-action-icon"><FileClock size={19} /></span><span><strong>Audit evidence</strong><small>{roster.audit.length} recorded schedule events</small></span><ChevronRight size={18} /></button>
-            <button type="button" onClick={() => setExecutiveOpen(true)} data-tone={executiveSummary.publicationState === 'draft-overdue' || openGaps ? 'attention' : 'neutral'}><span className="planning-action-icon"><CircleGauge size={19} /></span><span><strong>CEO follow-up</strong><small>{executiveSummary.publicationLabel}</small></span><ChevronRight size={18} /></button>
+          <section className="planning-actions" aria-label="Төлөвлөлт ба хариуцлагын хэрэгслүүд">
+            <button type="button" onClick={() => setRequirementsOpen(true)}><span className="planning-action-icon"><Settings2 size={19} /></span><span><strong>Хүний нөөцийн шаардлага</strong><small>Загвар {roster.requirementVersion}-р хувилбар · {formatDate(roster.requirementsEffectiveFrom, { month: 'short', day: 'numeric' })}-с хэрэгжинэ</small></span><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setResponseQueueOpen(true)} data-tone={responseQueue.some((item) => item.assignment.response === 'change-requested' || item.overdue) ? 'attention' : 'neutral'}><span className="planning-action-icon"><Inbox size={19} /></span><span><strong>Хариуны жагсаалт</strong><small>{roster.status === 'published' ? `${responseQueue.length} шийдвэрлээгүй · ${roster.assignments.length - responseQueue.length} баталгаажсан` : 'Нийтэлсний дараа ашиглана'}</small></span><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setAuditOpen(true)}><span className="planning-action-icon"><FileClock size={19} /></span><span><strong>Аудитын баримт</strong><small>Хуваарийн {roster.audit.length} үйл явдал бүртгэгдсэн</small></span><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setExecutiveOpen(true)} data-tone={executiveSummary.publicationState === 'draft-overdue' || openGaps ? 'attention' : 'neutral'}><span className="planning-action-icon"><CircleGauge size={19} /></span><span><strong>Гүйцэтгэх захирлын хяналт</strong><small>{executiveSummary.publicationLabel}</small></span><ChevronRight size={18} /></button>
           </section>
 
-          <section className="metric-grid" aria-label="Weekly schedule summary">
-            <article><div className="metric-icon metric-icon--blue"><Users size={20} /></div><div><span>Team members</span><strong>{teamMembers.filter((member) => member.active).length}</strong><small>Active in this branch</small></div></article>
-            <article><div className="metric-icon metric-icon--violet"><CalendarDays size={20} /></div><div><span>Weekly shifts</span><strong>{roster.assignments.length}</strong><small>{roster.status === 'draft' ? 'Draft assignments' : 'Published assignments'}</small></div></article>
-            <article><div className="metric-icon metric-icon--green"><CircleGauge size={20} /></div><div><span>Planned coverage</span><strong>{coveragePercent}%</strong><small>{scheduled} scheduled / {required} required</small></div></article>
-            <article data-tone={openGaps ? 'warning' : 'healthy'}><div className="metric-icon metric-icon--amber"><AlertTriangle size={20} /></div><div><span>Open coverage gaps</span><strong>{openGaps}</strong><small>{pendingAcknowledgements ? `${pendingAcknowledgements} acknowledgements pending` : 'Review before publish'}</small></div></article>
+          <section className="metric-grid" aria-label="Долоо хоногийн хуваарийн хураангуй">
+            <article><div className="metric-icon metric-icon--blue"><Users size={20} /></div><div><span>Багийн гишүүд</span><strong>{teamMembers.filter((member) => member.active).length}</strong><small>Энэ салбарт идэвхтэй</small></div></article>
+            <article><div className="metric-icon metric-icon--violet"><CalendarDays size={20} /></div><div><span>Долоо хоногийн ээлж</span><strong>{roster.assignments.length}</strong><small>{roster.status === 'draft' ? 'Ноорог ээлжүүд' : 'Нийтэлсэн ээлжүүд'}</small></div></article>
+            <article><div className="metric-icon metric-icon--green"><CircleGauge size={20} /></div><div><span>Төлөвлөсөн хангалт</span><strong>{coveragePercent}%</strong><small>{scheduled} хуваарилсан / {required} шаардлагатай</small></div></article>
+            <article data-tone={openGaps ? 'warning' : 'healthy'}><div className="metric-icon metric-icon--amber"><AlertTriangle size={20} /></div><div><span>Нээлттэй хангалтын дутагдал</span><strong>{openGaps}</strong><small>{pendingAcknowledgements ? `${pendingAcknowledgements} баталгаажуулалт хүлээгдэж байна` : 'Нийтлэхийн өмнө хянана уу'}</small></div></article>
           </section>
 
           <div className="planner-layout">
             <section className="schedule-card">
               <header className="card-header">
-                <div><h2>Team roster</h2><p>Click any day to add or edit a shift.</p></div>
+                <div><h2>Багийн хуваарь</h2><p>Өдөр дээр дарж ээлж нэмэх эсвэл засна уу.</p></div>
                 <div className="filters">
-                  <label className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search team" aria-label="Search team members" /></label>
-                  <select value={role} onChange={(event) => setRole(event.target.value as 'All' | WorkforceRole)} aria-label="Filter by role">
-                    <option value="All">All roles</option>
-                    {workforceRoles.map((item) => <option key={item} value={item}>{item}</option>)}
+                  <label className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Багийн гишүүн хайх" aria-label="Багийн гишүүдээс хайх" /></label>
+                  <select value={role} onChange={(event) => setRole(event.target.value as 'All' | WorkforceRole)} aria-label="Үүргээр шүүх">
+                    <option value="All">Бүх үүрэг</option>
+                    {workforceRoles.map((item) => <option key={item} value={item}>{roleLabels[item]}</option>)}
                   </select>
                 </div>
               </header>
               <div className="schedule-scroll">
                 <div className="schedule-grid" style={{ '--team-count': filteredMembers.length } as CSSProperties}>
-                  <div className="grid-corner"><span>Team member</span><small>{filteredMembers.length} shown</small></div>
+                  <div className="grid-corner"><span>Багийн гишүүн</span><small>{filteredMembers.length} харагдаж байна</small></div>
                   {dates.map((date) => {
                     const dayGaps = coverage.filter((item) => item.date === date).reduce((sum, item) => sum + item.gap, 0)
                     return (
                       <button key={date} type="button" className={selectedDay === date ? 'day-heading selected' : 'day-heading'} onClick={() => setSelectedDay(date)}>
-                        <span>{dayLabel.format(dateAtNoon(date))}</span><strong>{dateAtNoon(date).getDate()}</strong>{dayGaps ? <small>{dayGaps} gap</small> : <small className="covered">Covered</small>}
+                        <span>{formatDate(date, { weekday: 'short' })}</span><strong>{new Date(`${date}T12:00:00`).getDate()}</strong>{dayGaps ? <small>{dayGaps} дутуу</small> : <small className="covered">Бүрэн</small>}
                       </button>
                     )
                   })}
                   {filteredMembers.map((member) => (
                     <div className="schedule-row" key={member.id}>
-                      <div className="member-cell"><span className="avatar avatar--member">{member.initials}</span><div><strong>{member.name}</strong><small>{member.role}</small></div></div>
+                      <div className="member-cell"><span className="avatar avatar--member">{member.initials}</span><div><strong>{member.name}</strong><small>{roleLabels[member.role]}</small></div></div>
                       {dates.map((date) => {
                         const item = roster.assignments.find((candidate) => candidate.teamMemberId === member.id && candidate.date === date)
                         const unavailable = member.unavailableDates.includes(date)
@@ -648,12 +628,12 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
                           <div className="shift-cell" key={date}>
                             {item ? (
                               <button className="shift-pill" type="button" onClick={() => setEditor({ assignment: item, teamMemberId: member.id, date })}>
-                                <span>{item.start}–{item.end}</span><small>{item.shift}</small>{roster.status === 'published' ? <i data-response={item.response}>{responseText(item.response)}</i> : null}
+                                <span>{item.start}–{item.end}</span><small>{shiftLabels[item.shift]}</small>{roster.status === 'published' ? <i data-response={item.response}>{responseText(item.response)}</i> : null}
                               </button>
                             ) : unavailable ? (
-                              <span className="unavailable-cell">Unavailable</span>
+                              <span className="unavailable-cell">Боломжгүй</span>
                             ) : (
-                              <button className="add-shift" type="button" aria-label={`Add ${member.name} shift on ${date}`} onClick={() => setEditor({ teamMemberId: member.id, date })}><Plus size={16} /><span>Add</span></button>
+                              <button className="add-shift" type="button" aria-label={`${member.name}-д ${date}-нд ээлж нэмэх`} onClick={() => setEditor({ teamMemberId: member.id, date })}><Plus size={16} /><span>Нэмэх</span></button>
                             )}
                           </div>
                         )
@@ -662,33 +642,33 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
                   ))}
                 </div>
               </div>
-              {!filteredMembers.length ? <div className="empty-state"><Users size={24} /><strong>No matching team members</strong><span>Clear search or choose another role.</span></div> : null}
+              {!filteredMembers.length ? <div className="empty-state"><Users size={24} /><strong>Тохирох багийн гишүүн олдсонгүй</strong><span>Хайлтыг арилгах эсвэл өөр үүрэг сонгоно уу.</span></div> : null}
             </section>
 
             <aside className="coverage-card" id="coverage">
-              <header className="card-header"><div><span className="eyebrow">Daily check</span><h2>{longDate.format(dateAtNoon(selectedDay))}</h2></div><span className={selectedCoverage.some((item) => item.gap) ? 'risk-badge' : 'risk-badge risk-badge--healthy'}>{selectedCoverage.reduce((sum, item) => sum + item.gap, 0)} open</span></header>
+              <header className="card-header"><div><span className="eyebrow">Өдрийн шалгалт</span><h2>{formatDate(selectedDay, { weekday: 'long', month: 'short', day: 'numeric' })}</h2></div><span className={selectedCoverage.some((item) => item.gap) ? 'risk-badge' : 'risk-badge risk-badge--healthy'}>{selectedCoverage.reduce((sum, item) => sum + item.gap, 0)} нээлттэй</span></header>
               <div className="coverage-list">
                 {selectedCoverage.map((item) => {
                   const percent = item.required ? Math.min(100, Math.round((item.scheduled / item.required) * 100)) : 100
                   return (
                     <article key={item.role}>
-                      <header><strong>{item.role}</strong><span data-tone={item.gap ? 'warning' : 'healthy'}>{item.scheduled}/{item.required}</span></header>
+                      <header><strong>{roleLabels[item.role]}</strong><span data-tone={item.gap ? 'warning' : 'healthy'}>{item.scheduled}/{item.required}</span></header>
                       <div className="progress-track"><span style={{ width: `${percent}%` }} data-tone={item.gap ? 'warning' : 'healthy'} /></div>
-                      <small>{item.gap ? `${item.gap} more needed` : 'Minimum covered'}</small>
+                      <small>{item.gap ? `Дахин ${item.gap} хүн хэрэгтэй` : 'Доод хэмжээ бүрэн'}</small>
                     </article>
                   )
                 })}
               </div>
-              {selectedCoverage.some((item) => item.gap) ? <div className="coverage-callout"><AlertTriangle size={18} /><div><strong>Coverage action needed</strong><span>Assign an eligible team member or record a permitted shortage reason at publication.</span></div></div> : <div className="coverage-callout coverage-callout--healthy"><ShieldCheck size={18} /><div><strong>Minimum covered</strong><span>This day passes planned coverage checks.</span></div></div>}
-              <div className="deadline-card"><Clock3 size={18} /><div><strong>Publication evidence</strong><span>{roster.status === 'published' && roster.publishedAt ? `Published ${new Date(roster.publishedAt).toLocaleString()}` : `Due ${new Date(roster.publicationDue).toLocaleString()}`}</span></div></div>
+              {selectedCoverage.some((item) => item.gap) ? <div className="coverage-callout"><AlertTriangle size={18} /><div><strong>Хангалтын арга хэмжээ шаардлагатай</strong><span>Эрх бүхий багийн гишүүнийг хуваарилах эсвэл нийтлэх үед зөвшөөрөгдсөн дутагдлын шалтгааныг тэмдэглэнэ үү.</span></div></div> : <div className="coverage-callout coverage-callout--healthy"><ShieldCheck size={18} /><div><strong>Доод хэмжээ бүрэн</strong><span>Энэ өдөр төлөвлөсөн хангалтын шалгалтыг давлаа.</span></div></div>}
+              <div className="deadline-card"><Clock3 size={18} /><div><strong>Нийтлэлийн баримт</strong><span>{roster.status === 'published' && roster.publishedAt ? `${formatDateTime(roster.publishedAt)}-д нийтэлсэн` : `Эцсийн хугацаа ${formatDateTime(roster.publicationDue)}`}</span></div></div>
             </aside>
           </div>
 
           <section className="activity-card">
-            <header className="card-header"><div><h2>Recent schedule activity</h2><p>Versioned evidence for manager and CEO follow-up.</p></div><button className="button button--ghost" type="button" onClick={() => setAuditOpen(true)}>View audit trail</button></header>
+            <header className="card-header"><div><h2>Хуваарийн сүүлийн үйлдлүүд</h2><p>Менежер болон Гүйцэтгэх захирлын хяналтад зориулсан хувилбарт баримт.</p></div><button className="button button--ghost" type="button" onClick={() => setAuditOpen(true)}>Аудитын түүх харах</button></header>
             <div className="activity-list">
               {roster.audit.slice(-4).reverse().map((event) => (
-                <article key={event.id}><span className="activity-mark"><ClipboardCheck size={17} /></span><div><strong>{event.action.replaceAll('-', ' ')}</strong><small>{event.actor} · version {event.version}{event.reason ? ` · ${event.reason}` : ''}</small></div><time>{new Date(event.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>
+                <article key={event.id}><span className="activity-mark"><ClipboardCheck size={17} /></span><div><strong>{auditActionLabels[event.action]}</strong><small>{event.actor} · {event.version}-р хувилбар{event.reason ? ` · ${event.reason}` : ''}</small></div><time>{formatTime(event.at)}</time></article>
               ))}
             </div>
           </section>

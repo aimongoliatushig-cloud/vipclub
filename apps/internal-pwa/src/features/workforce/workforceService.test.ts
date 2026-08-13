@@ -8,7 +8,7 @@ describe('Branch Manager weekly scheduling rules', () => {
     const service = new BrowserWorkforceService()
     const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
 
-    expect(() => service.publishRoster(weekStart)).toThrow(/reason/i)
+    expect(() => service.publishRoster(weekStart)).toThrow(/шалтгаан/i)
 
     const published = service.publishRoster(weekStart, 'Security backfill is awaiting confirmation.')
     expect(published.status).toBe('published')
@@ -29,7 +29,7 @@ describe('Branch Manager weekly scheduling rules', () => {
       teamMemberId: original.teamMemberId,
       date: original.date,
       shift: 'Evening',
-    })).toThrow(/reason/i)
+    })).toThrow(/шалтгаан/i)
 
     const revised = service.upsertAssignment(weekStart, {
       id: original.id,
@@ -55,7 +55,7 @@ describe('Branch Manager weekly scheduling rules', () => {
       teamMemberId: original.teamMemberId,
       date: original.date,
       shift: 'Day',
-    })).toThrow(/already has a shift/i)
+    })).toThrow(/аль хэдийн ээлжтэй/i)
   })
 
   it('versions effective-dated staffing requirements with a reason', () => {
@@ -64,7 +64,7 @@ describe('Branch Manager weekly scheduling rules', () => {
     const roster = service.getRoster(weekStart)
     const requirements = roster.requirements.map((item, index) => index === 0 ? { ...item, required: item.required + 1 } : item)
 
-    expect(() => service.saveRequirements(weekStart, requirements, weekStart, '')).toThrow(/why/i)
+    expect(() => service.saveRequirements(weekStart, requirements, weekStart, '')).toThrow(/яагаад/i)
 
     const updated = service.saveRequirements(weekStart, requirements, weekStart, 'Reservation forecast increased.')
     expect(updated.requirementVersion).toBe(2)
@@ -97,19 +97,19 @@ describe('Branch Manager weekly scheduling rules', () => {
 
     expect(summary.publicationState).toBe('draft-overdue')
     expect(summary.coverageGapCount).toBe(2)
-    expect(summary.accountableManager).toBe('Ariun Manager')
-    expect(summary.lastManagerAction).toMatch(/Created/)
+    expect(summary.accountableManager).toBe('Ариун менежер')
+    expect(summary.lastManagerAction).toMatch(/үүсгэсэн/)
   })
 
   it('records due-dated CEO follow-up tasks in the audit trail', () => {
     const service = new BrowserWorkforceService()
     const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
 
-    expect(() => service.recordExecutiveFollowUp(weekStart, 'task', 'Publish the roster.')).toThrow(/due date/i)
+    expect(() => service.recordExecutiveFollowUp(weekStart, 'task', 'Хуваарийг нийтэлнэ үү.')).toThrow(/дуусах огноо/i)
 
-    const updated = service.recordExecutiveFollowUp(weekStart, 'task', 'Publish the roster.', '2026-08-14')
+    const updated = service.recordExecutiveFollowUp(weekStart, 'task', 'Хуваарийг нийтэлнэ үү.', '2026-08-14')
     expect(updated.executiveFollowUps.at(-1)).toMatchObject({ action: 'task', status: 'open', dueDate: '2026-08-14' })
-    expect(updated.audit.at(-1)).toMatchObject({ actor: 'CEO Demo', action: 'follow-up-created' })
+    expect(updated.audit.at(-1)).toMatchObject({ actor: 'Гүйцэтгэх захирлын демо', action: 'follow-up-created' })
   })
 
   it('accepts assignment responses only after publication and only from the assigned member', () => {
@@ -118,17 +118,17 @@ describe('Branch Manager weekly scheduling rules', () => {
     const draft = service.getRoster(weekStart)
     const assignment = draft.assignments[0]
 
-    expect(() => service.respondToAssignment(weekStart, assignment.teamMemberId, assignment.id, 'acknowledged')).toThrow(/published/i)
+    expect(() => service.respondToAssignment(weekStart, assignment.teamMemberId, assignment.id, 'acknowledged')).toThrow(/нийтэлсэн/i)
 
     const published = service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
     const publishedAssignment = published.assignments[0]
     expect(publishedAssignment.responseDueAt).toBeTruthy()
-    expect(() => service.respondToAssignment(weekStart, 'tm-bolor', publishedAssignment.id, 'acknowledged')).toThrow(/own published assignment/i)
+    expect(() => service.respondToAssignment(weekStart, 'tm-bolor', publishedAssignment.id, 'acknowledged')).toThrow(/зөвхөн өөрийн нийтэлсэн ээлж/i)
 
     const acknowledged = service.respondToAssignment(weekStart, publishedAssignment.teamMemberId, publishedAssignment.id, 'acknowledged')
     expect(acknowledged.version).toBe(1)
-    expect(acknowledged.assignments[0]).toMatchObject({ response: 'acknowledged', respondedBy: 'Anu Bat' })
-    expect(acknowledged.audit.at(-1)).toMatchObject({ actor: 'Anu Bat', action: 'assignment-acknowledged' })
+    expect(acknowledged.assignments[0]).toMatchObject({ response: 'acknowledged', respondedBy: 'Бат Ану' })
+    expect(acknowledged.audit.at(-1)).toMatchObject({ actor: 'Бат Ану', action: 'assignment-acknowledged' })
   })
 
   it('requires a specific change reason and prioritizes the request in the manager queue', () => {
@@ -137,7 +137,7 @@ describe('Branch Manager weekly scheduling rules', () => {
     const published = service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
     const assignment = published.assignments[0]
 
-    expect(() => service.respondToAssignment(weekStart, assignment.teamMemberId, assignment.id, 'change-requested', 'No')).toThrow(/at least 5/i)
+    expect(() => service.respondToAssignment(weekStart, assignment.teamMemberId, assignment.id, 'change-requested', 'Үгүй')).toThrow(/дор хаяж 5/i)
 
     service.respondToAssignment(weekStart, assignment.teamMemberId, assignment.id, 'change-requested', 'Class ends after this shift starts.')
     const queue = service.getResponseQueue(weekStart)
@@ -157,7 +157,7 @@ describe('Branch Manager weekly scheduling rules', () => {
     const reminded = service.recordResponseReminder(weekStart, assignment.id)
     expect(reminded.assignments[0]).toMatchObject({ reminderCount: 1 })
     expect(reminded.audit.at(-1)).toMatchObject({ action: 'acknowledgement-reminder-recorded' })
-    expect(reminded.audit.at(-1)?.reason).toMatch(/No message was sent/i)
+    expect(reminded.audit.at(-1)?.reason).toMatch(/мэдэгдэл илгээгээгүй/i)
   })
 
   it('escalates only acknowledgements past the configured reminder threshold', () => {
@@ -187,7 +187,7 @@ describe('Branch Manager weekly scheduling rules', () => {
       absent: 1,
       leave: 1,
     })
-    expect(() => service.getTeamMembers('branch-west')).toThrow(/access denied/i)
+    expect(() => service.getTeamMembers('branch-west')).toThrow(/хандах эрхгүй/i)
   })
 
   it('keeps attendance unavailable for drafts and records a reasoned decision without replacing evidence', () => {
@@ -200,13 +200,13 @@ describe('Branch Manager weekly scheduling rules', () => {
     service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
     const leaveRequest = service.getAttendanceExceptions(weekStart).find((item) => item.type === 'leave-request')
     expect(leaveRequest).toBeTruthy()
-    expect(() => service.decideAttendanceException(weekStart, leaveRequest!.id, 'confirm', 'Manager checked the request.')).toThrow(/not valid/i)
-    expect(() => service.decideAttendanceException(weekStart, leaveRequest!.id, 'approve', 'No')).toThrow(/at least 5/i)
+    expect(() => service.decideAttendanceException(weekStart, leaveRequest!.id, 'confirm', 'Менежер хүсэлтийг шалгасан.')).toThrow(/тохирохгүй/i)
+    expect(() => service.decideAttendanceException(weekStart, leaveRequest!.id, 'approve', 'Үгүй')).toThrow(/дор хаяж 5/i)
 
     const decided = service.decideAttendanceException(weekStart, leaveRequest!.id, 'approve', 'Coverage owner confirmed the approved backfill.')
     const retained = decided.attendanceExceptions.find((item) => item.id === leaveRequest!.id)
     expect(retained).toMatchObject({ status: 'approved', evidence: leaveRequest!.evidence })
-    expect(retained?.decision).toMatchObject({ action: 'approve', actor: 'Ariun Manager' })
+    expect(retained?.decision).toMatchObject({ action: 'approve', actor: 'Ариун менежер' })
     expect(decided.audit.at(-1)).toMatchObject({ action: 'attendance-decision-recorded' })
   })
 
@@ -217,12 +217,12 @@ describe('Branch Manager weekly scheduling rules', () => {
     const assignment = roster.assignments[0]
     const before = service.getReadiness(weekStart).find((row) => row.date === assignment.date && row.role === assignment.role)
 
-    expect(() => service.overrideAvailability(weekStart, assignment.teamMemberId, assignment.date, false, 'No')).toThrow(/at least 5/i)
+    expect(() => service.overrideAvailability(weekStart, assignment.teamMemberId, assignment.date, false, 'Үгүй')).toThrow(/дор хаяж 5/i)
 
     const updated = service.overrideAvailability(weekStart, assignment.teamMemberId, assignment.date, false, 'Approved training conflict recorded by the manager.')
     const after = service.getReadiness(weekStart).find((row) => row.date === assignment.date && row.role === assignment.role)
     expect(after?.scheduled).toBe((before?.scheduled ?? 0) - 1)
-    expect(updated.availabilityOverrides.at(-1)).toMatchObject({ available: false, actor: 'Ariun Manager' })
+    expect(updated.availabilityOverrides.at(-1)).toMatchObject({ available: false, actor: 'Ариун менежер' })
     expect(updated.audit.at(-1)).toMatchObject({ action: 'availability-overridden' })
   })
 })

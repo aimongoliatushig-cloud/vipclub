@@ -25,35 +25,32 @@ import type {
   WeeklyRoster,
   WorkforceRole,
 } from './models'
+import {
+  attendanceDecisionLabels,
+  attendanceExceptionLabels,
+  attendanceStatusLabels,
+  entertainerRankLabels,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  operationalStatusLabels,
+  roleLabels,
+  shiftLabels,
+} from './localization'
 import { weekDates } from './workforceService'
 
 export type ManagerView = 'overview' | 'schedule' | 'coverage' | 'attendance' | 'team'
 
-const shortDate = new Intl.DateTimeFormat('en', { weekday: 'short', month: 'short', day: 'numeric' })
-const longDate = new Intl.DateTimeFormat('en', { weekday: 'long', month: 'long', day: 'numeric' })
-
-function dateAtNoon(value: string): Date {
-  return new Date(`${value}T12:00:00`)
-}
-
 function statusLabel(status: OperationalStatus): string {
-  return status === 'off-shift' ? 'Off shift' : status[0].toUpperCase() + status.slice(1)
+  return operationalStatusLabels[status]
 }
 
 function exceptionLabel(type: AttendanceException['type']): string {
-  const labels: Record<AttendanceException['type'], string> = {
-    late: 'Late arrival',
-    'no-show': 'Unexpected no-show',
-    'approved-absence': 'Approved absence',
-    mismatch: 'Schedule mismatch',
-    correction: 'Correction request',
-    'leave-request': 'Leave request',
-  }
-  return labels[type]
+  return attendanceExceptionLabels[type]
 }
 
 function Notice({ message, onDismiss }: { message: string; onDismiss: () => void }) {
-  return message ? <div className="status-message manager-view-notice" role="status"><Check size={18} /><span>{message}</span><button type="button" aria-label="Dismiss message" onClick={onDismiss}><X size={17} /></button></div> : null
+  return message ? <div className="status-message manager-view-notice" role="status"><Check size={18} /><span>{message}</span><button type="button" aria-label="Мэдэгдлийг хаах" onClick={onDismiss}><X size={17} /></button></div> : null
 }
 
 interface OverviewProps {
@@ -76,49 +73,49 @@ export function ManagerOverviewView({ roster, dashboard, readiness, openAttendan
   const checkedIn = todayRows.reduce((sum, item) => sum + item.checkedIn, 0)
   const readinessGap = todayRows.reduce((sum, item) => sum + item.readinessGap, 0)
   const statusMetrics: Array<[string, number, string]> = [
-    ['On shift', dashboard.onShift, 'active'],
-    ['Available', dashboard.available, 'healthy'],
-    ['Reserved', dashboard.reserved, 'neutral'],
-    ['Serving', dashboard.serving, 'healthy'],
-    ['Break', dashboard.break, 'neutral'],
-    ['Late', dashboard.late, 'warning'],
-    ['Absent', dashboard.absent, 'danger'],
-    ['Leave', dashboard.leave, 'neutral'],
+    ['Ээлж дээр', dashboard.onShift, 'active'],
+    ['Боломжтой', dashboard.available, 'healthy'],
+    ['Захиалгатай', dashboard.reserved, 'neutral'],
+    ['Үйлчилж байна', dashboard.serving, 'healthy'],
+    ['Завсарлагатай', dashboard.break, 'neutral'],
+    ['Хоцорсон', dashboard.late, 'warning'],
+    ['Ирээгүй', dashboard.absent, 'danger'],
+    ['Чөлөөтэй', dashboard.leave, 'neutral'],
   ]
 
   return <>
     <section className="page-heading manager-view-heading">
-      <div><span className="eyebrow">Branch operations</span><h1>Manager overview</h1><p>One branch-scoped view of live team status, staffing risk, and action queues.</p></div>
-      <div className="freshness"><Clock3 size={15} /><span>Data refreshed</span><strong>{new Date(dashboard.dataFreshAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</strong></div>
+      <div><span className="eyebrow">Салбарын үйл ажиллагаа</span><h1>Менежерийн тойм</h1><p>Багийн бодит цагийн төлөв, хүний нөөцийн эрсдэл, шийдвэрлэх ажлыг нэг дор харуулна.</p></div>
+      <div className="freshness"><Clock3 size={15} /><span>Мэдээлэл шинэчилсэн</span><strong>{formatTime(dashboard.dataFreshAt)}</strong></div>
     </section>
     <Notice message={message} onDismiss={onDismissMessage} />
 
-    <section className="operations-metrics" aria-label="Current branch workforce status">
+    <section className="operations-metrics" aria-label="Салбарын ажиллах хүчний одоогийн төлөв">
       {statusMetrics.map(([label, value, tone]) => <article key={label} data-tone={tone}><span>{label}</span><strong>{value}</strong></article>)}
     </section>
 
     <div className="manager-overview-grid">
       <section className="workspace-panel readiness-summary">
-        <header className="card-header"><div><span className="eyebrow">Today</span><h2>{longDate.format(dateAtNoon(today))}</h2><p>Planning and attendance remain separate evidence.</p></div><CircleGauge size={22} /></header>
+        <header className="card-header"><div><span className="eyebrow">Өнөөдөр</span><h2>{formatDate(today, { weekday: 'long', month: 'long', day: 'numeric' })}</h2><p>Төлөвлөлт болон ирцийг тусдаа баримтаар харуулна.</p></div><CircleGauge size={22} /></header>
         <div className="readiness-chain">
-          <article><span>Required</span><strong>{required}</strong><small>Minimum staffing</small></article>
+          <article><span>Шаардлагатай</span><strong>{required}</strong><small>Хүний нөөцийн доод хэмжээ</small></article>
           <ArrowRight size={18} />
-          <article><span>Scheduled</span><strong>{scheduled}</strong><small>{openGaps ? `${openGaps} weekly gaps` : 'Plan covered'}</small></article>
+          <article><span>Хуваарилсан</span><strong>{scheduled}</strong><small>{openGaps ? `Долоо хоногт ${openGaps} дутуу` : 'Төлөвлөгөө бүрэн'}</small></article>
           <ArrowRight size={18} />
-          <article><span>Checked in</span><strong>{roster.status === 'published' ? checkedIn : '—'}</strong><small>{roster.status === 'published' ? `${readinessGap} readiness gaps` : 'Publish to activate'}</small></article>
+          <article><span>Ирсэн</span><strong>{roster.status === 'published' ? checkedIn : '—'}</strong><small>{roster.status === 'published' ? `${readinessGap} бэлэн байдлын дутагдал` : 'Идэвхжүүлэхийн тулд нийтэлнэ үү'}</small></article>
         </div>
-        <button className="button button--secondary" type="button" onClick={() => onNavigate('coverage')}>Open coverage and readiness<ArrowRight size={16} /></button>
+        <button className="button button--secondary" type="button" onClick={() => onNavigate('coverage')}>Хангалт ба бэлэн байдлыг нээх<ArrowRight size={16} /></button>
       </section>
 
       <section className="workspace-panel manager-queue-summary">
-        <header className="card-header"><div><span className="eyebrow">Action queue</span><h2>Manager follow-up</h2><p>Objective operational items requiring review.</p></div><FileCheck2 size={22} /></header>
-        <button type="button" onClick={() => onNavigate('attendance')}><span><AlertTriangle size={17} /><strong>Attendance exceptions</strong></span><b>{openAttendance}</b></button>
-        <button type="button" onClick={() => onNavigate('schedule')}><span><CalendarClock size={17} /><strong>Assignment responses</strong></span><b>{openResponses}</b></button>
-        <button type="button" onClick={() => onNavigate('coverage')}><span><CircleGauge size={17} /><strong>Coverage gaps</strong></span><b>{openGaps}</b></button>
+        <header className="card-header"><div><span className="eyebrow">Шийдвэрлэх ажлууд</span><h2>Менежерийн хяналт</h2><p>Хянаж шийдвэрлэх шаардлагатай үйл ажиллагааны баримтууд.</p></div><FileCheck2 size={22} /></header>
+        <button type="button" onClick={() => onNavigate('attendance')}><span><AlertTriangle size={17} /><strong>Ирцийн зөрчлүүд</strong></span><b>{openAttendance}</b></button>
+        <button type="button" onClick={() => onNavigate('schedule')}><span><CalendarClock size={17} /><strong>Ээлжийн хариунууд</strong></span><b>{openResponses}</b></button>
+        <button type="button" onClick={() => onNavigate('coverage')}><span><CircleGauge size={17} /><strong>Хангалтын дутагдал</strong></span><b>{openGaps}</b></button>
       </section>
     </div>
 
-    <section className="scope-guardrail"><ShieldCheck size={19} /><div><strong>Central Branch scope enforced</strong><span>This workspace exposes operational workforce fields only. Private HR, unrestricted customer, and billing data are not part of the manager projection.</span></div></section>
+    <section className="scope-guardrail"><ShieldCheck size={19} /><div><strong>{roster.branchName} · зөвшөөрөгдсөн хүрээ</strong><span>Энэ ажлын хэсэгт зөвхөн ажиллах хүчний үйл ажиллагааны мэдээлэл харагдана. Хүний нөөцийн нууц, хэрэглэгчийн хязгаарлалтгүй болон төлбөрийн мэдээлэл менежерт харагдахгүй.</span></div></section>
   </>
 }
 
@@ -144,28 +141,28 @@ export function CoverageReadinessView({ roster, readiness, message, onDismissMes
 
   return <>
     <section className="page-heading manager-view-heading">
-      <div><span className="eyebrow">Required → Scheduled → Checked In</span><h1>Coverage and readiness</h1><p>Separate manager planning gaps from actual attendance shortages by date and role.</p></div>
-      <button className="button button--secondary" type="button" onClick={() => onNavigate('schedule')}>Edit weekly schedule</button>
+      <div><span className="eyebrow">Шаардлагатай → Хуваарилсан → Ирсэн</span><h1>Хангалт ба бэлэн байдал</h1><p>Төлөвлөлтийн дутагдал болон бодит ирцийн дутагдлыг өдөр, үүргээр тусад нь хянана.</p></div>
+      <button className="button button--secondary" type="button" onClick={() => onNavigate('schedule')}>Долоо хоногийн хуваарь засах</button>
     </section>
     <Notice message={message} onDismiss={onDismissMessage} />
-    {roster.status === 'draft' ? <div className="readiness-unavailable"><LockKeyhole size={18} /><span><strong>Attendance readiness is not active for a draft.</strong> Scheduled planning remains visible; publish the authoritative roster before late or no-show evidence can apply.</span></div> : null}
+    {roster.status === 'draft' ? <div className="readiness-unavailable"><LockKeyhole size={18} /><span><strong>Ноорог үед ирцийн бэлэн байдлыг тооцохгүй.</strong> Хуваарийн төлөвлөгөө харагдана. Хоцролт, ирээгүй баримтыг ашиглахын өмнө албан ёсны хуваарийг нийтэлнэ үү.</span></div> : null}
 
-    <section className="coverage-day-strip" aria-label="Coverage date">
+    <section className="coverage-day-strip" aria-label="Хангалтын огноо">
       {dates.map((date) => {
         const dateRows = readiness.filter((item) => item.date === date)
         const gap = dateRows.reduce((sum, item) => sum + item.gap, 0)
         const actualGap = dateRows.reduce((sum, item) => sum + item.readinessGap, 0)
-        return <button key={date} className={selectedDate === date ? 'selected' : ''} type="button" onClick={() => setSelectedDate(date)}><span>{shortDate.format(dateAtNoon(date))}</span><strong>{gap ? `${gap} plan gap` : 'Plan covered'}</strong><small>{roster.status === 'published' ? `${actualGap} readiness gap` : 'Attendance pending'}</small></button>
+        return <button key={date} className={selectedDate === date ? 'selected' : ''} type="button" onClick={() => setSelectedDate(date)}><span>{formatDate(date, { weekday: 'short', month: 'short', day: 'numeric' })}</span><strong>{gap ? `Төлөвлөгөө ${gap}-аар дутуу` : 'Төлөвлөгөө бүрэн'}</strong><small>{roster.status === 'published' ? `Бэлэн байдал ${actualGap}-аар дутуу` : 'Ирц хүлээгдэж байна'}</small></button>
       })}
     </section>
 
     <section className="workspace-panel readiness-table-card">
-      <header className="card-header"><div><h2>{longDate.format(dateAtNoon(selectedDate))}</h2><p>Operational counts by approved branch role.</p></div><span className={totals.readinessGap || totals.planningGap ? 'risk-badge' : 'risk-badge risk-badge--healthy'}>{totals.readinessGap || totals.planningGap} open</span></header>
-      <div className="readiness-table" role="table" aria-label="Role readiness">
-        <div className="readiness-table-head" role="row"><span role="columnheader">Role</span><span role="columnheader">Required</span><span role="columnheader">Scheduled</span><span role="columnheader">Checked in</span><span role="columnheader">Leave</span><span role="columnheader">No-show</span><span role="columnheader">Late</span><span role="columnheader">Gap</span></div>
-        {rows.map((row) => <div className="readiness-table-row" role="row" key={row.role} data-tone={row.readinessGap || row.gap ? 'warning' : 'healthy'}><strong role="cell">{row.role}</strong><span role="cell">{row.required}</span><span role="cell">{row.scheduled}</span><span role="cell">{row.attendanceAvailable ? row.checkedIn : '—'}</span><span role="cell">{row.attendanceAvailable ? row.approvedAbsence : '—'}</span><span role="cell">{row.attendanceAvailable ? row.noShow : '—'}</span><span role="cell">{row.attendanceAvailable ? row.late : '—'}</span><b role="cell">{row.attendanceAvailable ? row.readinessGap : row.gap}</b></div>)}
+      <header className="card-header"><div><h2>{formatDate(selectedDate, { weekday: 'long', month: 'long', day: 'numeric' })}</h2><p>Салбарын зөвшөөрөгдсөн үүрэг тус бүрийн үйл ажиллагааны тоо.</p></div><span className={totals.readinessGap || totals.planningGap ? 'risk-badge' : 'risk-badge risk-badge--healthy'}>{totals.readinessGap || totals.planningGap} нээлттэй</span></header>
+      <div className="readiness-table" role="table" aria-label="Үүрэг тус бүрийн бэлэн байдал">
+        <div className="readiness-table-head" role="row"><span role="columnheader">Үүрэг</span><span role="columnheader">Шаардлагатай</span><span role="columnheader">Хуваарилсан</span><span role="columnheader">Ирсэн</span><span role="columnheader">Чөлөө</span><span role="columnheader">Ирээгүй</span><span role="columnheader">Хоцорсон</span><span role="columnheader">Дутуу</span></div>
+        {rows.map((row) => <div className="readiness-table-row" role="row" key={row.role} data-tone={row.readinessGap || row.gap ? 'warning' : 'healthy'}><strong role="cell">{roleLabels[row.role]}</strong><span role="cell">{row.required}</span><span role="cell">{row.scheduled}</span><span role="cell">{row.attendanceAvailable ? row.checkedIn : '—'}</span><span role="cell">{row.attendanceAvailable ? row.approvedAbsence : '—'}</span><span role="cell">{row.attendanceAvailable ? row.noShow : '—'}</span><span role="cell">{row.attendanceAvailable ? row.late : '—'}</span><b role="cell">{row.attendanceAvailable ? row.readinessGap : row.gap}</b></div>)}
       </div>
-      <footer className="readiness-total"><span>Daily total</span><strong>{totals.required} required</strong><strong>{totals.scheduled} scheduled</strong><strong>{roster.status === 'published' ? `${totals.checkedIn} checked in` : 'Attendance pending'}</strong></footer>
+      <footer className="readiness-total"><span>Өдрийн нийт</span><strong>{totals.required} шаардлагатай</strong><strong>{totals.scheduled} хуваарилсан</strong><strong>{roster.status === 'published' ? `${totals.checkedIn} ирсэн` : 'Ирц хүлээгдэж байна'}</strong></footer>
     </section>
   </>
 }
@@ -187,14 +184,14 @@ function AttendanceDecisionForm({ exception, onDecision }: DecisionFormProps) {
       setReason('')
       setError('')
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to record this attendance decision.')
+      setError(caught instanceof Error ? caught.message : 'Ирцийн шийдвэрийг тэмдэглэж чадсангүй.')
     }
   }
 
   return <form className="attendance-decision-form" onSubmit={(event) => event.preventDefault()}>
-    <label><span>Manager decision reason</span><textarea rows={3} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Record the evidence and policy basis" /></label>
+    <label><span>Менежерийн шийдвэрийн шалтгаан</span><textarea rows={3} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Баримт болон бодлогын үндэслэлийг бичнэ үү" /></label>
     {error ? <p className="form-error" role="alert">{error}</p> : null}
-    <div>{actions.map((action) => <button key={action} className={action === 'reject' || action === 'confirm' ? 'button button--secondary' : 'button button--primary'} type="button" onClick={() => submit(action)}>{action[0].toUpperCase() + action.slice(1)}</button>)}</div>
+    <div>{actions.map((action) => <button key={action} className={action === 'reject' || action === 'confirm' ? 'button button--secondary' : 'button button--primary'} type="button" onClick={() => submit(action)}>{attendanceDecisionLabels[action]}</button>)}</div>
   </form>
 }
 
@@ -215,27 +212,27 @@ export function AttendanceReviewView({ roster, exceptions, teamMembers, message,
   const memberById = new Map(teamMembers.map((member) => [member.id, member]))
 
   return <>
-    <section className="page-heading manager-view-heading"><div><span className="eyebrow">Daily exception review</span><h1>Attendance review</h1><p>Review source evidence without rewriting the original schedule or check-in record.</p></div><div className="segmented-control"><button className={filter === 'open' ? 'active' : ''} type="button" onClick={() => setFilter('open')}>Open</button><button className={filter === 'all' ? 'active' : ''} type="button" onClick={() => setFilter('all')}>All evidence</button></div></section>
+    <section className="page-heading manager-view-heading"><div><span className="eyebrow">Өдрийн зөрчлийн хяналт</span><h1>Ирцийн хяналт</h1><p>Анхны хуваарь болон ирсэн бүртгэлийг өөрчлөхгүйгээр эх баримтыг хянана.</p></div><div className="segmented-control"><button className={filter === 'open' ? 'active' : ''} type="button" onClick={() => setFilter('open')}>Нээлттэй</button><button className={filter === 'all' ? 'active' : ''} type="button" onClick={() => setFilter('all')}>Бүх баримт</button></div></section>
     <Notice message={message} onDismiss={onDismissMessage} />
 
-    {roster.status === 'draft' ? <div className="workspace-empty"><LockKeyhole size={24} /><strong>No authoritative attendance expectation yet</strong><span>Publish the weekly roster before reviewing lateness, no-show, leave, or correction evidence.</span></div> : filtered.length ? <div className="attendance-review-layout">
+    {roster.status === 'draft' ? <div className="workspace-empty"><LockKeyhole size={24} /><strong>Ирцийн албан ёсны хүлээлт үүсээгүй байна</strong><span>Хоцролт, ирээгүй, чөлөө болон залруулгын баримтыг хянахын өмнө долоо хоногийн хуваарийг нийтэлнэ үү.</span></div> : filtered.length ? <div className="attendance-review-layout">
       <section className="workspace-panel attendance-queue">
-        <header className="card-header"><div><h2>Exception queue</h2><p>{filtered.length} {filter === 'open' ? 'items need a decision' : 'records in this week'}</p></div><AlertTriangle size={20} /></header>
+        <header className="card-header"><div><h2>Зөрчлийн жагсаалт</h2><p>{filter === 'open' ? `${filtered.length} зүйл шийдвэр хүлээж байна` : `Энэ долоо хоногт ${filtered.length} бүртгэл байна`}</p></div><AlertTriangle size={20} /></header>
         <div>{filtered.map((exception) => {
           const member = memberById.get(exception.teamMemberId)
-          return <button key={exception.id} className={selected?.id === exception.id ? 'selected' : ''} type="button" onClick={() => setSelectedId(exception.id)}><span className="avatar avatar--member">{member?.initials}</span><span><strong>{member?.name}</strong><small>{exceptionLabel(exception.type)} · {shortDate.format(dateAtNoon(exception.date))}</small></span><b data-status={exception.status}>{exception.status}</b></button>
+          return <button key={exception.id} className={selected?.id === exception.id ? 'selected' : ''} type="button" onClick={() => setSelectedId(exception.id)}><span className="avatar avatar--member">{member?.initials}</span><span><strong>{member?.name}</strong><small>{exceptionLabel(exception.type)} · {formatDate(exception.date, { weekday: 'short', month: 'short', day: 'numeric' })}</small></span><b data-status={exception.status}>{attendanceStatusLabels[exception.status]}</b></button>
         })}</div>
       </section>
 
       {selected ? <section className="workspace-panel attendance-detail">
-        <header className="card-header"><div><span className="eyebrow">Source evidence</span><h2>{memberById.get(selected.teamMemberId)?.name}</h2><p>{exceptionLabel(selected.type)} on {longDate.format(dateAtNoon(selected.date))}</p></div><BadgeCheck size={22} /></header>
-        <dl><div><dt>Scheduled start</dt><dd>{selected.scheduledStart}</dd></div><div><dt>Verified check-in</dt><dd>{selected.checkInAt ? new Date(selected.checkInAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'No check-in'}</dd></div><div><dt>Late minutes</dt><dd>{selected.lateMinutes ?? '—'}</dd></div><div><dt>Current outcome</dt><dd>{selected.status}</dd></div></dl>
+        <header className="card-header"><div><span className="eyebrow">Эх баримт</span><h2>{memberById.get(selected.teamMemberId)?.name}</h2><p>{formatDate(selected.date, { weekday: 'long', month: 'long', day: 'numeric' })}-ны {exceptionLabel(selected.type).toLowerCase()}</p></div><BadgeCheck size={22} /></header>
+        <dl><div><dt>Хуваарийн эхлэл</dt><dd>{selected.scheduledStart}</dd></div><div><dt>Баталгаажсан ирэлт</dt><dd>{selected.checkInAt ? formatTime(selected.checkInAt) : 'Ирсэн бүртгэлгүй'}</dd></div><div><dt>Хоцорсон минут</dt><dd>{selected.lateMinutes ?? '—'}</dd></div><div><dt>Одоогийн үр дүн</dt><dd>{attendanceStatusLabels[selected.status]}</dd></div></dl>
         <blockquote>{selected.evidence}</blockquote>
-        {selected.requestNote ? <div className="request-note"><strong>Request note</strong><span>{selected.requestNote}</span></div> : null}
-        {selected.decision ? <div className="recorded-decision"><FileCheck2 size={17} /><span><strong>{selected.decision.action} recorded by {selected.decision.actor}</strong><small>{selected.decision.reason} · {new Date(selected.decision.at).toLocaleString()}</small></span></div> : null}
+        {selected.requestNote ? <div className="request-note"><strong>Хүсэлтийн тайлбар</strong><span>{selected.requestNote}</span></div> : null}
+        {selected.decision ? <div className="recorded-decision"><FileCheck2 size={17} /><span><strong>{selected.decision.actor} “{attendanceDecisionLabels[selected.decision.action]}” шийдвэр тэмдэглэсэн</strong><small>{selected.decision.reason} · {formatDateTime(selected.decision.at)}</small></span></div> : null}
         {selected.status === 'open' ? <AttendanceDecisionForm key={selected.id} exception={selected} onDecision={onDecision} /> : null}
       </section> : null}
-    </div> : <div className="workspace-empty"><Check size={24} /><strong>No open attendance exceptions</strong><span>Change the filter to review completed evidence.</span></div>}
+    </div> : <div className="workspace-empty"><Check size={24} /><strong>Нээлттэй ирцийн зөрчил алга</strong><span>Шийдвэрлэсэн баримтыг харахын тулд шүүлтүүрийг солино уу.</span></div>}
   </>
 }
 
@@ -259,7 +256,7 @@ export function TeamMembersView({ roster, teamMembers, message, onDismissMessage
   const query = search.trim().toLowerCase()
   const filtered = teamMembers.filter((member) => (role === 'All' || member.role === role)
     && (status === 'All' || member.operationalStatus === status)
-    && (!query || member.name.toLowerCase().includes(query) || member.role.toLowerCase().includes(query)))
+    && (!query || member.name.toLowerCase().includes(query) || roleLabels[member.role].toLowerCase().includes(query)))
   const selected = teamMembers.find((member) => member.id === selectedMemberId) ?? filtered[0]
   const upcoming = roster.assignments.filter((item) => item.teamMemberId === selected?.id).sort((left, right) => left.date.localeCompare(right.date)).slice(0, 4)
   const latestOverride = roster.availabilityOverrides.filter((item) => item.teamMemberId === selected?.id && item.date === date).sort((left, right) => right.at.localeCompare(left.at))[0]
@@ -273,26 +270,26 @@ export function TeamMembersView({ roster, teamMembers, message, onDismissMessage
       setReason('')
       setError('')
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : 'Unable to update availability.')
+      setError(caught instanceof Error ? caught.message : 'Ажиллах боломжийг шинэчилж чадсангүй.')
     }
   }
 
   return <>
-    <section className="page-heading manager-view-heading"><div><span className="eyebrow">Authorized operational roster</span><h1>Team members</h1><p>Search branch staff, review upcoming shifts, and record scheduling availability.</p></div><span className="branch-only-badge"><ShieldCheck size={15} />{roster.branchName} only</span></section>
+    <section className="page-heading manager-view-heading"><div><span className="eyebrow">Зөвшөөрөгдсөн ажиллах хүчний бүртгэл</span><h1>Багийн гишүүд</h1><p>Салбарын ажилтныг хайж, удахгүй болох ээлжийг хянаж, ажиллах боломжийг тэмдэглэнэ.</p></div><span className="branch-only-badge"><ShieldCheck size={15} />Зөвхөн {roster.branchName}</span></section>
     <Notice message={message} onDismiss={onDismissMessage} />
-    <section className="team-filter-bar"><label className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search team" aria-label="Search operational roster" /></label><select value={role} onChange={(event) => setRole(event.target.value as 'All' | WorkforceRole)} aria-label="Filter team by role"><option value="All">All roles</option>{Array.from(new Set(teamMembers.map((member) => member.role))).map((item) => <option key={item}>{item}</option>)}</select><select value={status} onChange={(event) => setStatus(event.target.value as 'All' | OperationalStatus)} aria-label="Filter team by status"><option value="All">All statuses</option>{Array.from(new Set(teamMembers.map((member) => member.operationalStatus))).map((item) => <option key={item} value={item}>{statusLabel(item)}</option>)}</select></section>
+    <section className="team-filter-bar"><label className="search-field"><Search size={17} /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Багийн гишүүн хайх" aria-label="Ажиллах хүчний бүртгэлээс хайх" /></label><select value={role} onChange={(event) => setRole(event.target.value as 'All' | WorkforceRole)} aria-label="Багийг үүргээр шүүх"><option value="All">Бүх үүрэг</option>{Array.from(new Set(teamMembers.map((member) => member.role))).map((item) => <option key={item} value={item}>{roleLabels[item]}</option>)}</select><select value={status} onChange={(event) => setStatus(event.target.value as 'All' | OperationalStatus)} aria-label="Багийг төлвөөр шүүх"><option value="All">Бүх төлөв</option>{Array.from(new Set(teamMembers.map((member) => member.operationalStatus))).map((item) => <option key={item} value={item}>{statusLabel(item)}</option>)}</select></section>
 
     {filtered.length ? <div className="team-workspace-layout">
-      <section className="workspace-panel team-directory"><header className="card-header"><div><h2>Branch roster</h2><p>{filtered.length} operational records shown</p></div><Users size={20} /></header><div>{filtered.map((member) => <button key={member.id} className={selected?.id === member.id ? 'selected' : ''} type="button" onClick={() => setSelectedMemberId(member.id)}><span className="avatar avatar--member">{member.initials}</span><span><strong>{member.name}</strong><small>{member.role}{member.rank ? ` · ${member.rank}` : ''}</small></span><b data-status={member.operationalStatus}>{statusLabel(member.operationalStatus)}</b></button>)}</div></section>
+      <section className="workspace-panel team-directory"><header className="card-header"><div><h2>Салбарын бүртгэл</h2><p>{filtered.length} үйл ажиллагааны бүртгэл харагдаж байна</p></div><Users size={20} /></header><div>{filtered.map((member) => <button key={member.id} className={selected?.id === member.id ? 'selected' : ''} type="button" onClick={() => setSelectedMemberId(member.id)}><span className="avatar avatar--member">{member.initials}</span><span><strong>{member.name}</strong><small>{roleLabels[member.role]}{member.rank ? ` · ${entertainerRankLabels[member.rank]}` : ''}</small></span><b data-status={member.operationalStatus}>{statusLabel(member.operationalStatus)}</b></button>)}</div></section>
 
       {selected ? <section className="workspace-panel team-detail-panel">
-        <header className="team-detail-header"><span className="avatar avatar--large">{selected.initials}</span><div><h2>{selected.name}</h2><p>{selected.role} · {roster.branchName}</p></div><span data-status={selected.operationalStatus}>{statusLabel(selected.operationalStatus)}</span></header>
-        <div className="team-detail-facts"><article><span>Active branch</span><strong>{roster.branchName}</strong></article><article><span>Operational rank</span><strong>{selected.rank ?? 'Not applicable'}</strong></article><article><span>Selected date</span><strong>{unavailable ? 'Unavailable' : 'Available'}</strong></article></div>
-        <div className="upcoming-shifts"><h3>Upcoming shifts</h3>{upcoming.length ? upcoming.map((item) => <article key={item.id}><CalendarClock size={16} /><span><strong>{shortDate.format(dateAtNoon(item.date))}</strong><small>{item.start}–{item.end} · {item.shift}</small></span></article>) : <p>No assignments in this week.</p>}</div>
-        <form className="availability-form" onSubmit={submitAvailability}><div><h3>Availability override</h3><p>Reason is required and the original availability evidence remains in history.</p></div><label><span>Date</span><select value={date} onChange={(event) => setDate(event.target.value)}>{weekDates(roster.weekStart).map((item) => <option key={item} value={item}>{longDate.format(dateAtNoon(item))}</option>)}</select></label><label><span>Override</span><select value={available ? 'available' : 'unavailable'} onChange={(event) => setAvailable(event.target.value === 'available')}><option value="available">Available</option><option value="unavailable">Unavailable</option></select></label><label className="availability-reason"><span>Reason</span><textarea rows={2} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Record why this override is necessary" /></label>{error ? <p className="form-error" role="alert">{error}</p> : null}<button className="button button--primary" type="submit"><UserCheck size={16} />Save availability</button></form>
-        {latestOverride ? <div className="latest-override"><FileCheck2 size={16} /><span><strong>Latest override: {latestOverride.available ? 'available' : 'unavailable'}</strong><small>{latestOverride.reason} · {latestOverride.actor}</small></span></div> : null}
-        {selected.rank ? <div className="rank-policy-lock"><LockKeyhole size={16} /><span><strong>Rank override is governance-locked</strong><small>The repository’s four-level ranking policy still requires CEO or General Manager approval. This manager UI does not invent override authority.</small></span></div> : null}
+        <header className="team-detail-header"><span className="avatar avatar--large">{selected.initials}</span><div><h2>{selected.name}</h2><p>{roleLabels[selected.role]} · {roster.branchName}</p></div><span data-status={selected.operationalStatus}>{statusLabel(selected.operationalStatus)}</span></header>
+        <div className="team-detail-facts"><article><span>Идэвхтэй салбар</span><strong>{roster.branchName}</strong></article><article><span>Үйл ажиллагааны зэрэглэл</span><strong>{selected.rank ? entertainerRankLabels[selected.rank] : 'Хамаарахгүй'}</strong></article><article><span>Сонгосон өдөр</span><strong>{unavailable ? 'Боломжгүй' : 'Боломжтой'}</strong></article></div>
+        <div className="upcoming-shifts"><h3>Удахгүй болох ээлжүүд</h3>{upcoming.length ? upcoming.map((item) => <article key={item.id}><CalendarClock size={16} /><span><strong>{formatDate(item.date, { weekday: 'short', month: 'short', day: 'numeric' })}</strong><small>{item.start}–{item.end} · {shiftLabels[item.shift]}</small></span></article>) : <p>Энэ долоо хоногт ээлж алга.</p>}</div>
+        <form className="availability-form" onSubmit={submitAvailability}><div><h3>Ажиллах боломжийг өөрчлөх</h3><p>Шалтгаан заавал бичигдэх бөгөөд анхны боломжийн баримт түүхэнд хадгалагдана.</p></div><label><span>Огноо</span><select value={date} onChange={(event) => setDate(event.target.value)}>{weekDates(roster.weekStart).map((item) => <option key={item} value={item}>{formatDate(item, { weekday: 'long', month: 'long', day: 'numeric' })}</option>)}</select></label><label><span>Өөрчлөх төлөв</span><select value={available ? 'available' : 'unavailable'} onChange={(event) => setAvailable(event.target.value === 'available')}><option value="available">Боломжтой</option><option value="unavailable">Боломжгүй</option></select></label><label className="availability-reason"><span>Шалтгаан</span><textarea rows={2} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Яагаад энэ өөрчлөлт шаардлагатайг бичнэ үү" /></label>{error ? <p className="form-error" role="alert">{error}</p> : null}<button className="button button--primary" type="submit"><UserCheck size={16} />Боломжийг хадгалах</button></form>
+        {latestOverride ? <div className="latest-override"><FileCheck2 size={16} /><span><strong>Сүүлийн өөрчлөлт: {latestOverride.available ? 'боломжтой' : 'боломжгүй'}</strong><small>{latestOverride.reason} · {latestOverride.actor}</small></span></div> : null}
+        {selected.rank ? <div className="rank-policy-lock"><LockKeyhole size={16} /><span><strong>Зэрэглэл өөрчлөх эрх түгжигдсэн</strong><small>Дөрвөн түвшний зэрэглэлийн бодлогод Гүйцэтгэх захирал эсвэл Ерөнхий менежерийн албан ёсны зөвшөөрөл шаардлагатай хэвээр байна. Энэ менежерийн дэлгэц зөвшөөрөөгүй эрх үүсгэхгүй.</small></span></div> : null}
       </section> : null}
-    </div> : <div className="workspace-empty"><Users size={24} /><strong>No matching team members</strong><span>Clear the search or choose another operational filter.</span></div>}
+    </div> : <div className="workspace-empty"><Users size={24} /><strong>Тохирох багийн гишүүн олдсонгүй</strong><span>Хайлтыг арилгах эсвэл өөр шүүлтүүр сонгоно уу.</span></div>}
   </>
 }

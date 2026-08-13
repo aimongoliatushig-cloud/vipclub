@@ -16,8 +16,9 @@ import {
   type WeeklyRoster,
   type WorkforceRole,
 } from './models'
+import { attendanceDecisionLabels, roleLabels } from './localization'
 
-const STORAGE_KEY = 'vipclub.workforce.manager-prototype.v1'
+const STORAGE_KEY = 'vipclub.workforce.manager-prototype.mn.v2'
 const DAY_MS = 86_400_000
 const ACKNOWLEDGEMENT_WINDOW_MS = DAY_MS
 const AUTHORIZED_BRANCH_ID = 'branch-central'
@@ -111,17 +112,17 @@ const demoWeekStart = startOfWeek(new Date())
 const demoStatusAt = new Date().toISOString()
 
 const teamMembers: TeamMember[] = [
-  { id: 'tm-anu', name: 'Anu Bat', initials: 'AB', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt, rank: 'Gold' },
-  { id: 'tm-bolor', name: 'Bolor Erdene', initials: 'BE', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'reserved', statusUpdatedAt: demoStatusAt, rank: 'Silver' },
-  { id: 'tm-naraa', name: 'Naraa Munkh', initials: 'NM', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'break', statusUpdatedAt: demoStatusAt, rank: 'Bronze' },
-  { id: 'tm-solongo', name: 'Solongo Tseren', initials: 'ST', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [addDays(demoWeekStart, 3)], operationalStatus: 'late', statusUpdatedAt: demoStatusAt, rank: 'Diamond' },
-  { id: 'tm-temuulen', name: 'Temuulen Baatar', initials: 'TB', branchId: AUTHORIZED_BRANCH_ID, role: 'Server', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt },
-  { id: 'tm-bilguun', name: 'Bilguun Dorj', initials: 'BD', branchId: AUTHORIZED_BRANCH_ID, role: 'Server', active: true, unavailableDates: [addDays(demoWeekStart, 4)], operationalStatus: 'absent', statusUpdatedAt: demoStatusAt },
-  { id: 'tm-sarnai', name: 'Sarnai Gan', initials: 'SG', branchId: AUTHORIZED_BRANCH_ID, role: 'Bartender', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },
-  { id: 'tm-oyun', name: 'Oyun Bold', initials: 'OB', branchId: AUTHORIZED_BRANCH_ID, role: 'Bartender', active: true, unavailableDates: [], operationalStatus: 'leave', statusUpdatedAt: demoStatusAt },
-  { id: 'tm-enkhjin', name: 'Enkhjin Amar', initials: 'EA', branchId: AUTHORIZED_BRANCH_ID, role: 'Reception', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt },
-  { id: 'tm-munkh', name: 'Munkh Orgil', initials: 'MO', branchId: AUTHORIZED_BRANCH_ID, role: 'Security', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },
-  { id: 'tm-altan', name: 'Altan Sukh', initials: 'AS', branchId: AUTHORIZED_BRANCH_ID, role: 'Security', active: true, unavailableDates: [], operationalStatus: 'off-shift', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-anu', name: 'Бат Ану', initials: 'БА', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt, rank: 'Gold' },
+  { id: 'tm-bolor', name: 'Эрдэнэ Болор', initials: 'ЭБ', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'reserved', statusUpdatedAt: demoStatusAt, rank: 'Silver' },
+  { id: 'tm-naraa', name: 'Мөнх Нараа', initials: 'МН', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [], operationalStatus: 'break', statusUpdatedAt: demoStatusAt, rank: 'Bronze' },
+  { id: 'tm-solongo', name: 'Цэрэн Солонго', initials: 'ЦС', branchId: AUTHORIZED_BRANCH_ID, role: 'Entertainer', active: true, unavailableDates: [addDays(demoWeekStart, 3)], operationalStatus: 'late', statusUpdatedAt: demoStatusAt, rank: 'Diamond' },
+  { id: 'tm-temuulen', name: 'Баатар Тэмүүлэн', initials: 'БТ', branchId: AUTHORIZED_BRANCH_ID, role: 'Server', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-bilguun', name: 'Дорж Билгүүн', initials: 'ДБ', branchId: AUTHORIZED_BRANCH_ID, role: 'Server', active: true, unavailableDates: [addDays(demoWeekStart, 4)], operationalStatus: 'absent', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-sarnai', name: 'Ган Сарнай', initials: 'ГС', branchId: AUTHORIZED_BRANCH_ID, role: 'Bartender', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-oyun', name: 'Болд Оюун', initials: 'БО', branchId: AUTHORIZED_BRANCH_ID, role: 'Bartender', active: true, unavailableDates: [], operationalStatus: 'leave', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-enkhjin', name: 'Амар Энхжин', initials: 'АЭ', branchId: AUTHORIZED_BRANCH_ID, role: 'Reception', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-munkh', name: 'Оргил Мөнх', initials: 'ОМ', branchId: AUTHORIZED_BRANCH_ID, role: 'Security', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-altan', name: 'Сүх Алтан', initials: 'СА', branchId: AUTHORIZED_BRANCH_ID, role: 'Security', active: true, unavailableDates: [], operationalStatus: 'off-shift', statusUpdatedAt: demoStatusAt },
 ]
 
 function id(prefix: string): string {
@@ -176,31 +177,31 @@ function createAttendanceExceptions(weekStart: string, assignments: ShiftAssignm
     {
       teamMemberId: 'tm-anu', date: addDays(weekStart, 3), type: 'late', status: 'open',
       checkInAt: `${addDays(weekStart, 3)}T20:13:00+08:00`, lateMinutes: 13,
-      evidence: 'Verified device check-in at the Central Branch entrance.',
+      evidence: 'Төв салбарын үүдний төхөөрөмжөөр ирснийг баталгаажуулсан.',
     },
     {
       teamMemberId: 'tm-bilguun', date: addDays(weekStart, 3), type: 'no-show', status: 'open',
-      evidence: 'No verified check-in was recorded by the shift threshold.',
+      evidence: 'Ээлжийн ирэх хугацаанд баталгаажсан ирсэн бүртгэл үүсээгүй.',
     },
     {
       teamMemberId: 'tm-solongo', date: addDays(weekStart, 2), type: 'approved-absence', status: 'approved',
-      requestNote: 'Approved medical leave from the HR source record.',
-      evidence: 'Approved Leave Application linked to the published assignment.',
+      requestNote: 'Хүний нөөцийн эх бүртгэл дэх зөвшөөрсөн эмнэлгийн чөлөө.',
+      evidence: 'Зөвшөөрсөн чөлөөний хүсэлтийг нийтэлсэн ээлжтэй холбосон.',
     },
     {
       teamMemberId: 'tm-oyun', date: addDays(weekStart, 3), type: 'leave-request', status: 'open',
-      requestNote: 'Family appointment; requesting this evening away from the branch.',
-      evidence: 'Team-member leave request submitted before shift start.',
+      requestNote: 'Гэр бүлийн ажилтай тул энэ оройн ээлжээс чөлөө хүссэн.',
+      evidence: 'Багийн гишүүн ээлж эхлэхээс өмнө чөлөөний хүсэлт илгээсэн.',
     },
     {
       teamMemberId: 'tm-enkhjin', date: addDays(weekStart, 1), type: 'mismatch', status: 'open',
       checkInAt: `${addDays(weekStart, 1)}T17:42:00+08:00`,
-      evidence: 'Check-in exists, but the device branch code differs from the published assignment.',
+      evidence: 'Ирсэн бүртгэл байгаа боловч төхөөрөмжийн салбарын код нийтэлсэн ээлжтэй таарахгүй байна.',
     },
     {
       teamMemberId: 'tm-temuulen', date: addDays(weekStart, 4), type: 'correction', status: 'open',
-      requestNote: 'Device was offline at arrival; security log records entry at 17:55.',
-      evidence: 'Correction request includes the branch security desk reference.',
+      requestNote: 'Ирэх үед төхөөрөмж сүлжээгүй байсан; хамгаалалтын бүртгэлд 17:55-д орсныг тэмдэглэсэн.',
+      evidence: 'Залруулгын хүсэлтэд салбарын хамгаалалтын бүртгэлийн лавлагаа хавсаргасан.',
     },
   ]
 
@@ -239,8 +240,8 @@ function createSeedRoster(weekStart: string): WeeklyRoster {
   return {
     id: `roster-central-${weekStart}`,
     branchId: 'branch-central',
-    branchName: 'Central Branch',
-    managerName: 'Ariun Manager',
+    branchName: 'Төв салбар',
+    managerName: 'Ариун менежер',
     weekStart,
     status: 'draft',
     version: 1,
@@ -253,7 +254,7 @@ function createSeedRoster(weekStart: string): WeeklyRoster {
     attendanceExceptions: createAttendanceExceptions(weekStart, assignments),
     availabilityOverrides: [],
     executiveFollowUps: [],
-    audit: [{ id: id('audit'), at: now, actor: 'Ariun Manager', action: 'created', version: 1 }],
+    audit: [{ id: id('audit'), at: now, actor: 'Ариун менежер', action: 'created', version: 1 }],
   }
 }
 
@@ -284,7 +285,7 @@ export class BrowserWorkforceService implements WorkforceService {
   }
 
   getTeamMembers(branchId = AUTHORIZED_BRANCH_ID): TeamMember[] {
-    if (branchId !== AUTHORIZED_BRANCH_ID) throw new Error('Branch access denied.')
+    if (branchId !== AUTHORIZED_BRANCH_ID) throw new Error('Энэ салбарт хандах эрхгүй байна.')
     return clone(teamMembers.filter((member) => member.branchId === branchId))
   }
 
@@ -381,14 +382,14 @@ export class BrowserWorkforceService implements WorkforceService {
     reason: string,
   ): WeeklyRoster {
     const roster = this.getRoster(weekStart)
-    if (roster.status === 'draft') throw new Error('Publish the roster before deciding an attendance exception.')
+    if (roster.status === 'draft') throw new Error('Ирцийн зөрчлийг шийдвэрлэхийн өмнө хуваарийг нийтэлнэ үү.')
     const exception = roster.attendanceExceptions.find((item) => item.id === exceptionId)
-    if (!exception) throw new Error('Attendance exception not found in this branch.')
-    if (exception.status !== 'open') throw new Error('This attendance exception already has a recorded outcome.')
-    if (reason.trim().length < 5) throw new Error('Add a specific decision reason of at least 5 characters.')
+    if (!exception) throw new Error('Энэ салбарт ирцийн зөрчил олдсонгүй.')
+    if (exception.status !== 'open') throw new Error('Энэ ирцийн зөрчилд шийдвэр аль хэдийн тэмдэглэгдсэн байна.')
+    if (reason.trim().length < 5) throw new Error('Шийдвэрийн шалтгааныг дор хаяж 5 тэмдэгтээр тодорхой бичнэ үү.')
     const requestDecision = exception.type === 'correction' || exception.type === 'leave-request'
     const allowed = requestDecision ? ['approve', 'reject'] : ['excuse', 'confirm']
-    if (!allowed.includes(decision)) throw new Error('This decision is not valid for the selected exception.')
+    if (!allowed.includes(decision)) throw new Error('Сонгосон зөрчилд энэ шийдвэр тохирохгүй байна.')
 
     const now = new Date().toISOString()
     const statuses = { excuse: 'excused', confirm: 'confirmed', approve: 'approved', reject: 'rejected' } as const
@@ -400,7 +401,7 @@ export class BrowserWorkforceService implements WorkforceService {
       at: now,
       actor: roster.managerName,
       action: 'attendance-decision-recorded',
-      reason: `${decision}: ${reason.trim()}`,
+      reason: `${attendanceDecisionLabels[decision]}: ${reason.trim()}`,
       assignmentId: exception.assignmentId,
       version: roster.version,
     })
@@ -416,9 +417,9 @@ export class BrowserWorkforceService implements WorkforceService {
   ): WeeklyRoster {
     const roster = this.getRoster(weekStart)
     const member = teamMembers.find((item) => item.id === teamMemberId && item.branchId === roster.branchId)
-    if (!member?.active) throw new Error('Choose an active team member from the authorized branch.')
-    if (!weekDates(weekStart).includes(date)) throw new Error('Choose a date within the selected week.')
-    if (reason.trim().length < 5) throw new Error('Add a specific availability reason of at least 5 characters.')
+    if (!member?.active) throw new Error('Зөвшөөрөгдсөн салбараас идэвхтэй багийн гишүүн сонгоно уу.')
+    if (!weekDates(weekStart).includes(date)) throw new Error('Сонгосон долоо хоногийн доторх огноо сонгоно уу.')
+    if (reason.trim().length < 5) throw new Error('Ажиллах боломжийн шалтгааныг дор хаяж 5 тэмдэгтээр тодорхой бичнэ үү.')
 
     const now = new Date().toISOString()
     roster.availabilityOverrides.push({
@@ -436,7 +437,7 @@ export class BrowserWorkforceService implements WorkforceService {
       at: now,
       actor: roster.managerName,
       action: 'availability-overridden',
-      reason: `${member.name} marked ${available ? 'available' : 'unavailable'} on ${date}: ${reason.trim()}`,
+      reason: `${member.name}-г ${date}-нд ${available ? 'боломжтой' : 'боломжгүй'} гэж тэмдэглэв: ${reason.trim()}`,
       version: roster.version,
     })
     return this.writeRoster(roster)
@@ -449,19 +450,19 @@ export class BrowserWorkforceService implements WorkforceService {
     reason: string,
   ): WeeklyRoster {
     const roster = this.getRoster(weekStart)
-    if (!reason.trim()) throw new Error('Record why the staffing requirement changed.')
-    if (!isDateKey(effectiveFrom)) throw new Error('Choose when these requirements take effect.')
+    if (!reason.trim()) throw new Error('Хүний нөөцийн шаардлага яагаад өөрчлөгдсөнийг бичнэ үү.')
+    if (!isDateKey(effectiveFrom)) throw new Error('Эдгээр шаардлага хэрэгжих огноог сонгоно уу.')
 
     const expectedKeys = weekDates(weekStart).flatMap((date) => workforceRoles.map((role) => `${date}:${role}`))
     const submitted = new Map(requirements.map((item) => [`${item.date}:${item.role}`, item]))
     if (requirements.length !== expectedKeys.length || submitted.size !== expectedKeys.length) {
-      throw new Error('Provide one staffing requirement for every day and role.')
+      throw new Error('Өдөр болон үүрэг тус бүрт нэг хүний нөөцийн шаардлага оруулна уу.')
     }
 
     const normalized = expectedKeys.map((key) => {
       const item = submitted.get(key)
       if (!item || !Number.isInteger(item.required) || item.required < 0 || item.required > 99) {
-        throw new Error('Staffing requirements must be whole numbers from 0 to 99.')
+        throw new Error('Хүний нөөцийн шаардлага 0-99 хүртэлх бүхэл тоо байна.')
       }
       return { ...item }
     })
@@ -492,10 +493,10 @@ export class BrowserWorkforceService implements WorkforceService {
       ? wasPublishedLate ? 'published-late' : 'published-on-time'
       : now > deadline ? 'draft-overdue' : 'draft-on-time'
     const publicationLabels: Record<ExecutiveFollowUpSummary['publicationState'], string> = {
-      'draft-overdue': 'Draft is overdue for publication',
-      'draft-on-time': 'Draft is still within its publication window',
-      'published-late': 'Schedule was published after its deadline',
-      'published-on-time': 'Schedule was published on time',
+      'draft-overdue': 'Ноорог нийтлэх хугацаа хэтэрсэн',
+      'draft-on-time': 'Ноорог нийтлэх хугацаандаа байна',
+      'published-late': 'Хуваарийг хугацаа хэтэрч нийтэлсэн',
+      'published-on-time': 'Хуваарийг хугацаанд нь нийтэлсэн',
     }
     const coverageGapCount = getCoverage(roster).reduce((total, row) => total + row.gap, 0)
     const pendingAcknowledgementCount = hasPublication
@@ -507,25 +508,25 @@ export class BrowserWorkforceService implements WorkforceService {
     const managerEvents = roster.audit.filter((event) => event.actor === roster.managerName)
     const lastManagerEvent = managerEvents[managerEvents.length - 1]
     const actionLabels: Record<string, string> = {
-      created: 'Created the weekly draft',
-      copied: 'Copied the previous week',
-      'assignment-added': 'Added an assignment',
-      'assignment-changed': 'Changed an assignment',
-      'assignment-removed': 'Removed an assignment',
-      'requirements-updated': 'Updated staffing requirements',
-      'attendance-decision-recorded': 'Reviewed an attendance exception',
-      'availability-overridden': 'Updated team-member availability',
-      published: 'Published the schedule',
+      created: 'Долоо хоногийн ноорог үүсгэсэн',
+      copied: 'Өмнөх долоо хоногийг хуулсан',
+      'assignment-added': 'Ээлж нэмсэн',
+      'assignment-changed': 'Ээлж өөрчилсөн',
+      'assignment-removed': 'Ээлж хассан',
+      'requirements-updated': 'Хүний нөөцийн шаардлага шинэчилсэн',
+      'attendance-decision-recorded': 'Ирцийн зөрчил хянасан',
+      'availability-overridden': 'Багийн гишүүний ажиллах боломжийг шинэчилсэн',
+      published: 'Хуваарь нийтэлсэн',
     }
     const nextAction = publicationState === 'draft-overdue'
-      ? 'Contact the Branch Manager and create a due-dated publication follow-up.'
+      ? 'Салбарын менежертэй холбогдож, дуусах хугацаатай нийтлэх хяналтын даалгавар үүсгэнэ үү.'
       : coverageGapCount > 0
-        ? `Confirm mitigation for ${coverageGapCount} uncovered role-shift${coverageGapCount === 1 ? '' : 's'}.`
+        ? `Хүн дутуу ${coverageGapCount} үүрэг-ээлжийн нөхөх арга хэмжээг баталгаажуулна уу.`
         : changeRequestCount > 0
-          ? `Review ${changeRequestCount} team-member change request${changeRequestCount === 1 ? '' : 's'}.`
+          ? `Багийн гишүүний ${changeRequestCount} өөрчлөх хүсэлтийг хянана уу.`
           : pendingAcknowledgementCount > 0
-            ? `Ask the Branch Manager to resolve ${pendingAcknowledgementCount} overdue acknowledgement${pendingAcknowledgementCount === 1 ? '' : 's'}.`
-            : 'No follow-up is currently required.'
+            ? `Хугацаа хэтэрсэн ${pendingAcknowledgementCount} баталгаажуулалтыг шийдвэрлэхийг салбарын менежерт мэдэгдэнэ үү.`
+            : 'Одоогоор нэмэлт хяналт шаардлагагүй.'
 
     return {
       publicationState,
@@ -534,7 +535,7 @@ export class BrowserWorkforceService implements WorkforceService {
       pendingAcknowledgementCount,
       changeRequestCount,
       accountableManager: roster.managerName,
-      lastManagerAction: lastManagerEvent ? actionLabels[lastManagerEvent.action] ?? lastManagerEvent.action : 'No manager activity recorded',
+      lastManagerAction: lastManagerEvent ? actionLabels[lastManagerEvent.action] ?? lastManagerEvent.action : 'Менежерийн үйлдэл бүртгэгдээгүй',
       lastManagerActionAt: lastManagerEvent?.at ?? roster.lastSavedAt,
       nextAction,
       dueDate: roster.publicationDue,
@@ -549,16 +550,16 @@ export class BrowserWorkforceService implements WorkforceService {
     dueDate?: string,
   ): WeeklyRoster {
     const roster = this.getRoster(weekStart)
-    if (!note.trim()) throw new Error('Add a specific follow-up note.')
+    if (!note.trim()) throw new Error('Хяналтын тодорхой тайлбар бичнэ үү.')
     if (action === 'task' && !isDateKey(dueDate ?? '')) {
-      throw new Error('Choose a due date for the follow-up task.')
+      throw new Error('Хяналтын даалгаврын дуусах огноог сонгоно уу.')
     }
 
     const now = new Date().toISOString()
     roster.executiveFollowUps.push({
       id: id('follow-up'),
       createdAt: now,
-      createdBy: 'CEO Demo',
+      createdBy: 'Гүйцэтгэх захирлын демо',
       action,
       note: note.trim(),
       dueDate: action === 'task' ? dueDate : undefined,
@@ -568,7 +569,7 @@ export class BrowserWorkforceService implements WorkforceService {
     roster.audit.push({
       id: id('audit'),
       at: now,
-      actor: 'CEO Demo',
+      actor: 'Гүйцэтгэх захирлын демо',
       action: action === 'message' ? 'manager-messaged' : 'follow-up-created',
       reason: note.trim(),
       version: roster.version,
@@ -609,15 +610,15 @@ export class BrowserWorkforceService implements WorkforceService {
     note?: string,
   ): WeeklyRoster {
     const roster = this.getRoster(weekStart)
-    if (roster.status !== 'published') throw new Error('Only published assignments can receive a team-member response.')
+    if (roster.status !== 'published') throw new Error('Зөвхөн нийтэлсэн ээлжид багийн гишүүн хариу өгч болно.')
     const assignment = roster.assignments.find((item) => item.id === assignmentId)
     if (!assignment || assignment.teamMemberId !== teamMemberId) {
-      throw new Error('You can respond only to your own published assignment.')
+      throw new Error('Та зөвхөн өөрийн нийтэлсэн ээлжид хариу өгч болно.')
     }
     const member = teamMembers.find((item) => item.id === teamMemberId)
-    if (!member?.active) throw new Error('This team member is not active in the branch.')
+    if (!member?.active) throw new Error('Энэ багийн гишүүн салбарт идэвхгүй байна.')
     if (response === 'change-requested' && (note?.trim().length ?? 0) < 5) {
-      throw new Error('Add a specific change-request reason of at least 5 characters.')
+      throw new Error('Өөрчлөх хүсэлтийн шалтгааныг дор хаяж 5 тэмдэгтээр тодорхой бичнэ үү.')
     }
 
     const now = new Date().toISOString()
@@ -640,13 +641,13 @@ export class BrowserWorkforceService implements WorkforceService {
 
   recordResponseReminder(weekStart: string, assignmentId: string): WeeklyRoster {
     const roster = this.getRoster(weekStart)
-    if (roster.status !== 'published') throw new Error('Publish the roster before recording an acknowledgement reminder.')
+    if (roster.status !== 'published') throw new Error('Баталгаажуулах сануулга тэмдэглэхийн өмнө хуваарийг нийтэлнэ үү.')
     const assignment = roster.assignments.find((item) => item.id === assignmentId)
     if (!assignment || assignment.response !== 'assigned') {
-      throw new Error('A reminder can be recorded only for a pending acknowledgement.')
+      throw new Error('Сануулгыг зөвхөн хүлээгдэж буй баталгаажуулалтад тэмдэглэж болно.')
     }
     const member = teamMembers.find((item) => item.id === assignment.teamMemberId)
-    if (!member) throw new Error('The assigned team member is no longer available.')
+    if (!member) throw new Error('Хуваарилсан багийн гишүүн цаашид боломжгүй байна.')
 
     const now = new Date().toISOString()
     assignment.lastReminderAt = now
@@ -657,7 +658,7 @@ export class BrowserWorkforceService implements WorkforceService {
       at: now,
       actor: roster.managerName,
       action: 'acknowledgement-reminder-recorded',
-      reason: `Reminder evidence recorded for ${member.name}. No message was sent by this prototype.`,
+      reason: `${member.name}-д сануулсан баримтыг тэмдэглэв. Энэ туршилтын хувилбараас мэдэгдэл илгээгээгүй.`,
       assignmentId,
       version: roster.version,
     })
@@ -671,18 +672,18 @@ export class BrowserWorkforceService implements WorkforceService {
     roster.assignments.forEach((item) => {
       const member = teamMembers.find((candidate) => candidate.id === item.teamMemberId)
       if (!member?.active) {
-        issues.push({ severity: 'error', code: 'inactive', message: 'Inactive team member is assigned.', date: item.date })
+        issues.push({ severity: 'error', code: 'inactive', message: 'Идэвхгүй багийн гишүүнийг ээлжид хуваарилсан байна.', date: item.date })
         return
       }
       if (member.role !== item.role) {
-        issues.push({ severity: 'error', code: 'role', message: `${member.name} is not eligible for ${item.role}.`, date: item.date, role: item.role })
+        issues.push({ severity: 'error', code: 'role', message: `${member.name} нь “${roleLabels[item.role]}” үүрэгт тохирохгүй.`, date: item.date, role: item.role })
       }
       if (isMemberUnavailable(roster, member.id, item.date)) {
-        issues.push({ severity: 'error', code: 'leave', message: `${member.name} is unavailable on ${item.date}.`, date: item.date, role: item.role })
+        issues.push({ severity: 'error', code: 'leave', message: `${member.name} нь ${item.date}-нд ажиллах боломжгүй.`, date: item.date, role: item.role })
       }
       const duplicateKey = `${item.teamMemberId}:${item.date}`
       if (seen.has(duplicateKey)) {
-        issues.push({ severity: 'error', code: 'overlap', message: `${member.name} has overlapping shifts on ${item.date}.`, date: item.date, role: item.role })
+        issues.push({ severity: 'error', code: 'overlap', message: `${member.name}-ийн ${item.date}-ны ээлжүүд давхцаж байна.`, date: item.date, role: item.role })
       }
       seen.add(duplicateKey)
     })
@@ -693,7 +694,7 @@ export class BrowserWorkforceService implements WorkforceService {
         issues.push({
           severity: 'warning',
           code: 'coverage',
-          message: `${item.date}: ${item.role} is ${item.gap} below minimum.`,
+          message: `${item.date}: “${roleLabels[item.role]}” үүрэг доод хэмжээнээс ${item.gap}-аар дутуу байна.`,
           date: item.date,
           role: item.role,
         })
@@ -704,14 +705,14 @@ export class BrowserWorkforceService implements WorkforceService {
   upsertAssignment(weekStart: string, input: AssignmentInput): WeeklyRoster {
     const roster = this.getRoster(weekStart)
     const member = teamMembers.find((candidate) => candidate.id === input.teamMemberId)
-    if (!member?.active) throw new Error('Choose an active team member from this branch.')
-    if (isMemberUnavailable(roster, member.id, input.date)) throw new Error('This team member is unavailable on the selected date.')
+    if (!member?.active) throw new Error('Энэ салбараас идэвхтэй багийн гишүүн сонгоно уу.')
+    if (isMemberUnavailable(roster, member.id, input.date)) throw new Error('Энэ багийн гишүүн сонгосон өдөр ажиллах боломжгүй.')
     const duplicate = roster.assignments.find(
       (item) => item.teamMemberId === input.teamMemberId && item.date === input.date && item.id !== input.id,
     )
-    if (duplicate) throw new Error('This team member already has a shift on the selected date.')
+    if (duplicate) throw new Error('Энэ багийн гишүүн сонгосон өдөр аль хэдийн ээлжтэй байна.')
     if (roster.status === 'published' && !input.reason?.trim()) {
-      throw new Error('A reason is required to change a published schedule.')
+      throw new Error('Нийтэлсэн хуваарийг өөрчлөхөд шалтгаан заавал бичнэ.')
     }
 
     const existingIndex = input.id ? roster.assignments.findIndex((item) => item.id === input.id) : -1
@@ -747,7 +748,7 @@ export class BrowserWorkforceService implements WorkforceService {
   removeAssignment(weekStart: string, assignmentId: string, reason?: string): WeeklyRoster {
     const roster = this.getRoster(weekStart)
     if (roster.status === 'published' && !reason?.trim()) {
-      throw new Error('A reason is required to remove a published assignment.')
+      throw new Error('Нийтэлсэн ээлжийг хасахад шалтгаан заавал бичнэ.')
     }
     if (!roster.assignments.some((item) => item.id === assignmentId)) return roster
     roster.assignments = roster.assignments.filter((item) => item.id !== assignmentId)
@@ -769,10 +770,10 @@ export class BrowserWorkforceService implements WorkforceService {
     const roster = this.getRoster(weekStart)
     const issues = this.validateRoster(roster)
     if (issues.some((issue) => issue.severity === 'error')) {
-      throw new Error('Resolve assignment validation errors before publishing.')
+      throw new Error('Нийтлэхийн өмнө ээлжийн шалгалтын алдааг шийдвэрлэнэ үү.')
     }
     if (issues.some((issue) => issue.code === 'coverage') && !shortageReason?.trim()) {
-      throw new Error('Record a reason before publishing below minimum coverage.')
+      throw new Error('Доод хангалтаас дутуугаар нийтлэхийн өмнө шалтгаан тэмдэглэнэ үү.')
     }
     const now = new Date().toISOString()
     roster.status = 'published'
@@ -826,7 +827,7 @@ export class BrowserWorkforceService implements WorkforceService {
       at: now,
       actor: roster.managerName,
       action: 'copied',
-      reason: `Copied roster ${previous.weekStart}`,
+      reason: `${previous.weekStart}-ны хуваарийг хуулсан`,
       version: 1,
     }]
     roster.lastSavedAt = now
