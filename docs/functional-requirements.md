@@ -68,6 +68,17 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-SHIFT-013 | A material change to a published assignment must create an audited roster version, record a reason, notify the affected team member, and return the assignment to acknowledgement pending. |
 | FR-SHIFT-014 | Each published assignment must record Assigned, Acknowledged, or Change requested independently from attendance status. |
 
+## Leave and day-off requests
+
+| ID | Requirement |
+| --- | --- |
+| FR-LEAVE-001 | An authenticated team member must be able to submit a leave or day-off request only for the person's own active branch assignment, with type, start date, end date, reason, submitter, and submitted timestamp. |
+| FR-LEAVE-002 | Leave requests must use explicit Pending, Approved, or Rejected states. A pending or rejected request must not change schedule coverage, availability, attendance classification, or pay treatment. |
+| FR-LEAVE-003 | The authorized Branch Manager must be able to view and approve or reject requests for the manager's own branch, with a required decision reason, actor, timestamp, and retained source request. Any HR co-approval required by policy remains a separate workflow. |
+| FR-LEAVE-004 | Approval must mark the team member unavailable for the approved date range and recalculate affected coverage without deleting or silently rewriting a published assignment. Any resulting shortage remains visible for backfill and follow-up. |
+| FR-LEAVE-005 | A leave request, manager decision, attendance evidence, and approved-absence classification must remain separate linked records. Approval alone must not fabricate check-in/out evidence. |
+| FR-LEAVE-006 | The team member must be able to view the current state and manager decision reason for the person's own requests; the manager must be able to filter pending and historical requests for the authorized branch. |
+
 ## Attendance relationship to schedule
 
 | ID | Requirement |
@@ -77,6 +88,9 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-ATT-003 | If a scheduled team member does not attend and no approved absence applies according to policy, the system must create an unexpected/unapproved no-show record. |
 | FR-ATT-004 | Branch Managers must be able to review branch attendance exceptions including lateness, unexpected no-show, approved absence, schedule/attendance mismatch, and correction requests. |
 | FR-ATT-005 | When policy permits a manager to excuse an incident, the system must retain the original attendance evidence and record a separate audited manager decision controlling downstream penalty treatment. |
+| FR-ATT-006 | Branch Managers must be able to inspect every branch lateness and no-show candidate with scheduled time, verified arrival where available, late minutes, source evidence, attendance decision, and downstream penalty-review state. |
+| FR-ATT-007 | The system must not calculate a penalty amount, create a deduction, or claim a payable outcome unless an approved effective-dated penalty policy version defines category, formula, evidence, authority, appeal path, and effective date. |
+| FR-ATT-008 | Attendance review states and penalty/deduction records must remain separate. Excused or rejected incidents are excluded from downstream penalty processing while confirmed incidents remain policy-pending until an authorized policy workflow acts. |
 
 ## Workforce task management
 

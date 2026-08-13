@@ -49,6 +49,18 @@ Maintain weekday/role staffing template
 → Publish verified attendance/readiness
 ```
 
+**Leave/day-off request subflow:**
+
+```text
+Team member submits own request with date range and reason
+→ Request remains Pending with no schedule/attendance effect
+→ Authorized Branch Manager reviews branch scope and coverage
+→ Approve with reason / Reject with reason
+→ If approved, mark unavailable and recalculate coverage
+→ Preserve any published assignment and open a backfill gap
+→ Keep request, decision, attendance, and pay treatment as separate records
+```
+
 **Key records:**
 
 - branch staffing template;
@@ -62,6 +74,8 @@ Maintain weekday/role staffing template
 - attendance correction/manager excusal decision.
 
 **Key rule:** a valid published shift assignment or equivalent approved schedule record is required before a person can be classified as late or no-show for that shift.
+
+**Penalty boundary:** manager confirmation preserves the lateness/no-show evidence but does not itself create a monetary penalty. Until CL-013 has an approved effective policy version, all penalty candidates remain amount-not-calculated and cannot become deductions.
 
 **Coverage model:**
 

@@ -36,7 +36,7 @@ export interface AvailabilityOverride {
   at: string
 }
 
-export type AttendanceExceptionType = 'late' | 'no-show' | 'approved-absence' | 'mismatch' | 'correction' | 'leave-request'
+export type AttendanceExceptionType = 'late' | 'no-show' | 'approved-absence' | 'mismatch' | 'correction'
 export type AttendanceDecisionAction = 'excuse' | 'confirm' | 'approve' | 'reject'
 export type AttendanceExceptionStatus = 'open' | 'approved' | 'excused' | 'confirmed' | 'rejected'
 
@@ -60,6 +60,54 @@ export interface AttendanceException {
   requestNote?: string
   evidence: string
   decision?: AttendanceDecision
+}
+
+export type LeaveRequestType = 'day-off' | 'leave'
+export type LeaveRequestStatus = 'pending' | 'approved' | 'rejected'
+
+export interface LeaveRequestDecision {
+  action: 'approve' | 'reject'
+  actor: string
+  reason: string
+  at: string
+}
+
+export interface LeaveRequest {
+  id: string
+  teamMemberId: string
+  branchId: string
+  type: LeaveRequestType
+  startDate: string
+  endDate: string
+  reason: string
+  status: LeaveRequestStatus
+  submittedBy: string
+  submittedAt: string
+  decision?: LeaveRequestDecision
+}
+
+export interface LeaveRequestInput {
+  teamMemberId: string
+  type: LeaveRequestType
+  startDate: string
+  endDate: string
+  reason: string
+}
+
+export type PenaltyReviewState = 'attendance-pending' | 'policy-pending' | 'excluded'
+
+export interface PenaltyReview {
+  id: string
+  exceptionId: string
+  teamMemberId: string
+  date: string
+  attendanceType: 'late' | 'no-show'
+  scheduledStart: string
+  checkInAt?: string
+  lateMinutes?: number
+  evidence: string
+  attendanceStatus: AttendanceExceptionStatus
+  state: PenaltyReviewState
 }
 
 export interface ShiftAssignment {
@@ -104,6 +152,8 @@ export interface RosterAuditEvent {
     | 'acknowledgement-reminder-recorded'
     | 'attendance-decision-recorded'
     | 'availability-overridden'
+    | 'leave-request-submitted'
+    | 'leave-request-decided'
   reason?: string
   assignmentId?: string
   version: number
@@ -136,6 +186,7 @@ export interface WeeklyRoster {
   requirementVersion: number
   requirementsEffectiveFrom: string
   attendanceExceptions: AttendanceException[]
+  leaveRequests: LeaveRequest[]
   availabilityOverrides: AvailabilityOverride[]
   executiveFollowUps: ExecutiveFollowUpRecord[]
   audit: RosterAuditEvent[]
@@ -147,6 +198,7 @@ export interface ExecutiveFollowUpSummary {
   coverageGapCount: number
   pendingAcknowledgementCount: number
   changeRequestCount: number
+  leaveRequestCount: number
   accountableManager: string
   lastManagerAction: string
   lastManagerActionAt: string

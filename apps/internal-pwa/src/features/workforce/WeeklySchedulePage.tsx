@@ -33,6 +33,7 @@ import {
   type AssignmentInput,
   type AttendanceDecisionAction,
   type ExecutiveFollowUpSummary,
+  type LeaveRequestInput,
   type ShiftAssignment,
   type StaffingRequirement,
   type ShiftTemplateName,
@@ -368,7 +369,7 @@ function ExecutiveFollowUpPanel({ roster, summary, onClose, onRecord }: Executiv
         <div className="executive-signals">
           <article><span>Хангалтын дутагдал</span><strong>{summary.coverageGapCount}</strong><small>Хүн дутуу үүрэг-ээлж</small></article>
           <article><span>Хугацаа хэтэрсэн хариу</span><strong>{summary.pendingAcknowledgementCount}</strong><small>Сануулах хугацаа өнгөрсөн</small></article>
-          <article><span>Өөрчлөх хүсэлт</span><strong>{summary.changeRequestCount}</strong><small>Багийн гишүүдийн хүсэлт</small></article>
+          <article><span>Нээлттэй хүсэлт</span><strong>{summary.changeRequestCount + summary.leaveRequestCount}</strong><small>{summary.changeRequestCount} хуваарь · {summary.leaveRequestCount} чөлөө</small></article>
         </div>
         <div className="manager-evidence">
           <ListChecks size={19} /><div><span>Менежерийн хамгийн сүүлд бүртгэсэн үйлдэл</span><strong>{summary.lastManagerAction}</strong><small>{formatDateTime(summary.lastManagerActionAt)}</small></div>
@@ -439,6 +440,9 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
   const dashboard = useMemo(() => service.getManagerDashboard(weekStart), [roster, service, weekStart])
   const readiness = useMemo(() => service.getReadiness(weekStart), [roster, service, weekStart])
   const attendanceExceptions = useMemo(() => service.getAttendanceExceptions(weekStart), [roster, service, weekStart])
+  const leaveRequests = useMemo(() => service.getLeaveRequests(weekStart), [roster, service, weekStart])
+  const penaltyReviews = useMemo(() => service.getPenaltyReviews(weekStart), [roster, service, weekStart])
+  const pendingLeaveRequests = leaveRequests.filter((item) => item.status === 'pending').length
   const openGaps = coverage.reduce((sum, item) => sum + item.gap, 0)
   const required = coverage.reduce((sum, item) => sum + item.required, 0)
   const scheduled = coverage.reduce((sum, item) => sum + item.scheduled, 0)
@@ -527,6 +531,20 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
     setMessage(`Ирцийн “${attendanceDecisionLabels[decision]}” шийдвэрийг тэмдэглэлээ. Эх хуваарь болон ирсэн баримтыг хэвээр хадгалав.`)
   }
 
+  function submitLeaveRequest(input: LeaveRequestInput) {
+    const next = service.submitLeaveRequest(weekStart, input)
+    setRoster(next)
+    setMessage('Чөлөөний хүсэлтийг салбарын менежерийн шийдвэрлэх жагсаалтад нэмлээ.')
+  }
+
+  function decideLeaveRequest(requestId: string, decision: 'approve' | 'reject', reason: string) {
+    const next = service.decideLeaveRequest(weekStart, requestId, decision, reason)
+    setRoster(next)
+    setMessage(decision === 'approve'
+      ? 'Чөлөөний хүсэлтийг зөвшөөрлөө. Хангалт болон ажиллах боломжийг дахин тооцоолов.'
+      : 'Чөлөөний хүсэлтийг татгалзсан шалтгаантайгаар тэмдэглэлээ.')
+  }
+
   function overrideAvailability(teamMemberId: string, date: string, available: boolean, reason: string) {
     const next = service.overrideAvailability(weekStart, teamMemberId, date, available, reason)
     setRoster(next)
@@ -557,13 +575,13 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
         <header className="topbar">
           <button className="icon-button mobile-menu" type="button" aria-label="Навигацыг нээх эсвэл хаах" onClick={() => setMenuOpen((current) => !current)}><Menu size={21} /></button>
           <div className="branch-scope"><span className="scope-mark">ТС</span><div><strong>{roster.branchName}</strong><small>Зөвшөөрөгдсөн салбарын хүрээ</small></div></div>
-          <div className="topbar-actions"><button className="icon-button" type="button" aria-label={`${attendanceExceptions.filter((item) => item.status === 'open').length + responseQueue.length} нээлттэй мэдэгдэл`} onClick={() => navigate('attendance')}><Bell size={20} /><i /></button><div className="avatar avatar--small">АМ</div></div>
+          <div className="topbar-actions"><button className="icon-button" type="button" aria-label={`${attendanceExceptions.filter((item) => item.status === 'open').length + pendingLeaveRequests + responseQueue.length} нээлттэй мэдэгдэл`} onClick={() => navigate('attendance')}><Bell size={20} /><i /></button><div className="avatar avatar--small">АМ</div></div>
         </header>
 
         <main id={activeView}>
-          {activeView === 'overview' ? <ManagerOverviewView roster={roster} dashboard={dashboard} readiness={readiness} openAttendance={attendanceExceptions.filter((item) => item.status === 'open').length} openResponses={responseQueue.length} openGaps={openGaps} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
+          {activeView === 'overview' ? <ManagerOverviewView roster={roster} dashboard={dashboard} readiness={readiness} openAttendance={attendanceExceptions.filter((item) => item.status === 'open').length + pendingLeaveRequests} openResponses={responseQueue.length} openGaps={openGaps} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
           {activeView === 'coverage' ? <CoverageReadinessView roster={roster} readiness={readiness} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
-          {activeView === 'attendance' ? <AttendanceReviewView roster={roster} exceptions={attendanceExceptions} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onDecision={decideAttendance} /> : null}
+          {activeView === 'attendance' ? <AttendanceReviewView roster={roster} exceptions={attendanceExceptions} leaveRequests={leaveRequests} penaltyReviews={penaltyReviews} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onDecision={decideAttendance} onLeaveDecision={decideLeaveRequest} /> : null}
           {activeView === 'team' ? <TeamMembersView roster={roster} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onOverrideAvailability={overrideAvailability} /> : null}
           {activeView === 'customers' ? <CustomerCrmView snapshot={managerInsights} /> : null}
           {activeView === 'rankings' ? <ManagerRankingsView snapshot={managerInsights} teamMembers={teamMembers} /> : null}
@@ -694,7 +712,7 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
       {auditOpen ? <AuditTrailPanel roster={roster} onClose={() => setAuditOpen(false)} /> : null}
       {executiveOpen ? <ExecutiveFollowUpPanel roster={roster} summary={executiveSummary} onClose={() => setExecutiveOpen(false)} onRecord={recordExecutiveFollowUp} /> : null}
       {responseQueueOpen ? <ResponseQueuePanel roster={roster} queue={responseQueue} onClose={() => setResponseQueueOpen(false)} onEdit={editResponseAssignment} onReminder={recordResponseReminder} onOpenMemberPreview={() => { setResponseQueueOpen(false); setMemberPreviewOpen(true) }} /> : null}
-      {memberPreviewOpen ? <TeamMemberSchedulePanel roster={roster} teamMembers={teamMembers} onClose={() => setMemberPreviewOpen(false)} onRespond={respondToAssignment} /> : null}
+      {memberPreviewOpen ? <TeamMemberSchedulePanel roster={roster} teamMembers={teamMembers} onClose={() => setMemberPreviewOpen(false)} onRespond={respondToAssignment} onLeaveRequest={submitLeaveRequest} /> : null}
     </div>
   )
 }

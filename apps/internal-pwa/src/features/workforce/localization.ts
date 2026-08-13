@@ -4,7 +4,10 @@ import type {
   AttendanceExceptionStatus,
   AttendanceExceptionType,
   EntertainerRank,
+  LeaveRequestStatus,
+  LeaveRequestType,
   OperationalStatus,
+  PenaltyReviewState,
   RosterAuditEvent,
   RosterStatus,
   ShiftTemplateName,
@@ -68,7 +71,23 @@ export const attendanceExceptionLabels: Record<AttendanceExceptionType, string> 
   'approved-absence': 'Зөвшөөрсөн чөлөө',
   mismatch: 'Хуваарь, ирцийн зөрүү',
   correction: 'Залруулгын хүсэлт',
-  'leave-request': 'Чөлөөний хүсэлт',
+}
+
+export const leaveRequestTypeLabels: Record<LeaveRequestType, string> = {
+  'day-off': 'Амралтын өдөр',
+  leave: 'Чөлөө',
+}
+
+export const leaveRequestStatusLabels: Record<LeaveRequestStatus, string> = {
+  pending: 'Шийдвэр хүлээж байна',
+  approved: 'Зөвшөөрсөн',
+  rejected: 'Татгалзсан',
+}
+
+export const penaltyReviewStateLabels: Record<PenaltyReviewState, string> = {
+  'attendance-pending': 'Ирцийн шийдвэр хүлээж байна',
+  'policy-pending': 'Торгуулийн бодлого хүлээж байна',
+  excluded: 'Торгуульд шилжүүлэхгүй',
 }
 
 export const attendanceDecisionLabels: Record<AttendanceDecisionAction, string> = {
@@ -101,6 +120,8 @@ export const auditActionLabels: Record<RosterAuditEvent['action'], string> = {
   'acknowledgement-reminder-recorded': 'Баталгаажуулалтын сануулгын баримт тэмдэглэсэн',
   'attendance-decision-recorded': 'Ирцийн шийдвэр тэмдэглэсэн',
   'availability-overridden': 'Ажиллах боломжийг өөрчилсөн',
+  'leave-request-submitted': 'Чөлөөний хүсэлт гаргасан',
+  'leave-request-decided': 'Чөлөөний хүсэлт шийдвэрлэсэн',
 }
 
 export function dateAtNoon(value: string): Date {

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { addDays, BrowserWorkforceService, resetWorkforcePrototype, startOfWeek } from './workforceService'
+import { addDays, BrowserWorkforceService, getCoverage, resetWorkforcePrototype, startOfWeek } from './workforceService'
 
 describe('Branch Manager weekly scheduling rules', () => {
   beforeEach(() => resetWorkforcePrototype())
@@ -190,7 +190,7 @@ describe('Branch Manager weekly scheduling rules', () => {
     expect(() => service.getTeamMembers('branch-west')).toThrow(/хандах эрхгүй/i)
   })
 
-  it('keeps attendance unavailable for drafts and records a reasoned decision without replacing evidence', () => {
+  it('keeps attendance unavailable for drafts and records a reasoned attendance decision without replacing evidence', () => {
     const service = new BrowserWorkforceService()
     const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
 
@@ -198,16 +198,70 @@ describe('Branch Manager weekly scheduling rules', () => {
     expect(service.getReadiness(weekStart).every((row) => !row.attendanceAvailable)).toBe(true)
 
     service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
-    const leaveRequest = service.getAttendanceExceptions(weekStart).find((item) => item.type === 'leave-request')
-    expect(leaveRequest).toBeTruthy()
-    expect(() => service.decideAttendanceException(weekStart, leaveRequest!.id, 'confirm', 'Менежер хүсэлтийг шалгасан.')).toThrow(/тохирохгүй/i)
-    expect(() => service.decideAttendanceException(weekStart, leaveRequest!.id, 'approve', 'Үгүй')).toThrow(/дор хаяж 5/i)
+    const late = service.getAttendanceExceptions(weekStart).find((item) => item.type === 'late')
+    expect(late).toBeTruthy()
+    expect(() => service.decideAttendanceException(weekStart, late!.id, 'approve', 'Менежер хүсэлтийг шалгасан.')).toThrow(/тохирохгүй/i)
+    expect(() => service.decideAttendanceException(weekStart, late!.id, 'confirm', 'Үгүй')).toThrow(/дор хаяж 5/i)
 
-    const decided = service.decideAttendanceException(weekStart, leaveRequest!.id, 'approve', 'Coverage owner confirmed the approved backfill.')
-    const retained = decided.attendanceExceptions.find((item) => item.id === leaveRequest!.id)
-    expect(retained).toMatchObject({ status: 'approved', evidence: leaveRequest!.evidence })
-    expect(retained?.decision).toMatchObject({ action: 'approve', actor: 'Ариун менежер' })
+    const decided = service.decideAttendanceException(weekStart, late!.id, 'confirm', 'Verified entrance-device timestamp confirmed the lateness.')
+    const retained = decided.attendanceExceptions.find((item) => item.id === late!.id)
+    expect(retained).toMatchObject({ status: 'confirmed', evidence: late!.evidence })
+    expect(retained?.decision).toMatchObject({ action: 'confirm', actor: 'Ариун менежер' })
     expect(decided.audit.at(-1)).toMatchObject({ action: 'attendance-decision-recorded' })
+  })
+
+  it('submits an own-branch leave request and applies coverage only after a reasoned manager approval', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    const roster = service.getRoster(weekStart)
+    const assignment = roster.assignments.find((item) => item.teamMemberId === 'tm-anu')!
+    const before = getCoverage(roster).find((row) => row.date === assignment.date && row.role === assignment.role)!
+
+    expect(() => service.submitLeaveRequest(weekStart, {
+      teamMemberId: assignment.teamMemberId,
+      type: 'day-off',
+      startDate: assignment.date,
+      endDate: assignment.date,
+      reason: 'Үгүй',
+    })).toThrow(/дор хаяж 5/i)
+
+    const submitted = service.submitLeaveRequest(weekStart, {
+      teamMemberId: assignment.teamMemberId,
+      type: 'day-off',
+      startDate: assignment.date,
+      endDate: assignment.date,
+      reason: 'Гэр бүлийн урьдчилан төлөвлөсөн ажилтай.',
+    })
+    const request = submitted.leaveRequests.find((item) => item.teamMemberId === assignment.teamMemberId)!
+    expect(request).toMatchObject({ status: 'pending', submittedBy: 'Бат Ану' })
+    expect(getCoverage(submitted).find((row) => row.date === assignment.date && row.role === assignment.role)?.scheduled).toBe(before.scheduled)
+    expect(() => service.decideLeaveRequest(weekStart, request.id, 'approve', 'Үгүй')).toThrow(/дор хаяж 5/i)
+
+    const approved = service.decideLeaveRequest(weekStart, request.id, 'approve', 'Орлох хүнийг хайх хангалтын ажил нээлттэй үлдэнэ.')
+    const retained = approved.leaveRequests.find((item) => item.id === request.id)
+    expect(retained).toMatchObject({ status: 'approved', reason: request.reason })
+    expect(retained?.decision).toMatchObject({ action: 'approve', actor: 'Ариун менежер' })
+    expect(approved.assignments.some((item) => item.id === assignment.id)).toBe(true)
+    expect(getCoverage(approved).find((row) => row.date === assignment.date && row.role === assignment.role)?.scheduled).toBe(before.scheduled - 1)
+    expect(approved.audit.at(-1)).toMatchObject({ action: 'leave-request-decided' })
+  })
+
+  it('shows every lateness and no-show candidate without calculating a penalty amount', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    service.publishRoster(weekStart, 'Two permitted gaps are being backfilled.')
+
+    const initial = service.getPenaltyReviews(weekStart)
+    expect(initial).toHaveLength(2)
+    expect(initial.every((item) => item.state === 'attendance-pending')).toBe(true)
+
+    const late = initial.find((item) => item.attendanceType === 'late')!
+    service.decideAttendanceException(weekStart, late.exceptionId, 'confirm', 'Verified source evidence confirms the late arrival.')
+    expect(service.getPenaltyReviews(weekStart).find((item) => item.id === late.id)?.state).toBe('policy-pending')
+
+    const noShow = initial.find((item) => item.attendanceType === 'no-show')!
+    service.decideAttendanceException(weekStart, noShow.exceptionId, 'excuse', 'Approved operational exception excludes this incident.')
+    expect(service.getPenaltyReviews(weekStart).find((item) => item.id === noShow.id)?.state).toBe('excluded')
   })
 
   it('requires a reason for availability overrides and recalculates effective coverage', () => {

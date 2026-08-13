@@ -188,6 +188,18 @@ The Branch Manager reviews attendance exceptions for the branch, including:
 
 The manager may excuse an incident where policy allows it. Excusing the incident must not erase the source attendance evidence; it records a separate audited decision controlling downstream penalty treatment.
 
+### Leave and day-off requests
+
+A team member can submit a leave or day-off request only for the person's own active branch assignment. The request stores type, start/end date, reason, submitter, branch, and submitted time, and uses `Pending`, `Approved`, or `Rejected` state.
+
+The authorized Branch Manager can approve or reject an own-branch request with a required reason. Pending and rejected requests do not change schedule coverage, attendance, or pay treatment. Approval marks the member unavailable for the approved period and recalculates coverage. If approval overlaps a published shift, retain the original shift/version, expose the resulting gap, and allow an auditable backfill; never silently delete the source assignment. HR co-approval, balance, category, notice-period, attachment, and emergency rules remain subject to approved HR policy.
+
+### Lateness and penalty review
+
+The manager can inspect every lateness and no-show candidate with scheduled time, verified arrival where available, late minutes, source evidence, attendance decision, and downstream review state. Attendance and penalty treatment remain separate records.
+
+CL-013 is still open. Therefore the system may display `Attendance decision pending`, `Penalty policy pending`, or `Excluded from penalty processing`, but it must display `Amount not calculated` and must not create a monetary penalty or deduction. A future authorized penalty record must reference the source evidence, manager decision, effective policy version, approver, and appeal result.
+
 ## 8. ERPNext/Frappe boundary
 
 Reuse ERPNext/Frappe records where appropriate, including:
@@ -218,6 +230,8 @@ Branch Managers own operational planning for their authorized branch:
 - weekly shift assignments;
 - shift coverage;
 - daily attendance exception handling within policy.
+- own-branch leave/day-off approval with an audited reason, subject to any separate HR co-approval;
+- visibility of lateness/no-show penalty-review evidence without authority to invent a monetary amount.
 
 HR remains the owner of formal employee lifecycle records such as employment activation, termination/offboarding, contract/employment type, and company-wide personnel policy unless separately delegated.
 
@@ -230,7 +244,7 @@ The internal PWA should provide the Branch Manager with a Workforce area contain
 1. **Staffing Requirements** — Monday-Sunday role minimums.
 2. **Weekly Schedule** — employee-to-shift planning calendar.
 3. **Coverage / Readiness** — Required vs Scheduled vs Checked In.
-4. **Attendance Review** — lateness, no-show, leave, and correction exceptions.
+4. **Attendance and Leave** — separate tabs for attendance exceptions, leave/day-off approval, and penalty-review evidence.
 5. **Team Members** — operational team view and availability within authorized scope.
 
 The scheduler should be mobile-friendly but may provide richer calendar interactions on larger screens.
@@ -273,6 +287,8 @@ Retain audit history for:
 - weekly schedule creation/publication;
 - schedule changes after publication;
 - manager attendance decisions;
+- leave/day-off submissions and manager decisions;
+- any later penalty-policy evaluation, approval, appeal, and deduction linkage;
 - shortage events and resolution where available.
 
 At minimum record branch, actor, timestamp, previous value, new value, and effective date where applicable.

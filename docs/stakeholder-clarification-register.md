@@ -27,6 +27,7 @@ Use this register to collect decisions and missing data from the CEO, branch man
 | CL-011 | Confirm the pay period for day-based contract workers and main fixed-salary employees. | HR / General accountant | High | Open |
 | CL-012 | Define how extra workdays are approved and calculated for day-based and fixed-salary workers. | HR / General accountant | High | Open |
 | CL-013 | Approve lateness, no-show, **гарааны торгууль**, and other penalty categories, formulas, evidence requirements, appeal path, and effective dates. | CEO / HR / Legal adviser | High | Open |
+| CL-013A | Approve leave/day-off categories, notice periods, attachments, emergency handling, leave-balance validation, Branch Manager versus HR approval boundary, withdrawal/cancellation, and overlap rules. The operational baseline permits own-request submission and an audited own-branch manager decision without implying final HR/pay approval. | CEO / HR / Legal adviser / Branch managers | High | Operational baseline; policy open |
 | CL-014 | Confirm which verified sales records and share rates determine entertainer three-day settlements. | General accountant / Branch managers | High | Open |
 | CL-015 | Confirm whether every employment type is loan-eligible and define minimum tenure, income history, maximum amount, repayment range, and departure treatment. | CEO / HR / General accountant | High | Open |
 | CL-016 | Confirm loan approval authority, bank/payment evidence requirements, and adjustment or reversal process. | CEO / Payment accountant | High | Open |

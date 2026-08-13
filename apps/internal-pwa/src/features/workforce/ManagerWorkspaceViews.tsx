@@ -2,12 +2,14 @@ import {
   AlertTriangle,
   ArrowRight,
   BadgeCheck,
+  CalendarOff,
   CalendarClock,
   Check,
   CircleGauge,
   Clock3,
   FileCheck2,
   LockKeyhole,
+  ReceiptText,
   Search,
   ShieldCheck,
   UserCheck,
@@ -18,8 +20,10 @@ import { useState, type FormEvent } from 'react'
 import type {
   AttendanceDecisionAction,
   AttendanceException,
+  LeaveRequest,
   ManagerDashboardSummary,
   OperationalStatus,
+  PenaltyReview,
   ReadinessRow,
   TeamMember,
   WeeklyRoster,
@@ -34,6 +38,9 @@ import {
   formatDateTime,
   formatTime,
   operationalStatusLabels,
+  leaveRequestStatusLabels,
+  leaveRequestTypeLabels,
+  penaltyReviewStateLabels,
   roleLabels,
   shiftLabels,
 } from './localization'
@@ -175,7 +182,7 @@ interface DecisionFormProps {
 function AttendanceDecisionForm({ exception, onDecision }: DecisionFormProps) {
   const [reason, setReason] = useState('')
   const [error, setError] = useState('')
-  const requestDecision = exception.type === 'correction' || exception.type === 'leave-request'
+  const requestDecision = exception.type === 'correction'
   const actions: AttendanceDecisionAction[] = requestDecision ? ['approve', 'reject'] : ['excuse', 'confirm']
 
   function submit(action: AttendanceDecisionAction) {
@@ -198,24 +205,62 @@ function AttendanceDecisionForm({ exception, onDecision }: DecisionFormProps) {
 interface AttendanceProps {
   roster: WeeklyRoster
   exceptions: AttendanceException[]
+  leaveRequests: LeaveRequest[]
+  penaltyReviews: PenaltyReview[]
   teamMembers: TeamMember[]
   message: string
   onDismissMessage: () => void
   onDecision: (id: string, action: AttendanceDecisionAction, reason: string) => void
+  onLeaveDecision: (id: string, action: 'approve' | 'reject', reason: string) => void
 }
 
-export function AttendanceReviewView({ roster, exceptions, teamMembers, message, onDismissMessage, onDecision }: AttendanceProps) {
+function LeaveDecisionForm({ request, onDecision }: { request: LeaveRequest; onDecision: (id: string, action: 'approve' | 'reject', reason: string) => void }) {
+  const [reason, setReason] = useState('')
+  const [error, setError] = useState('')
+
+  function submit(action: 'approve' | 'reject') {
+    try {
+      onDecision(request.id, action, reason)
+      setReason('')
+      setError('')
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Чөлөөний хүсэлтийн шийдвэрийг тэмдэглэж чадсангүй.')
+    }
+  }
+
+  return <form className="attendance-decision-form" onSubmit={(event) => event.preventDefault()}>
+    <label><span>Менежерийн шийдвэрийн шалтгаан</span><textarea rows={3} value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Хангалт, орлох хүн болон бодлогын үндэслэлийг бичнэ үү" /></label>
+    {error ? <p className="form-error" role="alert">{error}</p> : null}
+    <div><button className="button button--primary" type="button" onClick={() => submit('approve')}>Зөвшөөрөх</button><button className="button button--secondary" type="button" onClick={() => submit('reject')}>Татгалзах</button></div>
+  </form>
+}
+
+export function AttendanceReviewView({ roster, exceptions, leaveRequests, penaltyReviews, teamMembers, message, onDismissMessage, onDecision, onLeaveDecision }: AttendanceProps) {
+  const [section, setSection] = useState<'attendance' | 'leave' | 'penalties'>('attendance')
   const [filter, setFilter] = useState<'open' | 'all'>('open')
   const filtered = filter === 'open' ? exceptions.filter((item) => item.status === 'open') : exceptions
   const [selectedId, setSelectedId] = useState(filtered[0]?.id ?? '')
   const selected = filtered.find((item) => item.id === selectedId) ?? filtered[0]
+  const filteredLeave = filter === 'open' ? leaveRequests.filter((item) => item.status === 'pending') : leaveRequests
+  const [selectedLeaveId, setSelectedLeaveId] = useState(filteredLeave[0]?.id ?? '')
+  const selectedLeave = filteredLeave.find((item) => item.id === selectedLeaveId) ?? filteredLeave[0]
+  const [selectedPenaltyId, setSelectedPenaltyId] = useState(penaltyReviews[0]?.id ?? '')
+  const selectedPenalty = penaltyReviews.find((item) => item.id === selectedPenaltyId) ?? penaltyReviews[0]
   const memberById = new Map(teamMembers.map((member) => [member.id, member]))
+  const pendingLeave = leaveRequests.filter((item) => item.status === 'pending').length
 
   return <>
-    <section className="page-heading manager-view-heading"><div><span className="eyebrow">Өдрийн зөрчлийн хяналт</span><h1>Ирцийн хяналт</h1><p>Анхны хуваарь болон ирсэн бүртгэлийг өөрчлөхгүйгээр эх баримтыг хянана.</p></div><div className="segmented-control"><button className={filter === 'open' ? 'active' : ''} type="button" onClick={() => setFilter('open')}>Нээлттэй</button><button className={filter === 'all' ? 'active' : ''} type="button" onClick={() => setFilter('all')}>Бүх баримт</button></div></section>
+    <section className="page-heading manager-view-heading"><div><span className="eyebrow">Хүсэлт, ирц ба бодлогын хяналт</span><h1>Ирц ба чөлөө</h1><p>Чөлөөний хүсэлтийг шийдвэрлэж, хоцролтын эх баримт болон торгуулийн шилжилтийг тусад нь хянана.</p></div><div className="segmented-control"><button className={filter === 'open' ? 'active' : ''} type="button" onClick={() => setFilter('open')}>Нээлттэй</button><button className={filter === 'all' ? 'active' : ''} type="button" onClick={() => setFilter('all')}>Бүх баримт</button></div></section>
     <Notice message={message} onDismiss={onDismissMessage} />
 
-    {roster.status === 'draft' ? <div className="workspace-empty"><LockKeyhole size={24} /><strong>Ирцийн албан ёсны хүлээлт үүсээгүй байна</strong><span>Хоцролт, ирээгүй, чөлөө болон залруулгын баримтыг хянахын өмнө долоо хоногийн хуваарийг нийтэлнэ үү.</span></div> : filtered.length ? <div className="attendance-review-layout">
+    <div className="attendance-section-tabs" role="tablist" aria-label="Ирц ба чөлөөний хяналтын төрөл">
+      <button type="button" role="tab" aria-selected={section === 'attendance'} className={section === 'attendance' ? 'active' : ''} onClick={() => setSection('attendance')}><Clock3 size={17} />Ирцийн зөрчил <b>{exceptions.filter((item) => item.status === 'open').length}</b></button>
+      <button type="button" role="tab" aria-selected={section === 'leave'} className={section === 'leave' ? 'active' : ''} onClick={() => setSection('leave')}><CalendarOff size={17} />Чөлөөний хүсэлт <b>{pendingLeave}</b></button>
+      <button type="button" role="tab" aria-selected={section === 'penalties'} className={section === 'penalties' ? 'active' : ''} onClick={() => setSection('penalties')}><ReceiptText size={17} />Торгуулийн хяналт <b>{penaltyReviews.length}</b></button>
+    </div>
+
+    {section === 'attendance' && roster.status === 'draft' ? <div className="workspace-empty"><LockKeyhole size={24} /><strong>Ирцийн албан ёсны хүлээлт үүсээгүй байна</strong><span>Хоцролт, ирээгүй болон залруулгын баримтыг хянахын өмнө долоо хоногийн хуваарийг нийтэлнэ үү.</span></div> : null}
+    {section === 'attendance' && roster.status !== 'draft' && filtered.length ? <div className="attendance-review-layout">
       <section className="workspace-panel attendance-queue">
         <header className="card-header"><div><h2>Зөрчлийн жагсаалт</h2><p>{filter === 'open' ? `${filtered.length} зүйл шийдвэр хүлээж байна` : `Энэ долоо хоногт ${filtered.length} бүртгэл байна`}</p></div><AlertTriangle size={20} /></header>
         <div>{filtered.map((exception) => {
@@ -232,7 +277,46 @@ export function AttendanceReviewView({ roster, exceptions, teamMembers, message,
         {selected.decision ? <div className="recorded-decision"><FileCheck2 size={17} /><span><strong>{selected.decision.actor} “{attendanceDecisionLabels[selected.decision.action]}” шийдвэр тэмдэглэсэн</strong><small>{selected.decision.reason} · {formatDateTime(selected.decision.at)}</small></span></div> : null}
         {selected.status === 'open' ? <AttendanceDecisionForm key={selected.id} exception={selected} onDecision={onDecision} /> : null}
       </section> : null}
-    </div> : <div className="workspace-empty"><Check size={24} /><strong>Нээлттэй ирцийн зөрчил алга</strong><span>Шийдвэрлэсэн баримтыг харахын тулд шүүлтүүрийг солино уу.</span></div>}
+    </div> : null}
+    {section === 'attendance' && roster.status !== 'draft' && !filtered.length ? <div className="workspace-empty"><Check size={24} /><strong>Нээлттэй ирцийн зөрчил алга</strong><span>Шийдвэрлэсэн баримтыг харахын тулд шүүлтүүрийг солино уу.</span></div> : null}
+
+    {section === 'leave' && filteredLeave.length ? <div className="attendance-review-layout">
+      <section className="workspace-panel attendance-queue">
+        <header className="card-header"><div><h2>Чөлөөний хүсэлтүүд</h2><p>{filter === 'open' ? `${filteredLeave.length} хүсэлт шийдвэр хүлээж байна` : `Энэ долоо хоногт ${filteredLeave.length} хүсэлт байна`}</p></div><CalendarOff size={20} /></header>
+        <div>{filteredLeave.map((request) => {
+          const member = memberById.get(request.teamMemberId)
+          return <button key={request.id} className={selectedLeave?.id === request.id ? 'selected' : ''} type="button" onClick={() => setSelectedLeaveId(request.id)}><span className="avatar avatar--member">{member?.initials}</span><span><strong>{member?.name}</strong><small>{leaveRequestTypeLabels[request.type]} · {formatDate(request.startDate, { month: 'short', day: 'numeric' })}</small></span><b data-status={request.status}>{leaveRequestStatusLabels[request.status]}</b></button>
+        })}</div>
+      </section>
+      {selectedLeave ? <section className="workspace-panel attendance-detail leave-request-detail">
+        <header className="card-header"><div><span className="eyebrow">Багийн гишүүний хүсэлт</span><h2>{memberById.get(selectedLeave.teamMemberId)?.name}</h2><p>{leaveRequestTypeLabels[selectedLeave.type]} · {formatDateTime(selectedLeave.submittedAt)}-д илгээсэн</p></div><CalendarOff size={22} /></header>
+        <dl><div><dt>Эхлэх огноо</dt><dd>{formatDate(selectedLeave.startDate)}</dd></div><div><dt>Дуусах огноо</dt><dd>{formatDate(selectedLeave.endDate)}</dd></div><div><dt>Төрөл</dt><dd>{leaveRequestTypeLabels[selectedLeave.type]}</dd></div><div><dt>Одоогийн төлөв</dt><dd>{leaveRequestStatusLabels[selectedLeave.status]}</dd></div></dl>
+        <div className="request-note"><strong>Хүсэлтийн шалтгаан</strong><span>{selectedLeave.reason}</span></div>
+        <div className="leave-impact-note"><AlertTriangle size={17} /><span><strong>Хангалтын нөлөөг шийдвэрийн дараа тооцно</strong><small>Зөвшөөрвөл тухайн өдрийн ажиллах боломжийг хааж, нийтэлсэн ээлжтэй бол хангалтын дутагдлыг нээлттэй үлдээнэ. Эх хуваарийг устгахгүй.</small></span></div>
+        {selectedLeave.decision ? <div className="recorded-decision"><FileCheck2 size={17} /><span><strong>{selectedLeave.decision.actor} “{leaveRequestStatusLabels[selectedLeave.status]}” шийдвэр тэмдэглэсэн</strong><small>{selectedLeave.decision.reason} · {formatDateTime(selectedLeave.decision.at)}</small></span></div> : null}
+        {selectedLeave.status === 'pending' ? <LeaveDecisionForm key={selectedLeave.id} request={selectedLeave} onDecision={onLeaveDecision} /> : null}
+      </section> : null}
+    </div> : null}
+    {section === 'leave' && !filteredLeave.length ? <div className="workspace-empty"><Check size={24} /><strong>Шийдвэр хүлээж буй чөлөөний хүсэлт алга</strong><span>Шийдвэрлэсэн хүсэлтүүдийг харахын тулд “Бүх баримт”-ыг сонгоно уу.</span></div> : null}
+
+    {section === 'penalties' && roster.status === 'draft' ? <div className="workspace-empty"><LockKeyhole size={24} /><strong>Торгуулийн эх баримт үүсээгүй байна</strong><span>Нийтэлсэн хуваарь болон баталгаажсан ирцгүй үед хоцролт, ирээгүй тохиолдлыг торгуулийн хяналтад шилжүүлэхгүй.</span></div> : null}
+    {section === 'penalties' && roster.status !== 'draft' && penaltyReviews.length ? <div className="attendance-review-layout">
+      <section className="workspace-panel attendance-queue penalty-queue">
+        <header className="card-header"><div><h2>Торгуулийн эх баримт</h2><p>Хоцролт болон ирээгүй бүх тохиолдол</p></div><ReceiptText size={20} /></header>
+        <div>{penaltyReviews.map((review) => {
+          const member = memberById.get(review.teamMemberId)
+          return <button key={review.id} className={selectedPenalty?.id === review.id ? 'selected' : ''} type="button" onClick={() => setSelectedPenaltyId(review.id)}><span className="avatar avatar--member">{member?.initials}</span><span><strong>{member?.name}</strong><small>{review.attendanceType === 'late' ? `${review.lateMinutes ?? 0} минут хоцорсон` : 'Ирээгүй'} · {formatDate(review.date, { month: 'short', day: 'numeric' })}</small></span><b data-status={review.state}>{penaltyReviewStateLabels[review.state]}</b></button>
+        })}</div>
+      </section>
+      {selectedPenalty ? <section className="workspace-panel attendance-detail penalty-detail">
+        <header className="card-header"><div><span className="eyebrow">Торгуулийн өмнөх хяналт</span><h2>{memberById.get(selectedPenalty.teamMemberId)?.name}</h2><p>{selectedPenalty.attendanceType === 'late' ? 'Хоцролтын' : 'Ирээгүй'} эх баримт · {formatDate(selectedPenalty.date)}</p></div><ReceiptText size={22} /></header>
+        <dl><div><dt>Хуваарийн эхлэл</dt><dd>{selectedPenalty.scheduledStart}</dd></div><div><dt>Баталгаажсан ирэлт</dt><dd>{selectedPenalty.checkInAt ? formatTime(selectedPenalty.checkInAt) : 'Ирсэн бүртгэлгүй'}</dd></div><div><dt>Хоцорсон минут</dt><dd>{selectedPenalty.lateMinutes ?? '—'}</dd></div><div><dt>Торгуулийн дүн</dt><dd>Тооцоогүй</dd></div></dl>
+        <blockquote>{selectedPenalty.evidence}</blockquote>
+        <div className="penalty-policy-lock"><LockKeyhole size={18} /><span><strong>{penaltyReviewStateLabels[selectedPenalty.state]}</strong><small>CL-013-ийн төрөл, томьёо, нотолгоо, гомдол болон хүчин төгөлдөр огноо батлагдаагүй тул энэ дэлгэц мөнгөн дүн тооцох, суутгал үүсгэх эрхгүй.</small></span></div>
+        <div className="penalty-boundary"><ShieldCheck size={17} /><span>Менежер ирцийн эх баримтыг хянаж болно. Зөвхөн хүчинтэй бодлогын хувилбар болон эрх бүхий дараагийн workflow батлагдсаны дараа торгууль/суутгалын тусдаа бүртгэл үүснэ.</span></div>
+      </section> : null}
+    </div> : null}
+    {section === 'penalties' && roster.status !== 'draft' && !penaltyReviews.length ? <div className="workspace-empty"><Check size={24} /><strong>Торгуулийн хяналтын эх баримт алга</strong><span>Энэ долоо хоногт хоцролт эсвэл ирээгүй тохиолдол бүртгэгдээгүй байна.</span></div> : null}
   </>
 }
 

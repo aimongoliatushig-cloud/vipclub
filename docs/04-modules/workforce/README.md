@@ -101,6 +101,18 @@ Publication checks must cover:
 
 Where policy allows publication below minimum coverage, the manager must record a reason and the staffing exception remains open.
 
+## Leave and day-off request workflow
+
+A team member may submit a leave or day-off request only for the person's own active branch assignment. The request records type, start/end date, reason, submitter, branch, and submitted time.
+
+The operational states are `Pending`, `Approved`, and `Rejected`:
+
+- `Pending` is visible to the authorized Branch Manager but does not change availability, coverage, attendance, or pay treatment.
+- `Approved` records a separate manager decision with reason, actor, and time; it marks the person unavailable for the approved period and recalculates coverage.
+- `Rejected` retains the request and decision reason but does not change availability or coverage.
+
+If approved leave overlaps a published shift, keep the original assignment and publication version as evidence. Open a visible coverage impact for backfill rather than silently deleting the assignment. The leave request, manager decision, attendance evidence, and approved-absence classification remain separate linked records. Any HR co-approval or leave-balance rule required by final policy must be implemented as a separate authorization step.
+
 ## Coverage and readiness
 
 For every branch/date/role, show at least:
@@ -162,6 +174,16 @@ Branch Managers review attendance exceptions daily, including:
 
 Where policy permits, a manager may excuse an incident. The original attendance evidence remains unchanged; the excusal is a separate audited decision that controls downstream penalty treatment.
 
+### Penalty-review boundary
+
+The manager attendance workspace may show all lateness and no-show candidates with the published shift, verified arrival, late minutes, source evidence, attendance decision, and downstream state. The UI uses these states:
+
+- `Attendance decision pending` — the source incident still requires manager review;
+- `Penalty policy pending` — the incident is confirmed, but no amount is calculated because no approved effective policy version is available;
+- `Excluded from penalty processing` — the incident was excused or otherwise rejected for downstream treatment.
+
+CL-013 remains open. Until CEO, HR, and legal owners approve penalty categories, formulas, evidence, appeal, authority, and effective dates, the system must display `Amount not calculated`, must not create a deduction, and must not allow a Branch Manager to invent or enter a monetary penalty. A later penalty/deduction record must reference the attendance evidence, manager decision, effective policy version, authorized approver, and appeal outcome without rewriting those records.
+
 ## ERPNext/Frappe reuse
 
 Reuse standard records where appropriate:
@@ -188,7 +210,7 @@ The Branch Manager Workforce area must include:
 1. **Staffing Requirements** — Monday-Sunday role minimums.
 2. **Weekly Schedule** — weekly employee-to-shift planning calendar.
 3. **Coverage / Readiness** — Required vs Scheduled vs Checked In.
-4. **Attendance Review** — lateness, no-show, leave, and correction exceptions.
+4. **Attendance and Leave** — attendance exceptions, leave/day-off approval, and penalty-review evidence in separate tabs.
 5. **Team Members** — operational roster and authorized availability information.
 
 ## Reporting and KPI use
@@ -212,6 +234,8 @@ Audit at minimum:
 - schedule publication;
 - post-publication schedule changes;
 - manager attendance decisions;
+- leave/day-off submissions and manager decisions;
+- penalty-policy evaluation and deduction linkage when an approved policy exists;
 - shortage events and resolution where available.
 
 Record actor, branch, timestamp, previous value, new value, and effective date where applicable.

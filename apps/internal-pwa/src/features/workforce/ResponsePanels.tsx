@@ -1,7 +1,7 @@
-import { Bell, Check, Clock3, Eye, MessageSquare, Pencil, User, X } from 'lucide-react'
+import { Bell, CalendarOff, Check, Clock3, Eye, FileCheck2, MessageSquare, Pencil, User, X } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
-import { assignmentResponseLabels, formatDate, formatDateTime, roleLabels, shiftLabels } from './localization'
-import type { ResponseQueueItem, ShiftAssignment, TeamMember, WeeklyRoster } from './models'
+import { assignmentResponseLabels, formatDate, formatDateTime, leaveRequestStatusLabels, leaveRequestTypeLabels, roleLabels, shiftLabels } from './localization'
+import type { LeaveRequestInput, LeaveRequestType, ResponseQueueItem, ShiftAssignment, TeamMember, WeeklyRoster } from './models'
 
 interface ResponseQueuePanelProps {
   roster: WeeklyRoster
@@ -93,19 +93,29 @@ interface TeamMemberSchedulePanelProps {
     response: 'acknowledged' | 'change-requested',
     note?: string,
   ) => void
+  onLeaveRequest: (input: LeaveRequestInput) => void
 }
 
-export function TeamMemberSchedulePanel({ roster, teamMembers, onClose, onRespond }: TeamMemberSchedulePanelProps) {
-  const assignedMemberIds = useMemo(() => new Set(roster.assignments.map((item) => item.teamMemberId)), [roster.assignments])
-  const availableMembers = teamMembers.filter((member) => member.active && assignedMemberIds.has(member.id))
+export function TeamMemberSchedulePanel({ roster, teamMembers, onClose, onRespond, onLeaveRequest }: TeamMemberSchedulePanelProps) {
+  const availableMembers = useMemo(() => teamMembers.filter((member) => member.active), [teamMembers])
   const [teamMemberId, setTeamMemberId] = useState(availableMembers[0]?.id ?? '')
+  const [activeTab, setActiveTab] = useState<'schedule' | 'leave'>('schedule')
   const [requestAssignmentId, setRequestAssignmentId] = useState<string | null>(null)
   const [note, setNote] = useState('')
+  const [leaveType, setLeaveType] = useState<LeaveRequestType>('day-off')
+  const [leaveStart, setLeaveStart] = useState(roster.weekStart)
+  const [leaveEnd, setLeaveEnd] = useState(roster.weekStart)
+  const [leaveReason, setLeaveReason] = useState('')
+  const [confirmation, setConfirmation] = useState('')
   const [error, setError] = useState('')
+  const weekEnd = roster.requirements.reduce((latest, item) => item.date > latest ? item.date : latest, roster.weekStart)
   const member = availableMembers.find((item) => item.id === teamMemberId)
   const assignments = roster.status === 'published'
     ? roster.assignments.filter((item) => item.teamMemberId === teamMemberId).sort((left, right) => left.date.localeCompare(right.date))
     : []
+  const leaveRequests = roster.leaveRequests
+    .filter((request) => request.teamMemberId === teamMemberId)
+    .sort((left, right) => right.submittedAt.localeCompare(left.submittedAt))
 
   function acknowledge(assignmentId: string) {
     try {
@@ -133,7 +143,27 @@ export function TeamMemberSchedulePanel({ roster, teamMembers, onClose, onRespon
     setTeamMemberId(id)
     setRequestAssignmentId(null)
     setNote('')
+    setConfirmation('')
     setError('')
+  }
+
+  function requestLeave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    try {
+      onLeaveRequest({
+        teamMemberId,
+        type: leaveType,
+        startDate: leaveStart,
+        endDate: leaveEnd,
+        reason: leaveReason,
+      })
+      setLeaveReason('')
+      setConfirmation('Хүсэлтийг салбарын менежерийн шийдвэрлэх жагсаалтад илгээлээ.')
+      setError('')
+    } catch (caught) {
+      setConfirmation('')
+      setError(caught instanceof Error ? caught.message : 'Чөлөөний хүсэлтийг илгээж чадсангүй.')
+    }
   }
 
   return (
@@ -142,8 +172,8 @@ export function TeamMemberSchedulePanel({ roster, teamMembers, onClose, onRespon
         <header className="modal-header">
           <div>
             <span className="eyebrow">Туршилтын хувилбар · багийн гишүүний өөртөө үйлчлэх хэсэг</span>
-            <h2 id="member-preview-title">Миний нийтэлсэн хуваарь</h2>
-            <p>Сонголт нь зөвхөн туршилтын шалгалтад зориулагдсан. Үйлдвэрлэлийн орчинд нэвтрэлтээр хэрэглэгчийг таньж, зөвхөн өөрийн ээлжийг харуулна.</p>
+            <h2 id="member-preview-title">Миний хуваарь ба чөлөө</h2>
+            <p>Нийтэлсэн ээлжээ хянаж, өөрийн нэрээр амралтын өдөр эсвэл чөлөө хүснэ. Үйлдвэрлэлийн орчинд нэвтрэлтээр хэрэглэгчийг танина.</p>
           </div>
           <button className="icon-button" type="button" aria-label="Багийн гишүүний хуваарийн харагдацыг хаах" onClick={onClose}><X size={20} /></button>
         </header>
@@ -155,9 +185,14 @@ export function TeamMemberSchedulePanel({ roster, teamMembers, onClose, onRespon
           </select>
         </label>
 
-        {roster.status !== 'published' ? (
+        <div className="member-preview-tabs" role="tablist" aria-label="Багийн гишүүний ажлын хэсэг">
+          <button type="button" role="tab" aria-selected={activeTab === 'schedule'} className={activeTab === 'schedule' ? 'active' : ''} onClick={() => { setActiveTab('schedule'); setError(''); setConfirmation('') }}><Clock3 size={16} />Миний хуваарь</button>
+          <button type="button" role="tab" aria-selected={activeTab === 'leave'} className={activeTab === 'leave' ? 'active' : ''} onClick={() => { setActiveTab('leave'); setError(''); setConfirmation('') }}><CalendarOff size={16} />Чөлөө хүсэх</button>
+        </div>
+
+        {activeTab === 'schedule' && roster.status !== 'published' ? (
           <div className="response-empty"><Clock3 size={23} /><strong>Нийтэлсэн хуваарь алга</strong><span>Багийн гишүүд менежерийн нооргийг бус, зөвхөн албан ёсоор нийтэлсэн хуваарийг харна.</span></div>
-        ) : assignments.length ? (
+        ) : activeTab === 'schedule' && assignments.length ? (
           <div className="member-assignment-list">
             {assignments.map((assignment) => (
               <article key={assignment.id} data-response={assignment.response}>
@@ -180,9 +215,27 @@ export function TeamMemberSchedulePanel({ roster, teamMembers, onClose, onRespon
               </article>
             ))}
           </div>
-        ) : (
+        ) : activeTab === 'schedule' ? (
           <div className="response-empty"><User size={23} /><strong>Энэ долоо хоногт ээлж алга</strong><span>{member?.name ?? 'Энэ багийн гишүүн'} сонгосон долоо хоногт нийтэлсэн ээлжгүй байна.</span></div>
-        )}
+        ) : null}
+
+        {activeTab === 'leave' ? <div className="leave-request-workspace">
+          <form className="leave-request-form" onSubmit={requestLeave}>
+            <div className="leave-form-heading"><CalendarOff size={20} /><div><strong>Шинэ хүсэлт</strong><span>Хүсэлт зөвшөөрөгдөх хүртэл хуваарь, ирц болон хангалт өөрчлөгдөхгүй.</span></div></div>
+            <label><span>Хүсэлтийн төрөл</span><select value={leaveType} onChange={(event) => setLeaveType(event.target.value as LeaveRequestType)}>{Object.entries(leaveRequestTypeLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
+            <div className="leave-date-range">
+              <label><span>Эхлэх огноо</span><input type="date" min={roster.weekStart} max={weekEnd} value={leaveStart} onChange={(event) => { setLeaveStart(event.target.value); if (event.target.value > leaveEnd) setLeaveEnd(event.target.value) }} /></label>
+              <label><span>Дуусах огноо</span><input type="date" min={leaveStart} max={weekEnd} value={leaveEnd} onChange={(event) => setLeaveEnd(event.target.value)} /></label>
+            </div>
+            <label><span>Шалтгаан</span><textarea rows={3} value={leaveReason} onChange={(event) => setLeaveReason(event.target.value)} placeholder="Менежер шийдвэр гаргахад шаардлагатай тайлбар бичнэ үү" /></label>
+            <button className="button button--primary" type="submit">Хүсэлт илгээх</button>
+          </form>
+          <section className="leave-request-history" aria-label="Миний чөлөөний хүсэлтүүд">
+            <header><div><strong>Миний хүсэлтүүд</strong><span>{leaveRequests.length} хүсэлт</span></div><FileCheck2 size={19} /></header>
+            {leaveRequests.length ? leaveRequests.map((request) => <article key={request.id} data-status={request.status}><div><strong>{leaveRequestTypeLabels[request.type]}</strong><span>{formatDate(request.startDate)}{request.endDate !== request.startDate ? ` – ${formatDate(request.endDate)}` : ''}</span><small>{request.reason}</small></div><b>{leaveRequestStatusLabels[request.status]}</b>{request.decision ? <p>{request.decision.actor}: {request.decision.reason}</p> : null}</article>) : <div className="leave-history-empty">Одоогоор чөлөөний хүсэлт алга.</div>}
+          </section>
+        </div> : null}
+        {confirmation ? <p className="form-success response-panel-error" role="status">{confirmation}</p> : null}
         {error ? <p className="form-error response-panel-error" role="alert">{error}</p> : null}
       </section>
     </div>

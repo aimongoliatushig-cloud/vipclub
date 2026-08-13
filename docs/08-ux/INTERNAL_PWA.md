@@ -109,6 +109,14 @@ Include:
 
 An excusal must not erase the original attendance evidence.
 
+The attendance workspace should provide three clearly separated tabs:
+
+- attendance exceptions requiring evidence review;
+- leave/day-off requests requiring manager approval;
+- penalty review showing lateness/no-show evidence and downstream status.
+
+The penalty review must show `Amount not calculated` while CL-013 is open and explain that an approved effective-dated policy is required before any monetary deduction can be produced.
+
 ### 5. Team Members
 
 Purpose: provide the manager with the operational roster needed for scheduling.
@@ -128,6 +136,8 @@ Do not expose private HR or financial fields merely because the user is a Branch
 ## Employee workforce experience
 
 Employees and entertainers should be able to view their own published weekly schedule and attendance state in the same PWA according to permissions.
+
+They should also be able to submit a leave or day-off request for themselves, including a date range and reason, and view Pending, Approved, or Rejected status plus the manager's decision reason. A pending request must be visually distinguished from approved leave and must not imply that the shift is cancelled.
 
 The employee schedule view should make clear:
 

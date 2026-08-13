@@ -100,7 +100,7 @@ describe('WeeklySchedulePage', () => {
     await user.click(screen.getByRole('button', { name: /Хариуны жагсаалт/ }))
     expect(screen.getByRole('dialog', { name: 'Ээлжийн хариунууд' })).toHaveTextContent('Хуваарь нийтэлсний дараа хариу авч эхэлнэ')
     await user.click(screen.getByRole('button', { name: 'Багийн гишүүний харагдац нээх' }))
-    expect(screen.getByRole('dialog', { name: 'Миний нийтэлсэн хуваарь' })).toHaveTextContent('Нийтэлсэн хуваарь алга')
+    expect(screen.getByRole('dialog', { name: 'Миний хуваарь ба чөлөө' })).toHaveTextContent('Нийтэлсэн хуваарь алга')
   })
 
   it('routes a team-member change request into the manager response queue', async () => {
@@ -171,7 +171,7 @@ describe('WeeklySchedulePage', () => {
     await user.click(screen.getByRole('button', { name: 'Хуваарь нийтлэх' }))
     await user.click(screen.getByRole('link', { name: 'Ирц' }))
 
-    expect(screen.getByRole('heading', { name: 'Ирцийн хяналт' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Ирц ба чөлөө' })).toBeInTheDocument()
     expect(screen.getAllByText(/Залруулгын хүсэлт/).length).toBeGreaterThan(0)
     await user.type(screen.getByLabelText('Менежерийн шийдвэрийн шалтгаан'), 'Хамгаалалтын бүртгэл ирсэн цагийг баталсан.')
     await user.click(screen.getByRole('button', { name: 'Зөвшөөрөх' }))
@@ -192,6 +192,49 @@ describe('WeeklySchedulePage', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('ажиллах боломжийн өөрчлөлтийг тэмдэглэлээ')
     expect(screen.getByText(/Сүүлийн өөрчлөлт: боломжгүй/)).toBeInTheDocument()
+  })
+
+  it('routes a team-member day-off request to the manager and records the approval separately', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+    await user.click(screen.getByRole('link', { name: 'Долоо хоногийн хуваарь' }))
+    await user.click(screen.getByRole('button', { name: 'Хянаж нийтлэх' }))
+    await user.type(screen.getByLabelText(/Доод хэмжээнээс дутуугаар нийтлэх шалтгаан/), 'Зөвшөөрсөн хоёр дутагдлыг нөхөн бүрдүүлж байна.')
+    await user.click(screen.getByRole('button', { name: 'Хуваарь нийтлэх' }))
+    await user.click(screen.getByRole('button', { name: /Хариуны жагсаалт/ }))
+    await user.click(screen.getByRole('button', { name: 'Багийн гишүүний харагдац нээх' }))
+    await user.click(screen.getByRole('tab', { name: 'Чөлөө хүсэх' }))
+    await user.type(screen.getByLabelText('Шалтгаан'), 'Гэр бүлийн урьдчилан төлөвлөсөн ажилтай.')
+    await user.click(screen.getByRole('button', { name: 'Хүсэлт илгээх' }))
+
+    expect(screen.getByText('Хүсэлтийг салбарын менежерийн шийдвэрлэх жагсаалтад илгээлээ.')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Миний чөлөөний хүсэлтүүд' })).toHaveTextContent('Шийдвэр хүлээж байна')
+    await user.click(screen.getByRole('button', { name: 'Багийн гишүүний хуваарийн харагдацыг хаах' }))
+    await user.click(screen.getByRole('link', { name: 'Ирц' }))
+    await user.click(screen.getByRole('tab', { name: /Чөлөөний хүсэлт/ }))
+
+    expect(screen.getByText('Гэр бүлийн урьдчилан төлөвлөсөн ажилтай.')).toBeInTheDocument()
+    await user.type(screen.getByLabelText('Менежерийн шийдвэрийн шалтгаан'), 'Орлох хүнийг хайх хангалтын ажил нээлттэй үлдэнэ.')
+    await user.click(screen.getByRole('button', { name: 'Зөвшөөрөх' }))
+    expect(screen.getByRole('status')).toHaveTextContent('Чөлөөний хүсэлтийг зөвшөөрлөө')
+    await user.click(screen.getByRole('button', { name: 'Бүх баримт' }))
+    expect(screen.getByText(/Ариун менежер “Зөвшөөрсөн” шийдвэр тэмдэглэсэн/)).toBeInTheDocument()
+  }, 10_000)
+
+  it('shows all lateness and no-show penalty candidates while keeping monetary amounts locked', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+    await user.click(screen.getByRole('link', { name: 'Долоо хоногийн хуваарь' }))
+    await user.click(screen.getByRole('button', { name: 'Хянаж нийтлэх' }))
+    await user.type(screen.getByLabelText(/Доод хэмжээнээс дутуугаар нийтлэх шалтгаан/), 'Зөвшөөрсөн хоёр дутагдлыг нөхөн бүрдүүлж байна.')
+    await user.click(screen.getByRole('button', { name: 'Хуваарь нийтлэх' }))
+    await user.click(screen.getByRole('link', { name: 'Ирц' }))
+    await user.click(screen.getByRole('tab', { name: /Торгуулийн хяналт/ }))
+
+    expect(screen.getByText('Хоцролт болон ирээгүй бүх тохиолдол')).toBeInTheDocument()
+    expect(screen.getByText('Торгуулийн дүн').parentElement).toHaveTextContent('Тооцоогүй')
+    expect(screen.getByText(/CL-013-ийн төрөл, томьёо/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /торгууль оноох|дүн хадгалах/i })).not.toBeInTheDocument()
   })
 
   it('shows a masked branch-only customer intelligence view with working filters', async () => {

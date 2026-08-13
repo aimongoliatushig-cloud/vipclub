@@ -35,6 +35,10 @@ This document currently records the approved workforce-planning and scheduling p
 | View coverage/readiness | All authorized branches | Own authorized branch | All authorized branches | Own shift status only |
 | Review daily attendance exceptions | Oversight/drill-down | Yes, own authorized branch | HR review/escalation according to policy | Own attendance and correction request |
 | Excuse attendance incident | Only where executive policy permits | Yes where policy permits, own branch | Yes where HR policy permits | No |
+| Submit leave/day-off request | Own request only if acting as a team member | Own request only if acting as a team member | Own request only if acting as a team member | Yes, own request only |
+| Approve/reject branch leave request | Oversight/override only where policy permits | Yes, own authorized branch; HR co-approval remains separate where required | Yes according to HR policy | No |
+| View penalty-review evidence | Oversight/drill-down | Own authorized branch | HR review according to policy | Own incident and decision only |
+| Create monetary penalty/deduction | Only through approved policy workflow | No authority from branch scheduling role alone | Only where approved policy delegates | No |
 | Create/terminate employment record | No routine action unless separately delegated | No | Yes, according to HR authority | No |
 | Change employment type/contract | No routine action unless separately delegated | No | Yes, according to HR authority | No |
 
@@ -48,6 +52,8 @@ A Branch Manager may, for the manager's authorized branch:
 - view authorized leave/availability information required for scheduling;
 - identify and backfill staffing shortages;
 - review daily attendance exceptions;
+- approve or reject own-branch leave/day-off requests with an audited reason;
+- view own-branch lateness/no-show evidence and downstream penalty-review state;
 - make audited excusal decisions where policy allows.
 
 The Branch Manager may not, solely because of this authority:

@@ -6,7 +6,10 @@ import {
   type AttendanceException,
   type CoverageRow,
   type ExecutiveFollowUpSummary,
+  type LeaveRequest,
+  type LeaveRequestInput,
   type ManagerDashboardSummary,
+  type PenaltyReview,
   type ReadinessRow,
   type ResponseQueueItem,
   type ShiftAssignment,
@@ -18,7 +21,7 @@ import {
 } from './models'
 import { attendanceDecisionLabels, roleLabels } from './localization'
 
-const STORAGE_KEY = 'vipclub.workforce.manager-prototype.mn.v2'
+const STORAGE_KEY = 'vipclub.workforce.manager-prototype.mn.v3'
 const DAY_MS = 86_400_000
 const ACKNOWLEDGEMENT_WINDOW_MS = DAY_MS
 const AUTHORIZED_BRANCH_ID = 'branch-central'
@@ -71,6 +74,15 @@ export interface WorkforceService {
   getManagerDashboard(weekStart: string): ManagerDashboardSummary
   getReadiness(weekStart: string): ReadinessRow[]
   getAttendanceExceptions(weekStart: string): AttendanceException[]
+  getLeaveRequests(weekStart: string, teamMemberId?: string): LeaveRequest[]
+  submitLeaveRequest(weekStart: string, input: LeaveRequestInput): WeeklyRoster
+  decideLeaveRequest(
+    weekStart: string,
+    requestId: string,
+    decision: 'approve' | 'reject',
+    reason: string,
+  ): WeeklyRoster
+  getPenaltyReviews(weekStart: string): PenaltyReview[]
   decideAttendanceException(
     weekStart: string,
     exceptionId: string,
@@ -139,9 +151,19 @@ function latestAvailabilityOverride(roster: WeeklyRoster, teamMemberId: string, 
     .sort((left, right) => right.at.localeCompare(left.at))[0]
 }
 
+function dateFallsWithin(date: string, startDate: string, endDate: string): boolean {
+  return date >= startDate && date <= endDate
+}
+
 function isMemberUnavailable(roster: WeeklyRoster, teamMemberId: string, date: string): boolean {
   const override = latestAvailabilityOverride(roster, teamMemberId, date)
   if (override) return !override.available
+  const approvedLeave = (roster.leaveRequests ?? []).some((request) => (
+    request.teamMemberId === teamMemberId
+    && request.status === 'approved'
+    && dateFallsWithin(date, request.startDate, request.endDate)
+  ))
+  if (approvedLeave) return true
   const member = teamMembers.find((item) => item.id === teamMemberId)
   return Boolean(member?.unavailableDates.includes(date))
 }
@@ -189,11 +211,6 @@ function createAttendanceExceptions(weekStart: string, assignments: ShiftAssignm
       evidence: 'Зөвшөөрсөн чөлөөний хүсэлтийг нийтэлсэн ээлжтэй холбосон.',
     },
     {
-      teamMemberId: 'tm-oyun', date: addDays(weekStart, 3), type: 'leave-request', status: 'open',
-      requestNote: 'Гэр бүлийн ажилтай тул энэ оройн ээлжээс чөлөө хүссэн.',
-      evidence: 'Багийн гишүүн ээлж эхлэхээс өмнө чөлөөний хүсэлт илгээсэн.',
-    },
-    {
       teamMemberId: 'tm-enkhjin', date: addDays(weekStart, 1), type: 'mismatch', status: 'open',
       checkInAt: `${addDays(weekStart, 1)}T17:42:00+08:00`,
       evidence: 'Ирсэн бүртгэл байгаа боловч төхөөрөмжийн салбарын код нийтэлсэн ээлжтэй таарахгүй байна.',
@@ -210,6 +227,22 @@ function createAttendanceExceptions(weekStart: string, assignments: ShiftAssignm
     if (!source) return []
     return [{ ...spec, id: id('attendance'), assignmentId: source.id, scheduledStart: source.start }]
   })
+}
+
+function createLeaveRequests(weekStart: string): LeaveRequest[] {
+  const submittedAt = new Date().toISOString()
+  return [{
+    id: id('leave'),
+    teamMemberId: 'tm-oyun',
+    branchId: AUTHORIZED_BRANCH_ID,
+    type: 'day-off',
+    startDate: addDays(weekStart, 3),
+    endDate: addDays(weekStart, 3),
+    reason: 'Гэр бүлийн ажилтай тул энэ оройн ээлжээс амралтын өдөр хүссэн.',
+    status: 'pending',
+    submittedBy: 'Болд Оюун',
+    submittedAt,
+  }]
 }
 
 function createSeedRoster(weekStart: string): WeeklyRoster {
@@ -252,6 +285,7 @@ function createSeedRoster(weekStart: string): WeeklyRoster {
     requirementVersion: 1,
     requirementsEffectiveFrom: weekStart,
     attendanceExceptions: createAttendanceExceptions(weekStart, assignments),
+    leaveRequests: createLeaveRequests(weekStart),
     availabilityOverrides: [],
     executiveFollowUps: [],
     audit: [{ id: id('audit'), at: now, actor: 'Ариун менежер', action: 'created', version: 1 }],
@@ -305,6 +339,7 @@ export class BrowserWorkforceService implements WorkforceService {
     const needsMigration = !('requirementVersion' in existing)
       || !('executiveFollowUps' in existing)
       || !('attendanceExceptions' in existing)
+      || !('leaveRequests' in existing)
       || !('availabilityOverrides' in existing)
       || needsResponseMigration
     const roster = {
@@ -313,6 +348,7 @@ export class BrowserWorkforceService implements WorkforceService {
       requirementVersion: existing.requirementVersion ?? 1,
       requirementsEffectiveFrom: existing.requirementsEffectiveFrom ?? existing.weekStart,
       attendanceExceptions: existing.attendanceExceptions ?? createAttendanceExceptions(existing.weekStart, assignments),
+      leaveRequests: existing.leaveRequests ?? createLeaveRequests(existing.weekStart),
       availabilityOverrides: existing.availabilityOverrides ?? [],
       executiveFollowUps: existing.executiveFollowUps ?? [],
     }
@@ -348,12 +384,23 @@ export class BrowserWorkforceService implements WorkforceService {
             item.date === row.date && memberById.get(item.teamMemberId)?.role === row.role && item.status !== 'rejected'
           ))
         : []
-      const approvedAbsence = relevant.filter((item) => (
-        item.type === 'approved-absence' || (item.type === 'leave-request' && item.status === 'approved')
-      )).length
+      const attendanceAbsence = relevant.filter((item) => item.type === 'approved-absence').length
+      const approvedLeave = attendanceAvailable
+        ? roster.leaveRequests.filter((request) => (
+            request.status === 'approved'
+            && dateFallsWithin(row.date, request.startDate, request.endDate)
+            && memberById.get(request.teamMemberId)?.role === row.role
+            && roster.assignments.some((assignment) => (
+              assignment.teamMemberId === request.teamMemberId
+              && assignment.date === row.date
+              && assignment.role === row.role
+            ))
+          )).length
+        : 0
+      const approvedAbsence = attendanceAbsence + approvedLeave
       const noShow = relevant.filter((item) => item.type === 'no-show').length
       const late = relevant.filter((item) => item.type === 'late').length
-      const checkedIn = attendanceAvailable ? Math.max(0, row.scheduled - approvedAbsence - noShow) : 0
+      const checkedIn = attendanceAvailable ? Math.max(0, row.scheduled - attendanceAbsence - noShow) : 0
       return {
         ...row,
         attendanceAvailable,
@@ -375,6 +422,110 @@ export class BrowserWorkforceService implements WorkforceService {
     })
   }
 
+  getLeaveRequests(weekStart: string, teamMemberId?: string): LeaveRequest[] {
+    const roster = this.getRoster(weekStart)
+    return clone(roster.leaveRequests)
+      .filter((request) => !teamMemberId || request.teamMemberId === teamMemberId)
+      .sort((left, right) => {
+        if ((left.status === 'pending') !== (right.status === 'pending')) return left.status === 'pending' ? -1 : 1
+        return right.submittedAt.localeCompare(left.submittedAt)
+      })
+  }
+
+  submitLeaveRequest(weekStart: string, input: LeaveRequestInput): WeeklyRoster {
+    const roster = this.getRoster(weekStart)
+    const member = teamMembers.find((item) => item.id === input.teamMemberId && item.branchId === roster.branchId)
+    if (!member?.active) throw new Error('Та зөвхөн өөрийн идэвхтэй салбарын эрхээр чөлөө хүсэж болно.')
+    const dates = weekDates(weekStart)
+    if (!dates.includes(input.startDate) || !dates.includes(input.endDate) || input.startDate > input.endDate) {
+      throw new Error('Сонгосон долоо хоногийн дотор зөв эхлэх, дуусах огноо сонгоно уу.')
+    }
+    if (input.reason.trim().length < 5) throw new Error('Чөлөө хүсэх шалтгааныг дор хаяж 5 тэмдэгтээр тодорхой бичнэ үү.')
+    const overlaps = roster.leaveRequests.some((request) => (
+      request.teamMemberId === member.id
+      && request.status !== 'rejected'
+      && request.startDate <= input.endDate
+      && request.endDate >= input.startDate
+    ))
+    if (overlaps) throw new Error('Сонгосон хугацаанд шийдвэр хүлээж буй эсвэл зөвшөөрсөн хүсэлт аль хэдийн байна.')
+
+    const now = new Date().toISOString()
+    const request: LeaveRequest = {
+      id: id('leave'),
+      teamMemberId: member.id,
+      branchId: roster.branchId,
+      type: input.type,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      reason: input.reason.trim(),
+      status: 'pending',
+      submittedBy: member.name,
+      submittedAt: now,
+    }
+    roster.leaveRequests.push(request)
+    roster.lastSavedAt = now
+    roster.audit.push({
+      id: id('audit'),
+      at: now,
+      actor: member.name,
+      action: 'leave-request-submitted',
+      reason: `${input.startDate}–${input.endDate}: ${request.reason}`,
+      version: roster.version,
+    })
+    return this.writeRoster(roster)
+  }
+
+  decideLeaveRequest(
+    weekStart: string,
+    requestId: string,
+    decision: 'approve' | 'reject',
+    reason: string,
+  ): WeeklyRoster {
+    const roster = this.getRoster(weekStart)
+    const request = roster.leaveRequests.find((item) => item.id === requestId && item.branchId === roster.branchId)
+    if (!request) throw new Error('Энэ салбарт чөлөөний хүсэлт олдсонгүй.')
+    if (request.status !== 'pending') throw new Error('Энэ чөлөөний хүсэлтэд шийдвэр аль хэдийн тэмдэглэгдсэн байна.')
+    if (reason.trim().length < 5) throw new Error('Шийдвэрийн шалтгааныг дор хаяж 5 тэмдэгтээр тодорхой бичнэ үү.')
+
+    const now = new Date().toISOString()
+    request.status = decision === 'approve' ? 'approved' : 'rejected'
+    request.decision = { action: decision, actor: roster.managerName, reason: reason.trim(), at: now }
+    roster.lastSavedAt = now
+    roster.audit.push({
+      id: id('audit'),
+      at: now,
+      actor: roster.managerName,
+      action: 'leave-request-decided',
+      reason: `${decision === 'approve' ? 'Зөвшөөрсөн' : 'Татгалзсан'}: ${reason.trim()}`,
+      version: roster.version,
+    })
+    return this.writeRoster(roster)
+  }
+
+  getPenaltyReviews(weekStart: string): PenaltyReview[] {
+    return this.getAttendanceExceptions(weekStart)
+      .filter((exception): exception is AttendanceException & { type: 'late' | 'no-show' } => (
+        exception.type === 'late' || exception.type === 'no-show'
+      ))
+      .map((exception) => ({
+        id: `penalty-${exception.id}`,
+        exceptionId: exception.id,
+        teamMemberId: exception.teamMemberId,
+        date: exception.date,
+        attendanceType: exception.type,
+        scheduledStart: exception.scheduledStart,
+        checkInAt: exception.checkInAt,
+        lateMinutes: exception.lateMinutes,
+        evidence: exception.evidence,
+        attendanceStatus: exception.status,
+        state: exception.status === 'open'
+          ? 'attendance-pending'
+          : exception.status === 'confirmed'
+            ? 'policy-pending'
+            : 'excluded',
+      }))
+  }
+
   decideAttendanceException(
     weekStart: string,
     exceptionId: string,
@@ -387,7 +538,7 @@ export class BrowserWorkforceService implements WorkforceService {
     if (!exception) throw new Error('Энэ салбарт ирцийн зөрчил олдсонгүй.')
     if (exception.status !== 'open') throw new Error('Энэ ирцийн зөрчилд шийдвэр аль хэдийн тэмдэглэгдсэн байна.')
     if (reason.trim().length < 5) throw new Error('Шийдвэрийн шалтгааныг дор хаяж 5 тэмдэгтээр тодорхой бичнэ үү.')
-    const requestDecision = exception.type === 'correction' || exception.type === 'leave-request'
+    const requestDecision = exception.type === 'correction'
     const allowed = requestDecision ? ['approve', 'reject'] : ['excuse', 'confirm']
     if (!allowed.includes(decision)) throw new Error('Сонгосон зөрчилд энэ шийдвэр тохирохгүй байна.')
 
@@ -505,6 +656,7 @@ export class BrowserWorkforceService implements WorkforceService {
         )).length
       : 0
     const changeRequestCount = roster.assignments.filter((item) => item.response === 'change-requested').length
+    const leaveRequestCount = roster.leaveRequests.filter((item) => item.status === 'pending').length
     const managerEvents = roster.audit.filter((event) => event.actor === roster.managerName)
     const lastManagerEvent = managerEvents[managerEvents.length - 1]
     const actionLabels: Record<string, string> = {
@@ -516,6 +668,7 @@ export class BrowserWorkforceService implements WorkforceService {
       'requirements-updated': 'Хүний нөөцийн шаардлага шинэчилсэн',
       'attendance-decision-recorded': 'Ирцийн зөрчил хянасан',
       'availability-overridden': 'Багийн гишүүний ажиллах боломжийг шинэчилсэн',
+      'leave-request-decided': 'Чөлөөний хүсэлт шийдвэрлэсэн',
       published: 'Хуваарь нийтэлсэн',
     }
     const nextAction = publicationState === 'draft-overdue'
@@ -524,6 +677,8 @@ export class BrowserWorkforceService implements WorkforceService {
         ? `Хүн дутуу ${coverageGapCount} үүрэг-ээлжийн нөхөх арга хэмжээг баталгаажуулна уу.`
         : changeRequestCount > 0
           ? `Багийн гишүүний ${changeRequestCount} өөрчлөх хүсэлтийг хянана уу.`
+          : leaveRequestCount > 0
+            ? `Багийн гишүүний ${leaveRequestCount} чөлөөний хүсэлтийг хянана уу.`
           : pendingAcknowledgementCount > 0
             ? `Хугацаа хэтэрсэн ${pendingAcknowledgementCount} баталгаажуулалтыг шийдвэрлэхийг салбарын менежерт мэдэгдэнэ үү.`
             : 'Одоогоор нэмэлт хяналт шаардлагагүй.'
@@ -534,6 +689,7 @@ export class BrowserWorkforceService implements WorkforceService {
       coverageGapCount,
       pendingAcknowledgementCount,
       changeRequestCount,
+      leaveRequestCount,
       accountableManager: roster.managerName,
       lastManagerAction: lastManagerEvent ? actionLabels[lastManagerEvent.action] ?? lastManagerEvent.action : 'Менежерийн үйлдэл бүртгэгдээгүй',
       lastManagerActionAt: lastManagerEvent?.at ?? roster.lastSavedAt,
@@ -821,6 +977,7 @@ export class BrowserWorkforceService implements WorkforceService {
     roster.requirementsEffectiveFrom = weekStart
     roster.requirementVersion = 1
     roster.attendanceExceptions = []
+    roster.leaveRequests = []
     roster.availabilityOverrides = []
     roster.audit = [{
       id: id('audit'),

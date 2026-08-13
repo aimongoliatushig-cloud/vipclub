@@ -36,6 +36,9 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 | Task Comment / Evidence | Conversation, result notes, images, or other completion proof. | Operational Task |
 | Attendance Evidence Event | Check-in/out or attendance signal with source and original time. | Employee, Shift |
 | Attendance Correction Request | Evidence-backed correction, decision, and adjustment reference. | Attendance Event |
+| Leave / Day-off Request | Team-member self-service request with branch, date range, reason, Pending/Approved/Rejected state, and separate manager decision. Reuse ERPNext Leave Application where appropriate. | Employee, Club Branch, Shift Assignment, Manager Decision |
+| Penalty Review Candidate | Read-only bridge from confirmed lateness/no-show evidence to an effective policy workflow; contains no amount until an approved policy applies. | Attendance Evidence Event, Shift Assignment, Manager Decision, Policy Version |
+| Penalty / Deduction Record | Authorized, effective-policy result with category, formula inputs, amount, approver, appeal state, and payroll/settlement reference. It never replaces source attendance evidence. | Penalty Review Candidate, Policy Version, Payroll/Settlement |
 | Maintenance Request | Branch issue, urgency, assignee, due date, and completion evidence. | Club Branch, Task |
 
 ### ERPNext/Frappe workforce reuse
