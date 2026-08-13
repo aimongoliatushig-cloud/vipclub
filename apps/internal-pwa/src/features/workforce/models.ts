@@ -41,10 +41,30 @@ export interface RosterAuditEvent {
   id: string
   at: string
   actor: string
-  action: 'created' | 'assignment-added' | 'assignment-changed' | 'assignment-removed' | 'published' | 'copied'
+  action:
+    | 'created'
+    | 'assignment-added'
+    | 'assignment-changed'
+    | 'assignment-removed'
+    | 'published'
+    | 'copied'
+    | 'requirements-updated'
+    | 'manager-messaged'
+    | 'follow-up-created'
   reason?: string
   assignmentId?: string
   version: number
+  requirementVersion?: number
+}
+
+export interface ExecutiveFollowUpRecord {
+  id: string
+  createdAt: string
+  createdBy: string
+  action: 'message' | 'task'
+  note: string
+  dueDate?: string
+  status: 'recorded' | 'open'
 }
 
 export interface WeeklyRoster {
@@ -60,7 +80,24 @@ export interface WeeklyRoster {
   lastSavedAt: string
   assignments: ShiftAssignment[]
   requirements: StaffingRequirement[]
+  requirementVersion: number
+  requirementsEffectiveFrom: string
+  executiveFollowUps: ExecutiveFollowUpRecord[]
   audit: RosterAuditEvent[]
+}
+
+export interface ExecutiveFollowUpSummary {
+  publicationState: 'draft-overdue' | 'draft-on-time' | 'published-late' | 'published-on-time'
+  publicationLabel: string
+  coverageGapCount: number
+  pendingAcknowledgementCount: number
+  changeRequestCount: number
+  accountableManager: string
+  lastManagerAction: string
+  lastManagerActionAt: string
+  nextAction: string
+  dueDate: string
+  latestFollowUp?: ExecutiveFollowUpRecord
 }
 
 export interface AssignmentInput {

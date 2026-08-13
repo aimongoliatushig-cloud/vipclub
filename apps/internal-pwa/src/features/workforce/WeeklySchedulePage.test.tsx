@@ -33,4 +33,36 @@ describe('WeeklySchedulePage', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Draft shift saved')
   })
+
+  it('edits staffing requirements and exposes the resulting audit evidence', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('button', { name: /Staffing requirements/ }))
+    expect(screen.getByRole('dialog', { name: 'Minimum people required' })).toBeInTheDocument()
+    const bartenderRequirement = screen.getAllByRole('spinbutton', { name: /Bartender required/ })[0]
+    await user.clear(bartenderRequirement)
+    await user.type(bartenderRequirement, '2')
+    await user.type(screen.getByLabelText(/Reason for change/), 'Monday event needs a second bartender.')
+    await user.click(screen.getByRole('button', { name: /Save requirements/ }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('version 2')
+    await user.click(screen.getByRole('button', { name: /Audit evidence/ }))
+    expect(screen.getByRole('dialog', { name: 'Complete audit trail' })).toHaveTextContent('Staffing requirements updated')
+  })
+
+  it('records a CEO follow-up task from objective schedule evidence', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('button', { name: /CEO follow-up/ }))
+    const dialog = screen.getByRole('dialog', { name: 'Branch follow-up' })
+    expect(dialog).toHaveTextContent('This does not infer effort from missing activity')
+    expect(dialog).toHaveTextContent('Last recorded manager action')
+    await user.click(screen.getByRole('button', { name: 'Create follow-up task' }))
+    await user.click(screen.getByRole('button', { name: 'Create task' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('CEO follow-up task recorded')
+    expect(dialog).toHaveTextContent('Latest: task due')
+  })
 })

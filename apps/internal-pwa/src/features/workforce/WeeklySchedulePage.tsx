@@ -9,12 +9,16 @@ import {
   ClipboardCheck,
   Clock3,
   Copy,
+  FileClock,
   LayoutDashboard,
+  ListChecks,
   Menu,
+  MessageSquare,
   MoreHorizontal,
   Plus,
   Search,
   Send,
+  Settings2,
   ShieldCheck,
   Users,
   X,
@@ -24,7 +28,10 @@ import {
   shiftTemplates,
   workforceRoles,
   type AssignmentInput,
+  type ExecutiveFollowUpSummary,
+  type RosterAuditEvent,
   type ShiftAssignment,
+  type StaffingRequirement,
   type ShiftTemplateName,
   type TeamMember,
   type ValidationIssue,
@@ -35,6 +42,7 @@ import {
   addDays,
   getCoverage,
   startOfWeek,
+  toDateKey,
   weekDates,
   type WorkforceService,
 } from './workforceService'
@@ -213,6 +221,180 @@ function PublishReview({ roster, issues, onClose, onPublish }: PublishReviewProp
   )
 }
 
+interface StaffingRequirementsEditorProps {
+  roster: WeeklyRoster
+  onClose: () => void
+  onSave: (requirements: StaffingRequirement[], effectiveFrom: string, reason: string) => void
+}
+
+function StaffingRequirementsEditor({ roster, onClose, onSave }: StaffingRequirementsEditorProps) {
+  const [requirements, setRequirements] = useState(() => roster.requirements.map((item) => ({ ...item })))
+  const [effectiveFrom, setEffectiveFrom] = useState(roster.requirementsEffectiveFrom)
+  const [reason, setReason] = useState('')
+  const [error, setError] = useState('')
+  const dates = weekDates(roster.weekStart)
+
+  function updateRequired(date: string, role: WorkforceRole, value: string) {
+    const required = Number(value)
+    setRequirements((current) => current.map((item) => item.date === date && item.role === role ? { ...item, required } : item))
+  }
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    try {
+      onSave(requirements, effectiveFrom, reason)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to save staffing requirements.')
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="modal-card modal-card--requirements" role="dialog" aria-modal="true" aria-labelledby="requirements-title">
+        <header className="modal-header">
+          <div>
+            <span className="eyebrow">Staffing template · version {roster.requirementVersion}</span>
+            <h2 id="requirements-title">Minimum people required</h2>
+            <p>Set the operating minimum for every role and day. Changes are effective-dated and recorded.</p>
+          </div>
+          <button className="icon-button" type="button" aria-label="Close staffing requirements" onClick={onClose}><X size={20} /></button>
+        </header>
+        <form className="requirements-form" onSubmit={submit}>
+          <div className="requirements-scroll">
+            <div className="requirements-grid">
+              <strong className="requirements-corner">Role</strong>
+              {dates.map((date) => <span className="requirements-day" key={date}>{dayLabel.format(dateAtNoon(date))}<small>{dateAtNoon(date).getDate()}</small></span>)}
+              {workforceRoles.map((itemRole) => (
+                <div className="requirements-row" key={itemRole}>
+                  <strong>{itemRole}</strong>
+                  {dates.map((date) => {
+                    const requirement = requirements.find((item) => item.date === date && item.role === itemRole)
+                    return <input key={date} type="number" min="0" max="99" step="1" required value={requirement?.required ?? 0} aria-label={`${itemRole} required on ${date}`} onChange={(event) => updateRequired(date, itemRole, event.target.value)} />
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="requirements-meta">
+            <label><span>Effective from</span><input type="date" required value={effectiveFrom} onChange={(event) => setEffectiveFrom(event.target.value)} /></label>
+            <label className="requirements-reason"><span>Reason for change <b>Required</b></span><input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Example: Friday event needs higher floor coverage" /></label>
+          </div>
+          {error ? <p className="form-error" role="alert">{error}</p> : null}
+          <div className="modal-actions modal-actions--end">
+            <button className="button button--ghost" type="button" onClick={onClose}>Cancel</button>
+            <button className="button button--primary" type="submit"><Check size={17} />Save requirements</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  )
+}
+
+function auditActionLabel(action: RosterAuditEvent['action']): string {
+  const labels: Record<RosterAuditEvent['action'], string> = {
+    created: 'Weekly draft created',
+    copied: 'Previous week copied',
+    'assignment-added': 'Assignment added',
+    'assignment-changed': 'Assignment changed',
+    'assignment-removed': 'Assignment removed',
+    published: 'Schedule published',
+    'requirements-updated': 'Staffing requirements updated',
+    'manager-messaged': 'Branch Manager messaged',
+    'follow-up-created': 'CEO follow-up task created',
+  }
+  return labels[action]
+}
+
+interface AuditTrailPanelProps {
+  roster: WeeklyRoster
+  onClose: () => void
+}
+
+function AuditTrailPanel({ roster, onClose }: AuditTrailPanelProps) {
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="modal-card modal-card--audit" role="dialog" aria-modal="true" aria-labelledby="audit-title">
+        <header className="modal-header">
+          <div><span className="eyebrow">Schedule evidence</span><h2 id="audit-title">Complete audit trail</h2><p>Who changed what, when, and why for roster version {roster.version}.</p></div>
+          <button className="icon-button" type="button" aria-label="Close audit trail" onClick={onClose}><X size={20} /></button>
+        </header>
+        <div className="audit-list">
+          {[...roster.audit].reverse().map((event) => (
+            <article key={event.id}>
+              <span className="audit-icon"><FileClock size={18} /></span>
+              <div><strong>{auditActionLabel(event.action)}</strong><span>{event.actor} · roster v{event.version}{event.requirementVersion ? ` · requirement v${event.requirementVersion}` : ''}</span>{event.reason ? <p>{event.reason}</p> : null}</div>
+              <time dateTime={event.at}>{new Date(event.at).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</time>
+            </article>
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
+
+interface ExecutiveFollowUpPanelProps {
+  roster: WeeklyRoster
+  summary: ExecutiveFollowUpSummary
+  onClose: () => void
+  onRecord: (action: 'message' | 'task', note: string, dueDate?: string) => void
+}
+
+function ExecutiveFollowUpPanel({ roster, summary, onClose, onRecord }: ExecutiveFollowUpPanelProps) {
+  const [action, setAction] = useState<'message' | 'task'>('message')
+  const [note, setNote] = useState(summary.nextAction)
+  const today = toDateKey(new Date())
+  const [dueDate, setDueDate] = useState(addDays(today, 1))
+  const [error, setError] = useState('')
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    try {
+      onRecord(action, note, action === 'task' ? dueDate : undefined)
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Unable to record this follow-up.')
+    }
+  }
+
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <section className="modal-card modal-card--executive" role="dialog" aria-modal="true" aria-labelledby="executive-title">
+        <header className="modal-header">
+          <div><span className="eyebrow">Prototype · CEO evidence view</span><h2 id="executive-title">Branch follow-up</h2><p>Objective schedule signals for {roster.branchName}. This does not infer effort from missing activity.</p></div>
+          <button className="icon-button" type="button" aria-label="Close CEO follow-up" onClick={onClose}><X size={20} /></button>
+        </header>
+        <div className="executive-owner">
+          <div className="avatar">AM</div><div><span>Accountable Branch Manager</span><strong>{summary.accountableManager}</strong></div>
+          <span className="evidence-state" data-state={summary.publicationState}>{summary.publicationLabel} · deadline {new Date(summary.dueDate).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}</span>
+        </div>
+        <div className="executive-signals">
+          <article><span>Coverage gap</span><strong>{summary.coverageGapCount}</strong><small>Uncovered role-shifts</small></article>
+          <article><span>Pending response</span><strong>{summary.pendingAcknowledgementCount}</strong><small>Published assignments</small></article>
+          <article><span>Change requests</span><strong>{summary.changeRequestCount}</strong><small>Team-member requests</small></article>
+        </div>
+        <div className="manager-evidence">
+          <ListChecks size={19} /><div><span>Last recorded manager action</span><strong>{summary.lastManagerAction}</strong><small>{new Date(summary.lastManagerActionAt).toLocaleString()}</small></div>
+        </div>
+        <div className="recommended-action"><strong>Recommended next action</strong><p>{summary.nextAction}</p></div>
+        {summary.latestFollowUp ? <div className="latest-follow-up"><Check size={17} /><span>Latest: {summary.latestFollowUp.action === 'message' ? 'message recorded' : `task due ${summary.latestFollowUp.dueDate}`} · {summary.latestFollowUp.note}</span></div> : null}
+        <div className="integration-note"><ShieldCheck size={16} /><span>This prototype records outreach evidence only. Slack delivery requires the secure notification integration.</span></div>
+        <form className="follow-up-form" onSubmit={submit}>
+          <div className="action-toggle" aria-label="Follow-up type">
+            <button type="button" className={action === 'message' ? 'active' : ''} onClick={() => setAction('message')}><MessageSquare size={17} />Message manager</button>
+            <button type="button" className={action === 'task' ? 'active' : ''} onClick={() => setAction('task')}><ClipboardCheck size={17} />Create follow-up task</button>
+          </div>
+          <label><span>Specific follow-up note</span><textarea rows={3} value={note} onChange={(event) => setNote(event.target.value)} /></label>
+          {action === 'task' ? <label className="follow-up-due"><span>Due date</span><input type="date" min={today} required value={dueDate} onChange={(event) => setDueDate(event.target.value)} /></label> : null}
+          {error ? <p className="form-error" role="alert">{error}</p> : null}
+          <div className="modal-actions modal-actions--end">
+            <button className="button button--ghost" type="button" onClick={onClose}>Cancel</button>
+            <button className="button button--primary" type="submit">{action === 'message' ? <MessageSquare size={17} /> : <ClipboardCheck size={17} />}{action === 'message' ? 'Record message' : 'Create task'}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  )
+}
+
 export interface WeeklySchedulePageProps {
   service: WorkforceService
 }
@@ -225,6 +407,9 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
   const [role, setRole] = useState<'All' | WorkforceRole>('All')
   const [editor, setEditor] = useState<EditorState | null>(null)
   const [publishOpen, setPublishOpen] = useState(false)
+  const [requirementsOpen, setRequirementsOpen] = useState(false)
+  const [auditOpen, setAuditOpen] = useState(false)
+  const [executiveOpen, setExecutiveOpen] = useState(false)
   const [message, setMessage] = useState('')
   const [menuOpen, setMenuOpen] = useState(false)
   const teamMembers = useMemo(() => service.getTeamMembers(), [service])
@@ -233,11 +418,15 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
     setRoster(service.getRoster(weekStart))
     setSelectedDay(weekStart)
     setMessage('')
+    setRequirementsOpen(false)
+    setAuditOpen(false)
+    setExecutiveOpen(false)
   }, [service, weekStart])
 
   const dates = weekDates(weekStart)
   const coverage = useMemo(() => getCoverage(roster), [roster])
   const issues = useMemo(() => service.validateRoster(roster), [roster, service])
+  const executiveSummary = useMemo(() => service.getExecutiveFollowUp(weekStart), [roster, service, weekStart])
   const openGaps = coverage.reduce((sum, item) => sum + item.gap, 0)
   const required = coverage.reduce((sum, item) => sum + item.required, 0)
   const scheduled = coverage.reduce((sum, item) => sum + item.scheduled, 0)
@@ -277,6 +466,19 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
     const next = service.copyPreviousWeek(weekStart)
     setRoster(next)
     setMessage('Previous week copied into a new draft. Review leave, eligibility, and coverage before publishing.')
+  }
+
+  function saveRequirements(requirements: StaffingRequirement[], effectiveFrom: string, reason: string) {
+    const next = service.saveRequirements(weekStart, requirements, effectiveFrom, reason)
+    setRoster(next)
+    setRequirementsOpen(false)
+    setMessage(`Staffing requirements saved as version ${next.requirementVersion}. Coverage has been recalculated.`)
+  }
+
+  function recordExecutiveFollowUp(action: 'message' | 'task', note: string, dueDate?: string) {
+    const next = service.recordExecutiveFollowUp(weekStart, action, note, dueDate)
+    setRoster(next)
+    setMessage(action === 'message' ? 'Manager message recorded in the audit trail.' : `CEO follow-up task recorded for ${dueDate}.`)
   }
 
   return (
@@ -329,6 +531,12 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
           </section>
 
           {message ? <div className="status-message" role="status"><Check size={18} /><span>{message}</span><button type="button" aria-label="Dismiss message" onClick={() => setMessage('')}><X size={17} /></button></div> : null}
+
+          <section className="planning-actions" aria-label="Planning and accountability tools">
+            <button type="button" onClick={() => setRequirementsOpen(true)}><span className="planning-action-icon"><Settings2 size={19} /></span><span><strong>Staffing requirements</strong><small>Template v{roster.requirementVersion} · effective {shortDate.format(dateAtNoon(roster.requirementsEffectiveFrom))}</small></span><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setAuditOpen(true)}><span className="planning-action-icon"><FileClock size={19} /></span><span><strong>Audit evidence</strong><small>{roster.audit.length} recorded schedule events</small></span><ChevronRight size={18} /></button>
+            <button type="button" onClick={() => setExecutiveOpen(true)} data-tone={executiveSummary.publicationState === 'draft-overdue' || openGaps ? 'attention' : 'neutral'}><span className="planning-action-icon"><CircleGauge size={19} /></span><span><strong>CEO follow-up</strong><small>{executiveSummary.publicationLabel}</small></span><ChevronRight size={18} /></button>
+          </section>
 
           <section className="metric-grid" aria-label="Weekly schedule summary">
             <article><div className="metric-icon metric-icon--blue"><Users size={20} /></div><div><span>Team members</span><strong>{teamMembers.filter((member) => member.active).length}</strong><small>Active in this branch</small></div></article>
@@ -407,7 +615,7 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
           </div>
 
           <section className="activity-card">
-            <header className="card-header"><div><h2>Recent schedule activity</h2><p>Versioned evidence for manager and CEO follow-up.</p></div><button className="button button--ghost" type="button">View audit trail</button></header>
+            <header className="card-header"><div><h2>Recent schedule activity</h2><p>Versioned evidence for manager and CEO follow-up.</p></div><button className="button button--ghost" type="button" onClick={() => setAuditOpen(true)}>View audit trail</button></header>
             <div className="activity-list">
               {roster.audit.slice(-4).reverse().map((event) => (
                 <article key={event.id}><span className="activity-mark"><ClipboardCheck size={17} /></span><div><strong>{event.action.replaceAll('-', ' ')}</strong><small>{event.actor} · version {event.version}{event.reason ? ` · ${event.reason}` : ''}</small></div><time>{new Date(event.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</time></article>
@@ -419,6 +627,9 @@ export function WeeklySchedulePage({ service }: WeeklySchedulePageProps) {
 
       {editor ? <AssignmentEditor state={editor} roster={roster} teamMembers={teamMembers} onClose={() => setEditor(null)} onSave={saveAssignment} onRemove={removeAssignment} /> : null}
       {publishOpen ? <PublishReview roster={roster} issues={issues} onClose={() => setPublishOpen(false)} onPublish={publish} /> : null}
+      {requirementsOpen ? <StaffingRequirementsEditor roster={roster} onClose={() => setRequirementsOpen(false)} onSave={saveRequirements} /> : null}
+      {auditOpen ? <AuditTrailPanel roster={roster} onClose={() => setAuditOpen(false)} /> : null}
+      {executiveOpen ? <ExecutiveFollowUpPanel roster={roster} summary={executiveSummary} onClose={() => setExecutiveOpen(false)} onRecord={recordExecutiveFollowUp} /> : null}
     </div>
   )
 }

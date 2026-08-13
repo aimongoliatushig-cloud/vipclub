@@ -3,6 +3,7 @@ import {
   workforceRoles,
   type AssignmentInput,
   type CoverageRow,
+  type ExecutiveFollowUpSummary,
   type ShiftAssignment,
   type StaffingRequirement,
   type TeamMember,
@@ -61,6 +62,14 @@ export interface WorkforceService {
   removeAssignment(weekStart: string, assignmentId: string, reason?: string): WeeklyRoster
   publishRoster(weekStart: string, shortageReason?: string): WeeklyRoster
   copyPreviousWeek(weekStart: string): WeeklyRoster
+  saveRequirements(weekStart: string, requirements: StaffingRequirement[], effectiveFrom: string, reason: string): WeeklyRoster
+  getExecutiveFollowUp(weekStart: string, now?: Date): ExecutiveFollowUpSummary
+  recordExecutiveFollowUp(
+    weekStart: string,
+    action: 'message' | 'task',
+    note: string,
+    dueDate?: string,
+  ): WeeklyRoster
   validateRoster(roster: WeeklyRoster): ValidationIssue[]
 }
 
@@ -86,6 +95,10 @@ function id(prefix: string): string {
 
 function clone<T>(value: T): T {
   return structuredClone(value)
+}
+
+function isDateKey(value: string): boolean {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) && toDateKey(parseDateKey(value)) === value
 }
 
 function createRequirements(weekStart: string): StaffingRequirement[] {
@@ -147,6 +160,9 @@ function createSeedRoster(weekStart: string): WeeklyRoster {
     lastSavedAt: now,
     assignments,
     requirements: createRequirements(weekStart),
+    requirementVersion: 1,
+    requirementsEffectiveFrom: weekStart,
+    executiveFollowUps: [],
     audit: [{ id: id('audit'), at: now, actor: 'Ariun Manager', action: 'created', version: 1 }],
   }
 }
@@ -183,7 +199,146 @@ export class BrowserWorkforceService implements WorkforceService {
 
   getRoster(weekStart: string): WeeklyRoster {
     const existing = this.readState().rosters[weekStart]
-    return existing ? clone(existing) : this.writeRoster(createSeedRoster(weekStart))
+    if (!existing) return this.writeRoster(createSeedRoster(weekStart))
+
+    const needsMigration = !('requirementVersion' in existing) || !('executiveFollowUps' in existing)
+    const roster = {
+      ...existing,
+      requirementVersion: existing.requirementVersion ?? 1,
+      requirementsEffectiveFrom: existing.requirementsEffectiveFrom ?? existing.weekStart,
+      executiveFollowUps: existing.executiveFollowUps ?? [],
+    }
+    return needsMigration ? this.writeRoster(roster) : clone(roster)
+  }
+
+  saveRequirements(
+    weekStart: string,
+    requirements: StaffingRequirement[],
+    effectiveFrom: string,
+    reason: string,
+  ): WeeklyRoster {
+    const roster = this.getRoster(weekStart)
+    if (!reason.trim()) throw new Error('Record why the staffing requirement changed.')
+    if (!isDateKey(effectiveFrom)) throw new Error('Choose when these requirements take effect.')
+
+    const expectedKeys = weekDates(weekStart).flatMap((date) => workforceRoles.map((role) => `${date}:${role}`))
+    const submitted = new Map(requirements.map((item) => [`${item.date}:${item.role}`, item]))
+    if (requirements.length !== expectedKeys.length || submitted.size !== expectedKeys.length) {
+      throw new Error('Provide one staffing requirement for every day and role.')
+    }
+
+    const normalized = expectedKeys.map((key) => {
+      const item = submitted.get(key)
+      if (!item || !Number.isInteger(item.required) || item.required < 0 || item.required > 99) {
+        throw new Error('Staffing requirements must be whole numbers from 0 to 99.')
+      }
+      return { ...item }
+    })
+
+    const now = new Date().toISOString()
+    roster.requirements = normalized
+    roster.requirementVersion += 1
+    roster.requirementsEffectiveFrom = effectiveFrom
+    roster.lastSavedAt = now
+    roster.audit.push({
+      id: id('audit'),
+      at: now,
+      actor: roster.managerName,
+      action: 'requirements-updated',
+      reason: reason.trim(),
+      version: roster.version,
+      requirementVersion: roster.requirementVersion,
+    })
+    return this.writeRoster(roster)
+  }
+
+  getExecutiveFollowUp(weekStart: string, now = new Date()): ExecutiveFollowUpSummary {
+    const roster = this.getRoster(weekStart)
+    const deadline = new Date(roster.publicationDue)
+    const hasPublication = Boolean(roster.publishedAt) || roster.status === 'published' || roster.status === 'closed' || roster.status === 'superseded'
+    const wasPublishedLate = Boolean(roster.publishedAt && new Date(roster.publishedAt) > deadline)
+    const publicationState: ExecutiveFollowUpSummary['publicationState'] = hasPublication
+      ? wasPublishedLate ? 'published-late' : 'published-on-time'
+      : now > deadline ? 'draft-overdue' : 'draft-on-time'
+    const publicationLabels: Record<ExecutiveFollowUpSummary['publicationState'], string> = {
+      'draft-overdue': 'Draft is overdue for publication',
+      'draft-on-time': 'Draft is still within its publication window',
+      'published-late': 'Schedule was published after its deadline',
+      'published-on-time': 'Schedule was published on time',
+    }
+    const coverageGapCount = getCoverage(roster).reduce((total, row) => total + row.gap, 0)
+    const pendingAcknowledgementCount = hasPublication
+      ? roster.assignments.filter((item) => item.response === 'assigned').length
+      : 0
+    const changeRequestCount = roster.assignments.filter((item) => item.response === 'change-requested').length
+    const managerEvents = roster.audit.filter((event) => event.actor === roster.managerName)
+    const lastManagerEvent = managerEvents[managerEvents.length - 1]
+    const actionLabels: Record<string, string> = {
+      created: 'Created the weekly draft',
+      copied: 'Copied the previous week',
+      'assignment-added': 'Added an assignment',
+      'assignment-changed': 'Changed an assignment',
+      'assignment-removed': 'Removed an assignment',
+      'requirements-updated': 'Updated staffing requirements',
+      published: 'Published the schedule',
+    }
+    const nextAction = publicationState === 'draft-overdue'
+      ? 'Contact the Branch Manager and create a due-dated publication follow-up.'
+      : coverageGapCount > 0
+        ? `Confirm mitigation for ${coverageGapCount} uncovered role-shift${coverageGapCount === 1 ? '' : 's'}.`
+        : pendingAcknowledgementCount > 0
+          ? `Ask the Branch Manager to resolve ${pendingAcknowledgementCount} pending acknowledgement${pendingAcknowledgementCount === 1 ? '' : 's'}.`
+          : changeRequestCount > 0
+            ? `Review ${changeRequestCount} team-member change request${changeRequestCount === 1 ? '' : 's'}.`
+            : 'No follow-up is currently required.'
+
+    return {
+      publicationState,
+      publicationLabel: publicationLabels[publicationState],
+      coverageGapCount,
+      pendingAcknowledgementCount,
+      changeRequestCount,
+      accountableManager: roster.managerName,
+      lastManagerAction: lastManagerEvent ? actionLabels[lastManagerEvent.action] ?? lastManagerEvent.action : 'No manager activity recorded',
+      lastManagerActionAt: lastManagerEvent?.at ?? roster.lastSavedAt,
+      nextAction,
+      dueDate: roster.publicationDue,
+      latestFollowUp: roster.executiveFollowUps[roster.executiveFollowUps.length - 1],
+    }
+  }
+
+  recordExecutiveFollowUp(
+    weekStart: string,
+    action: 'message' | 'task',
+    note: string,
+    dueDate?: string,
+  ): WeeklyRoster {
+    const roster = this.getRoster(weekStart)
+    if (!note.trim()) throw new Error('Add a specific follow-up note.')
+    if (action === 'task' && !isDateKey(dueDate ?? '')) {
+      throw new Error('Choose a due date for the follow-up task.')
+    }
+
+    const now = new Date().toISOString()
+    roster.executiveFollowUps.push({
+      id: id('follow-up'),
+      createdAt: now,
+      createdBy: 'CEO Demo',
+      action,
+      note: note.trim(),
+      dueDate: action === 'task' ? dueDate : undefined,
+      status: action === 'message' ? 'recorded' : 'open',
+    })
+    roster.lastSavedAt = now
+    roster.audit.push({
+      id: id('audit'),
+      at: now,
+      actor: 'CEO Demo',
+      action: action === 'message' ? 'manager-messaged' : 'follow-up-created',
+      reason: note.trim(),
+      version: roster.version,
+    })
+    return this.writeRoster(roster)
   }
 
   validateRoster(roster: WeeklyRoster): ValidationIssue[] {
@@ -319,6 +474,9 @@ export class BrowserWorkforceService implements WorkforceService {
       date: addDays(item.date, 7),
       response: 'assigned',
     }))
+    roster.requirements = previous.requirements.map((item) => ({ ...item, date: addDays(item.date, 7) }))
+    roster.requirementsEffectiveFrom = weekStart
+    roster.requirementVersion = 1
     roster.audit = [{
       id: id('audit'),
       at: now,

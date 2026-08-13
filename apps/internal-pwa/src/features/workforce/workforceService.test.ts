@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { BrowserWorkforceService, resetWorkforcePrototype, startOfWeek } from './workforceService'
+import { addDays, BrowserWorkforceService, resetWorkforcePrototype, startOfWeek } from './workforceService'
 
 describe('Branch Manager weekly scheduling rules', () => {
   beforeEach(() => resetWorkforcePrototype())
@@ -56,5 +56,59 @@ describe('Branch Manager weekly scheduling rules', () => {
       date: original.date,
       shift: 'Day',
     })).toThrow(/already has a shift/i)
+  })
+
+  it('versions effective-dated staffing requirements with a reason', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    const roster = service.getRoster(weekStart)
+    const requirements = roster.requirements.map((item, index) => index === 0 ? { ...item, required: item.required + 1 } : item)
+
+    expect(() => service.saveRequirements(weekStart, requirements, weekStart, '')).toThrow(/why/i)
+
+    const updated = service.saveRequirements(weekStart, requirements, weekStart, 'Reservation forecast increased.')
+    expect(updated.requirementVersion).toBe(2)
+    expect(updated.requirements[0].required).toBe(roster.requirements[0].required + 1)
+    expect(updated.audit.at(-1)).toMatchObject({
+      action: 'requirements-updated',
+      reason: 'Reservation forecast increased.',
+      requirementVersion: 2,
+    })
+  })
+
+  it('carries the previous staffing template into a copied week', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+    const previousWeek = addDays(weekStart, -7)
+    const previous = service.getRoster(previousWeek)
+    const requirements = previous.requirements.map((item, index) => index === 0 ? { ...item, required: 4 } : item)
+    service.saveRequirements(previousWeek, requirements, previousWeek, 'Recurring Monday event.')
+
+    const copied = service.copyPreviousWeek(weekStart)
+    expect(copied.requirements[0]).toMatchObject({ date: weekStart, required: 4 })
+    expect(copied.requirementsEffectiveFrom).toBe(weekStart)
+  })
+
+  it('summarizes objective CEO follow-up evidence without inferring effort', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+
+    const summary = service.getExecutiveFollowUp(weekStart, new Date('2026-08-13T12:00:00+08:00'))
+
+    expect(summary.publicationState).toBe('draft-overdue')
+    expect(summary.coverageGapCount).toBe(2)
+    expect(summary.accountableManager).toBe('Ariun Manager')
+    expect(summary.lastManagerAction).toMatch(/Created/)
+  })
+
+  it('records due-dated CEO follow-up tasks in the audit trail', () => {
+    const service = new BrowserWorkforceService()
+    const weekStart = startOfWeek(new Date('2026-08-13T12:00:00'))
+
+    expect(() => service.recordExecutiveFollowUp(weekStart, 'task', 'Publish the roster.')).toThrow(/due date/i)
+
+    const updated = service.recordExecutiveFollowUp(weekStart, 'task', 'Publish the roster.', '2026-08-14')
+    expect(updated.executiveFollowUps.at(-1)).toMatchObject({ action: 'task', status: 'open', dueDate: '2026-08-14' })
+    expect(updated.audit.at(-1)).toMatchObject({ actor: 'CEO Demo', action: 'follow-up-created' })
   })
 })
