@@ -1,0 +1,24 @@
+{
+ "actions": [],
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["absence_deduction", "late_deduction_per_minute", "same_day_request_deadline", "emergency_leave_monthly_limit", "timezone"],
+ "fields": [
+  {"fieldname":"absence_deduction","fieldtype":"Currency","label":"Full-day Absence Deduction","default":"150000","reqd":1},
+  {"fieldname":"late_deduction_per_minute","fieldtype":"Currency","label":"Late Deduction per Minute","default":"500","reqd":1},
+  {"fieldname":"same_day_request_deadline","fieldtype":"Time","label":"Previous-day Request Deadline","default":"21:00:00","reqd":1,"description":"Overnight shift leave requests close at this time on the previous calendar day."},
+  {"fieldname":"emergency_leave_monthly_limit","fieldtype":"Int","label":"Emergency Leave Monthly Limit","default":"2","reqd":1},
+  {"fieldname":"timezone","fieldtype":"Data","label":"Timezone","default":"Asia/Ulaanbaatar","read_only":1}
+ ],
+ "issingle": 1,
+ "module": "NOMAD VIP",
+ "name": "VIP Attendance Policy",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1},
+  {"role":"VIP Admin","read":1,"write":1},
+  {"role":"HR Manager","read":1,"write":1},
+  {"role":"Branch Manager","read":1},
+  {"role":"Entertainer","read":1}
+ ],
+ "track_changes": 1
+}

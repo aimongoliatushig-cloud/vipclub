@@ -2,11 +2,13 @@ import {
   AlertTriangle,
   ArrowRight,
   BadgeCheck,
+  Bell,
   CalendarOff,
   CalendarClock,
   Check,
   CircleGauge,
   CircleDollarSign,
+  ClipboardCheck,
   Clock3,
   FileCheck2,
   LockKeyhole,
@@ -49,7 +51,7 @@ import {
 } from './localization'
 import { weekDates } from './workforceService'
 
-export type ManagerView = 'overview' | 'schedule' | 'coverage' | 'attendance' | 'team' | 'customers' | 'rankings'
+export type ManagerView = 'overview' | 'tasks' | 'goal-planning' | 'operations' | 'inbox' | 'recommendations' | 'schedule' | 'coverage' | 'attendance' | 'team' | 'customers' | 'rankings'
 
 function statusLabel(status: OperationalStatus): string {
   return operationalStatusLabels[status]
@@ -117,7 +119,7 @@ function SalesGoalSpotlight({ goal, branchName, onNavigate }: { goal?: BranchSal
 
       <footer className="sales-goal-footer">
         <span><strong>{goal.actualSource}</strong> · {goal.sourceState === 'reconciled' ? 'Тулгалттай' : 'Шинэчлэлт хоцорсон'} · {formatDateTime(goal.dataFreshAt)}</span>
-        <button className="button button--secondary" type="button" onClick={() => onNavigate('customers')}>Харилцагчийн түвшин ба CRM<ArrowRight size={16} /></button>
+        <div className="sales-goal-links"><button className="button button--secondary" type="button" onClick={() => onNavigate('goal-planning')}>Дараагийн сарын санал<ArrowRight size={16} /></button><button className="button button--secondary" type="button" onClick={() => onNavigate('customers')}>Харилцагчийн түвшин ба CRM<ArrowRight size={16} /></button></div>
       </footer>
     </section>
   )
@@ -131,12 +133,16 @@ interface OverviewProps {
   openAttendance: number
   openResponses: number
   openGaps: number
+  openTasks: number
+  tasksToReview: number
+  openOperations: number
+  unreadNotifications: number
   message: string
   onDismissMessage: () => void
   onNavigate: (view: ManagerView) => void
 }
 
-export function ManagerOverviewView({ roster, dashboard, salesGoal, readiness, openAttendance, openResponses, openGaps, message, onDismissMessage, onNavigate }: OverviewProps) {
+export function ManagerOverviewView({ roster, dashboard, salesGoal, readiness, openAttendance, openResponses, openGaps, openTasks, tasksToReview, openOperations, unreadNotifications, message, onDismissMessage, onNavigate }: OverviewProps) {
   const today = weekDates(roster.weekStart).find((date) => date === new Date().toISOString().slice(0, 10)) ?? roster.weekStart
   const todayRows = readiness.filter((item) => item.date === today)
   const required = todayRows.reduce((sum, item) => sum + item.required, 0)
@@ -183,6 +189,9 @@ export function ManagerOverviewView({ roster, dashboard, salesGoal, readiness, o
       <section className="workspace-panel manager-queue-summary">
         <header className="card-header"><div><span className="eyebrow">Шийдвэрлэх ажлууд</span><h2>Менежерийн хяналт</h2><p>Хянаж шийдвэрлэх шаардлагатай үйл ажиллагааны баримтууд.</p></div><FileCheck2 size={22} /></header>
         <button type="button" onClick={() => onNavigate('attendance')}><span><AlertTriangle size={17} /><strong>Ирцийн зөрчлүүд</strong></span><b>{openAttendance}</b></button>
+        <button type="button" onClick={() => onNavigate('tasks')}><span><FileCheck2 size={17} /><strong>Даалгавар · хянуулах {tasksToReview}</strong></span><b>{openTasks}</b></button>
+        <button type="button" onClick={() => onNavigate('operations')}><span><ClipboardCheck size={17} /><strong>Үйл ажиллагааны хяналт</strong></span><b>{openOperations}</b></button>
+        <button type="button" onClick={() => onNavigate('inbox')}><span><Bell size={17} /><strong>Уншаагүй мэдэгдэл</strong></span><b>{unreadNotifications}</b></button>
         <button type="button" onClick={() => onNavigate('schedule')}><span><CalendarClock size={17} /><strong>Ээлжийн хариунууд</strong></span><b>{openResponses}</b></button>
         <button type="button" onClick={() => onNavigate('coverage')}><span><CircleGauge size={17} /><strong>Хангалтын дутагдал</strong></span><b>{openGaps}</b></button>
       </section>

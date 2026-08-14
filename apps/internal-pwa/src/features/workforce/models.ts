@@ -1,4 +1,4 @@
-export const workforceRoles = ['Entertainer', 'Server', 'Bartender', 'Reception', 'Security'] as const
+export const workforceRoles = ['Entertainer', 'Server', 'Bartender', 'Reception', 'Security', 'Driver', 'Maintenance'] as const
 export type WorkforceRole = (typeof workforceRoles)[number]
 
 export const shiftTemplates = {

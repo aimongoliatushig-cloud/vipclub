@@ -1,0 +1,10 @@
+/server/
+/server-full/
+/manager-integration-*.tgz
+/manager-deploy-*/
+/deploy-temp/
+**/__pycache__/
+*.pyc
+/apps/internal-pwa/dist/
+/apps/internal-pwa/dev-dist/
+/apps/nomad_vip/artifacts/

@@ -12,6 +12,25 @@ Define role-aware internal PWA user journeys, workspaces, navigation, and notifi
 
 The application is one role-aware internal PWA. Server-side permissions determine available data and actions.
 
+## Role-aware entry and shared decision flow
+
+After authentication, one session shell resolves the user's role and authorized branch scope:
+
+- **CEO** lands on a company-wide dashboard with branch sales progress, branch risks, executive workforce evidence, masked CRM/ranking evidence, and the final approval queue.
+- **Branch Manager** lands on the manager overview for the assigned branch with the branch sales goal first, followed by tasks, operations, workforce, attendance, CRM, and recommendations.
+
+The navigation and actions are permission-filtered, not merely hidden by page styling. A Branch Manager session cannot call CEO approval operations, and a CEO session does not receive the routine weekly schedule editor as its default workspace.
+
+Manager goal and rank/membership submissions and CEO decisions use one shared record. The flow must preserve:
+
+1. manager draft and submission state;
+2. the source value, proposal, evidence, version, actor, and timestamp;
+3. CEO approve, revision-request, or reject authority;
+4. the CEO decision state and comment on the same record;
+5. the decision result in the Manager workspace without granting the Manager an approval override.
+
+The browser prototype persists this contract in a shared local store for interaction testing. Production must replace it with an authenticated server session, server-side branch/permission enforcement, and transactional API persistence.
+
 ## Branch Manager default overview
 
 The default page for a Branch Manager is the manager overview for the authenticated manager's authorized branch. The first business panel must show the current active monthly sales goal before operational workforce cards:
@@ -40,6 +59,35 @@ The customer directory should expose, without opening every record:
 - ordering by membership level, total expenditure, average expenditure, and latest visit.
 
 Opening a customer preserves the detailed visit, spend range, affinity, consent, benefit-use, and policy evidence already defined for the manager CRM. Search and sorting do not grant membership editing, approval, export, or cross-branch access.
+
+## Branch Manager operations workspace
+
+The Branch Manager navigation provides one branch-scoped operations center with three queues:
+
+1. **Reservations** — request, confirm, mark arrived, complete, or cancel using the permitted lifecycle. New records use a masked phone identifier in the browser; full identity matching remains a production server responsibility.
+2. **Maintenance** — report a problem, assign a technical/facilities owner and due date, inspect result/evidence, verify closure, or return for rework. The worker performs the repair; the manager verifies the submitted outcome.
+3. **Service feedback and complaints** — triage normal service concerns, route them to the responsible owner, and close branch-service issues. HR-restricted complaint details remain hidden and can only be handed to the authorized HR owner.
+
+The default overview queue includes requested reservations, maintenance results waiting for verification, and unresolved service issues.
+
+## Manager information center
+
+The Manager information center separates three kinds of evidence:
+
+- internal PWA notifications with severity, read state, related work, and recorded escalation;
+- formal branch instructions with audience, due date, and per-person acknowledgement;
+- customer communication history with masked identity, purpose, channel, consent state, delivery evidence, and date.
+
+A Branch Manager may prepare a segment/communication handoff for the CRM/marketing owner. The screen must clearly state that the handoff does not send a campaign. No external channel may be shown as delivered without provider evidence.
+
+## Manager decision recommendations
+
+The Branch Manager can prepare and submit:
+
+- an entertainer rank recommendation based on the approved 14-day evaluation evidence; and
+- a support/retain-current recommendation for customer membership evaluation.
+
+Each card keeps the current source value, proposed value, evidence, reason, policy status, and submission/decision state separate. The Manager interface has no approve or override action. CEO final rank decisions and authorized CRM/CEO membership decisions remain separate workflows.
 
 ## Branch Manager workforce workspace
 
@@ -220,6 +268,7 @@ The PWA must not be the only authorization layer. Every staffing-template edit, 
 
 ## Related documents
 
+- [CEO and Branch Manager role integration](../decisions/2026-08-13-ceo-manager-role-integration.md)
 - [Branch workforce scheduling decision](../decisions/2026-08-13-branch-workforce-scheduling.md)
 - [Workforce module](../04-modules/workforce/README.md)
 - [Role permission matrix](../03-roles/ROLE_PERMISSION_MATRIX.md)

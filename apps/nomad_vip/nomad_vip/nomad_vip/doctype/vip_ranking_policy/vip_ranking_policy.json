@@ -1,0 +1,39 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:version",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["version","effective_from","status","evaluation_section","evaluation_mode","evaluation_window_days","evaluation_cadence","weights_section","sales_weight","attendance_weight","loyalty_weight","behavior_weight","points_section","ready_points","not_ready_points","notes"],
+ "fields": [
+  {"fieldname":"version","fieldtype":"Data","label":"Бодлогын хувилбар","reqd":1,"unique":1,"in_list_view":1},
+  {"fieldname":"effective_from","fieldtype":"Date","label":"Мөрдөж эхлэх огноо","reqd":1,"in_list_view":1},
+  {"fieldname":"status","fieldtype":"Select","label":"Төлөв","options":"Draft\nPublished\nRetired","default":"Draft","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"evaluation_section","fieldtype":"Section Break","label":"Зэрэглэлийн үнэлгээ"},
+  {"fieldname":"evaluation_mode","fieldtype":"Select","label":"Үнэлгээний горим","options":"Shadow\nActive","default":"Shadow","reqd":1,"description":"Shadow үед нотолгоо цуглуулж харуулах боловч автомат зэрэглэл тогтоохгүй."},
+  {"fieldname":"evaluation_window_days","fieldtype":"Int","label":"Үнэлгээний хугацаа (хоног)","default":"62","reqd":1},
+  {"fieldname":"evaluation_cadence","fieldtype":"Select","label":"Албан үнэлгээний давтамж","options":"Monthly\nQuarterly","default":"Monthly","reqd":1},
+  {"fieldname":"weights_section","fieldtype":"Section Break","label":"Дөрвөн хэмжүүрийн жин"},
+  {"fieldname":"sales_weight","fieldtype":"Percent","label":"Борлуулалт ба гүйцэтгэл","default":"0"},
+  {"fieldname":"attendance_weight","fieldtype":"Percent","label":"Ирц ба найдвартай байдал","default":"0"},
+  {"fieldname":"loyalty_weight","fieldtype":"Percent","label":"Давтан үйлчлүүлэгч","default":"0"},
+  {"fieldname":"behavior_weight","fieldtype":"Percent","label":"Ажлын бэлэн байдал ба сахилга","default":"0"},
+  {"fieldname":"points_section","fieldtype":"Section Break","label":"Ажлын бэлэн байдлын оноо"},
+  {"fieldname":"ready_points","fieldtype":"Float","label":"Бэлэн үнэлгээний оноо","default":"5","reqd":1},
+  {"fieldname":"not_ready_points","fieldtype":"Float","label":"Бэлэн бус үнэлгээний оноо","default":"-10","reqd":1},
+  {"fieldname":"notes","fieldtype":"Small Text","label":"Тайлбар"}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Ranking Policy",
+ "naming_rule": "By fieldname",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1},
+  {"role":"Branch Manager","read":1},
+  {"role":"Entertainer Supervisor","read":1}
+ ],
+ "sort_field": "effective_from",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

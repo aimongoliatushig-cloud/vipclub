@@ -135,6 +135,9 @@ const teamMembers: TeamMember[] = [
   { id: 'tm-enkhjin', name: 'Амар Энхжин', initials: 'АЭ', branchId: AUTHORIZED_BRANCH_ID, role: 'Reception', active: true, unavailableDates: [], operationalStatus: 'serving', statusUpdatedAt: demoStatusAt },
   { id: 'tm-munkh', name: 'Оргил Мөнх', initials: 'ОМ', branchId: AUTHORIZED_BRANCH_ID, role: 'Security', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },
   { id: 'tm-altan', name: 'Сүх Алтан', initials: 'СА', branchId: AUTHORIZED_BRANCH_ID, role: 'Security', active: true, unavailableDates: [], operationalStatus: 'off-shift', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-bat', name: 'Техник Бат', initials: 'ТБ', branchId: AUTHORIZED_BRANCH_ID, role: 'Maintenance', active: true, unavailableDates: [], operationalStatus: 'available', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-tamir', name: 'Мужаан Тамир', initials: 'МТ', branchId: AUTHORIZED_BRANCH_ID, role: 'Maintenance', active: true, unavailableDates: [], operationalStatus: 'off-shift', statusUpdatedAt: demoStatusAt },
+  { id: 'tm-naran', name: 'Жолооч Наран', initials: 'ЖН', branchId: AUTHORIZED_BRANCH_ID, role: 'Driver', active: true, unavailableDates: [], operationalStatus: 'off-shift', statusUpdatedAt: demoStatusAt },
 ]
 
 function id(prefix: string): string {
@@ -177,7 +180,7 @@ function createRequirements(weekStart: string): StaffingRequirement[] {
     workforceRoles.map((role) => ({
       date,
       role,
-      required: role === 'Entertainer' ? (dayIndex === 4 || dayIndex === 5 ? 3 : 2) : 1,
+      required: role === 'Entertainer' ? (dayIndex === 4 || dayIndex === 5 ? 3 : 2) : role === 'Driver' || role === 'Maintenance' ? 0 : 1,
     })),
   )
 }
@@ -335,16 +338,25 @@ export class BrowserWorkforceService implements WorkforceService {
         ? { ...item, responseDueAt }
         : item
     ))
+    const expectedRequirements = createRequirements(existing.weekStart)
+    const requirementKeys = new Set(existing.requirements.map((item) => `${item.date}:${item.role}`))
+    const requirements = [
+      ...existing.requirements,
+      ...expectedRequirements.filter((item) => !requirementKeys.has(`${item.date}:${item.role}`)),
+    ]
+    const needsRoleMigration = requirements.length !== existing.requirements.length
     const needsResponseMigration = assignments.some((item, index) => item !== existing.assignments[index])
     const needsMigration = !('requirementVersion' in existing)
       || !('executiveFollowUps' in existing)
       || !('attendanceExceptions' in existing)
       || !('leaveRequests' in existing)
       || !('availabilityOverrides' in existing)
+      || needsRoleMigration
       || needsResponseMigration
     const roster = {
       ...existing,
       assignments,
+      requirements,
       requirementVersion: existing.requirementVersion ?? 1,
       requirementsEffectiveFrom: existing.requirementsEffectiveFrom ?? existing.weekStart,
       attendanceExceptions: existing.attendanceExceptions ?? createAttendanceExceptions(existing.weekStart, assignments),

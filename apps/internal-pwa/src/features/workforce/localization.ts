@@ -13,6 +13,7 @@ import type {
   ShiftTemplateName,
   WorkforceRole,
 } from './models'
+import type { CustomerMembershipLevel } from './managerInsightsModels'
 
 export const MN_LOCALE = 'mn-MN'
 
@@ -27,6 +28,8 @@ export const roleLabels: Record<WorkforceRole, string> = {
   Bartender: 'Бармен',
   Reception: 'Хүлээн авах',
   Security: 'Хамгаалалт',
+  Driver: 'Жолооч',
+  Maintenance: 'Засвар, техник',
 }
 
 export const shiftLabels: Record<ShiftTemplateName, string> = {
@@ -63,6 +66,15 @@ export const entertainerRankLabels: Record<EntertainerRank, string> = {
   Rank1: '1-р зэрэглэл',
   Rank2: '2-р зэрэглэл',
   Rank3: '3-р зэрэглэл',
+}
+
+export const membershipLevelLabels: Record<CustomerMembershipLevel, string> = {
+  provisional: 'Түр түвшин',
+  bronze: 'Bronze',
+  silver: 'Silver',
+  gold: 'Gold',
+  diamond: 'Diamond',
+  'black-diamond': 'Black Diamond',
 }
 
 export const attendanceExceptionLabels: Record<AttendanceExceptionType, string> = {

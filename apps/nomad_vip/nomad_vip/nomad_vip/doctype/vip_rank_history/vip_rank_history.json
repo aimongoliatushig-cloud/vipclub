@@ -1,0 +1,30 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:VIP-RANK-{YYYY}-{#####}",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["entertainer","from_rank","to_rank","points_at_change","changed_at","reason"],
+ "fields": [
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"from_rank","fieldtype":"Link","label":"From Rank","options":"VIP Rank Definition","reqd":1,"in_list_view":1},
+  {"fieldname":"to_rank","fieldtype":"Link","label":"To Rank","options":"VIP Rank Definition","reqd":1,"in_list_view":1},
+  {"fieldname":"points_at_change","fieldtype":"Float","label":"Points at Change","reqd":1,"in_list_view":1},
+  {"fieldname":"changed_at","fieldtype":"Datetime","label":"Changed At","reqd":1,"in_list_view":1},
+  {"fieldname":"reason","fieldtype":"Small Text","label":"Reason","reqd":1}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Rank History",
+ "naming_rule": "Expression",
+ "permissions": [
+  {"role":"System Manager","read":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1},
+  {"role":"Entertainer Supervisor","read":1},
+  {"role":"Entertainer","read":1}
+ ],
+ "sort_field": "changed_at",
+ "sort_order": "DESC",
+ "track_changes": 0
+}

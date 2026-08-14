@@ -4,16 +4,27 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import { WeeklySchedulePage } from './WeeklySchedulePage'
 import { formatDate, formatDateTime } from './localization'
 import { BrowserManagerInsightsService } from './managerInsightsService'
+import { resetManagerOperationsPrototype } from './managerOperationsService'
+import { resetManagerBusinessPrototype } from './managerBusinessService'
 import { BrowserWorkforceService, resetWorkforcePrototype } from './workforceService'
 
 describe('WeeklySchedulePage', () => {
-  beforeEach(() => resetWorkforcePrototype())
+  beforeEach(() => {
+    resetWorkforcePrototype()
+    resetManagerOperationsPrototype()
+    resetManagerBusinessPrototype()
+  })
 
   it('renders the primary manager experience in Mongolian', () => {
     render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
 
     const navigation = screen.getByRole('navigation', { name: 'Менежерийн навигац' })
     expect(navigation).toHaveTextContent('Тойм')
+    expect(navigation).toHaveTextContent('Даалгавар')
+    expect(navigation).toHaveTextContent('Зорилгын төлөвлөгөө')
+    expect(navigation).toHaveTextContent('Үйл ажиллагаа')
+    expect(navigation).toHaveTextContent('Мэдэгдэл')
+    expect(navigation).toHaveTextContent('Шийдвэрийн санал')
     expect(navigation).toHaveTextContent('Долоо хоногийн хуваарь')
     expect(navigation).toHaveTextContent('Хангалт')
     expect(navigation).toHaveTextContent('Ирц')
@@ -22,6 +33,35 @@ describe('WeeklySchedulePage', () => {
     expect(navigation).toHaveTextContent('Зэрэглэл')
     expect(screen.queryByText('Manager overview')).not.toBeInTheDocument()
     expect(screen.queryByText('Weekly schedule')).not.toBeInTheDocument()
+  })
+
+  it('reviews a submitted branch task and preserves the manager decision', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('link', { name: /Даалгавар/ }))
+    expect(screen.getByRole('heading', { name: 'Даалгаврын төв' })).toBeInTheDocument()
+    await user.click(screen.getByRole('tab', { name: /Хянуулах/ }))
+    expect(screen.getByRole('heading', { name: 'Баасан гарагийн арга хэмжээний бэлтгэл' })).toBeInTheDocument()
+    await user.type(screen.getByPlaceholderText('Хяналтын тэмдэглэл эсвэл дахин ажиллуулах заавар'), 'Баримт болон үр дүн шаардлага хангасан.')
+    await user.click(screen.getByRole('button', { name: /Үр дүн батлах/ }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('Гүйцэтгэлийн үр дүнг баталж, даалгаврыг хаалаа')
+  })
+
+  it('submits the manager monthly goal proposal for CEO review without activating it', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('link', { name: 'Зорилгын төлөвлөгөө' }))
+    expect(screen.getByRole('heading', { name: 'Зорилгын санал ба үйл ажиллагааны төлөвлөгөө' })).toBeInTheDocument()
+    expect(screen.getByText('Hermes · зөвлөмж 1')).toBeInTheDocument()
+    expect(screen.getByText(/Зөвхөн Гүйцэтгэх захирал баталснаар сарын зорилго идэвхжинэ/)).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Гүйцэтгэх захиралд илгээх/ }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('Зорилгын санал, үйл ажиллагааны төлөвлөгөөг Гүйцэтгэх захирлын хяналтад илгээлээ')
+    expect(screen.getByText(/Гүйцэтгэх захирлын хяналтад · хувилбар 2/)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Гүйцэтгэх захиралд илгээх/ })).not.toBeInTheDocument()
   })
 
   it('opens on the manager branch sales goal with CEO approval and CRM access', async () => {
@@ -38,6 +78,45 @@ describe('WeeklySchedulePage', () => {
 
     await user.click(screen.getByRole('button', { name: /Харилцагчийн түвшин ба CRM/ }))
     expect(screen.getByRole('heading', { name: 'Харилцагчийн удирдлага' })).toBeInTheDocument()
+  })
+
+  it('manages the branch reservation queue from request to confirmation', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('link', { name: /Үйл ажиллагаа/ }))
+    expect(screen.getByRole('heading', { name: 'Үйл ажиллагааны төв' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: /Болормаа Г\./ }))
+    expect(screen.getByRole('heading', { name: 'Болормаа Г.' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Баталгаажуулах' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('Захиалгыг баталгаажууллаа')
+    expect(screen.getByRole('heading', { name: 'Болормаа Г.' }).closest('section')).toHaveTextContent('Баталгаажсан')
+  })
+
+  it('shows PWA notifications and records an escalation without claiming delivery', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('link', { name: /Мэдэгдэл/ }))
+    expect(screen.getByRole('heading', { name: 'Менежерийн мэдээллийн төв' })).toBeInTheDocument()
+    expect(screen.getByText(/гаднын суваг руу бодитоор илгээгээгүй/)).toBeInTheDocument()
+    await user.click(screen.getAllByRole('button', { name: 'Шат ахиулсан баримт' })[0])
+
+    expect(screen.getByRole('status')).toHaveTextContent('Гадаад суваг руу бодитоор илгээгээгүй')
+  })
+
+  it('submits a manager recommendation without exposing an approval action', async () => {
+    const user = userEvent.setup()
+    render(<WeeklySchedulePage service={new BrowserWorkforceService()} />)
+
+    await user.click(screen.getByRole('link', { name: 'Шийдвэрийн санал' }))
+    expect(screen.getByRole('heading', { name: 'Шийдвэрийн санал' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /батлах/i })).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Эцсийн шийдвэрт илгээх' }))
+
+    expect(screen.getByRole('status')).toHaveTextContent('Зэрэглэл эсвэл түвшин өөрчлөгдөөгүй')
+    expect(screen.queryByRole('button', { name: 'Эцсийн шийдвэрт илгээх' })).not.toBeInTheDocument()
   })
 
   it('does not present an unapproved sales proposal as an active goal', () => {

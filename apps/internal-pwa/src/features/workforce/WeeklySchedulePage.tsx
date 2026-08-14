@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleGauge,
+  Target,
   ClipboardCheck,
   Clock3,
   ContactRound,
@@ -14,6 +15,7 @@ import {
   Inbox,
   LayoutDashboard,
   ListChecks,
+  LogOut,
   Menu,
   MessageSquare,
   Gem,
@@ -27,6 +29,7 @@ import {
   X,
 } from 'lucide-react'
 import { useEffect, useMemo, useState, type CSSProperties, type FormEvent } from 'react'
+import { demoManagerSession, roleLabels as managementRoleLabels, type ManagementSession } from '../../shared/managementAccess'
 import {
   shiftTemplates,
   workforceRoles,
@@ -52,6 +55,18 @@ import {
 } from './workforceService'
 import { ResponseQueuePanel, TeamMemberSchedulePanel } from './ResponsePanels'
 import { CustomerCrmView, ManagerRankingsView } from './ManagerInsightsViews'
+import { ManagerGoalPlanningView, ManagerTasksView } from './ManagerOperationsViews'
+import { BrowserManagerOperationsService, type ManagerOperationsService } from './managerOperationsService'
+import type { CreateManagerTaskInput, ManagerTask, SaveGoalProposalInput } from './managerOperationsModels'
+import { ManagerBranchOperationsView, ManagerInboxView, ManagerRecommendationsView } from './ManagerBusinessViews'
+import { BrowserManagerBusinessService, type ManagerBusinessService } from './managerBusinessService'
+import type {
+  CreateCrmHandoffInput,
+  CreateFormalNoticeInput,
+  CreateMaintenanceInput,
+  CreateRecommendationInput,
+  CreateReservationInput,
+} from './managerBusinessModels'
 import { BrowserManagerInsightsService, type ManagerInsightsService } from './managerInsightsService'
 import {
   AttendanceReviewView,
@@ -398,11 +413,17 @@ function ExecutiveFollowUpPanel({ roster, summary, onClose, onRecord }: Executiv
 export interface WeeklySchedulePageProps {
   service: WorkforceService
   insightsService?: ManagerInsightsService
+  operationsService?: ManagerOperationsService
+  businessService?: ManagerBusinessService
+  session?: ManagementSession
+  onSignOut?: () => void
 }
 
 const defaultInsightsService = new BrowserManagerInsightsService()
+const defaultOperationsService = new BrowserManagerOperationsService()
+const defaultBusinessService = new BrowserManagerBusinessService()
 
-export function WeeklySchedulePage({ service, insightsService = defaultInsightsService }: WeeklySchedulePageProps) {
+export function WeeklySchedulePage({ service, insightsService = defaultInsightsService, operationsService = defaultOperationsService, businessService = defaultBusinessService, session = demoManagerSession, onSignOut }: WeeklySchedulePageProps) {
   const [activeView, setActiveView] = useState<ManagerView>('overview')
   const [weekStart, setWeekStart] = useState(() => startOfWeek(new Date()))
   const [roster, setRoster] = useState(() => service.getRoster(weekStart))
@@ -420,6 +441,8 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
   const [menuOpen, setMenuOpen] = useState(false)
   const teamMembers = useMemo(() => service.getTeamMembers(), [service])
   const managerInsights = useMemo(() => insightsService.getSnapshot(), [insightsService])
+  const [managerOperations, setManagerOperations] = useState(() => operationsService.getSnapshot())
+  const [managerBusiness, setManagerBusiness] = useState(() => businessService.getSnapshot())
 
   useEffect(() => {
     setRoster(service.getRoster(weekStart))
@@ -443,6 +466,12 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
   const leaveRequests = useMemo(() => service.getLeaveRequests(weekStart), [roster, service, weekStart])
   const penaltyReviews = useMemo(() => service.getPenaltyReviews(weekStart), [roster, service, weekStart])
   const pendingLeaveRequests = leaveRequests.filter((item) => item.status === 'pending').length
+  const openTasks = managerOperations.tasks.filter((item) => item.status !== 'completed').length
+  const tasksToReview = managerOperations.tasks.filter((item) => item.status === 'submitted').length
+  const openOperations = managerBusiness.reservations.filter((item) => item.status === 'requested').length
+    + managerBusiness.maintenance.filter((item) => item.status === 'submitted').length
+    + managerBusiness.complaints.filter((item) => item.status !== 'resolved').length
+  const unreadNotifications = managerBusiness.notifications.filter((item) => !item.readAt).length
   const openGaps = coverage.reduce((sum, item) => sum + item.gap, 0)
   const required = coverage.reduce((sum, item) => sum + item.required, 0)
   const scheduled = coverage.reduce((sum, item) => sum + item.scheduled, 0)
@@ -521,6 +550,7 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
   }
 
   function navigate(view: ManagerView) {
+    if (view !== activeView) setMessage('')
     setActiveView(view)
     setMenuOpen(false)
   }
@@ -551,12 +581,127 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
     setMessage(`${formatDate(date)}-ны ажиллах боломжийн өөрчлөлтийг тэмдэглэлээ. Хангалт болон ээлжийн шалгалтыг дахин тооцоолов.`)
   }
 
+  function createManagerTask(input: CreateManagerTaskInput) {
+    const next = operationsService.createTask(input)
+    setManagerOperations(next)
+    setMessage('Даалгаврыг үүсгэж, багийн гишүүний PWA мэдэгдлийн баримтыг тэмдэглэлээ.')
+  }
+
+  function addTaskComment(taskId: string, body: string) {
+    const next = operationsService.addTaskComment(taskId, body)
+    setManagerOperations(next)
+    setMessage('Даалгаврын сэтгэгдэл болон аудитын түүхийг хадгаллаа.')
+  }
+
+  function reviewManagerTask(taskId: string, action: 'approve' | 'rework', note: string) {
+    const next = operationsService.reviewTask(taskId, action, note)
+    setManagerOperations(next)
+    setMessage(action === 'approve' ? 'Гүйцэтгэлийн үр дүнг баталж, даалгаврыг хаалаа.' : 'Тодорхой заавартайгаар дахин ажиллуулахаар буцаалаа.')
+  }
+
+  function simulateTaskProgress(task: ManagerTask, action: 'acknowledge' | 'start' | 'submit') {
+    const next = action === 'acknowledge'
+      ? operationsService.acknowledgeTask(task.id, task.assigneeId)
+      : action === 'start'
+        ? operationsService.startTask(task.id, task.assigneeId)
+        : operationsService.submitTask(task.id, task.assigneeId, 'Даалгаврын ажлыг зааврын дагуу гүйцэтгэж, үр дүнг менежерийн хяналтад илгээв.', { fileName: 'guitsetgeliin-barimt.jpg', mimeType: 'image/jpeg', size: 286_000 })
+    setManagerOperations(next)
+    setMessage(action === 'acknowledge' ? 'Багийн гишүүн даалгаврыг хүлээн авснаа баталгаажууллаа.' : action === 'start' ? 'Багийн гишүүн ажлыг эхлүүллээ.' : 'Багийн гишүүн үр дүн болон зурагт баримтыг хянуулахад илгээлээ.')
+  }
+
+  function saveGoalProposal(input: SaveGoalProposalInput) {
+    const next = operationsService.saveGoalProposal(input)
+    setManagerOperations(next)
+    setMessage('Дараагийн сарын зорилгын санал болон үйл ажиллагааны төлөвлөгөөний нооргийг хадгаллаа.')
+  }
+
+  function submitGoalProposal() {
+    const next = operationsService.submitGoalProposal()
+    setManagerOperations(next)
+    setMessage('Зорилгын санал, үйл ажиллагааны төлөвлөгөөг Гүйцэтгэх захирлын хяналтад илгээлээ. Зорилго хараахан идэвхжээгүй.')
+  }
+
+  function createReservation(input: CreateReservationInput) {
+    setManagerBusiness(businessService.createReservation(input))
+    setMessage('Захиалгын хүсэлтийг масктай таних баримттайгаар бүртгэлээ.')
+  }
+
+  function updateReservation(id: string, action: 'confirm' | 'arrive' | 'complete' | 'cancel') {
+    setManagerBusiness(businessService.updateReservation(id, action))
+    setMessage(action === 'confirm' ? 'Захиалгыг баталгаажууллаа.' : action === 'arrive' ? 'Зочин ирснийг тэмдэглэлээ.' : action === 'complete' ? 'Үйлчилгээг дуусгаж захиалгыг хаалаа.' : 'Захиалгыг цуцлагдсан төлөвт орууллаа.')
+  }
+
+  function createMaintenance(input: CreateMaintenanceInput) {
+    setManagerBusiness(businessService.createMaintenance(input))
+    setMessage('Засварын асуудлыг салбарын хүсэлтээр бүртгэлээ.')
+  }
+
+  function assignMaintenance(id: string, assignedTo: string, dueDate: string) {
+    setManagerBusiness(businessService.assignMaintenance(id, assignedTo, dueDate))
+    setMessage('Засварын ажлыг хариуцагч болон дуусах хугацаатайгаар оноолоо.')
+  }
+
+  function simulateMaintenance(id: string, action: 'start' | 'submit') {
+    setManagerBusiness(businessService.simulateMaintenance(id, action))
+    setMessage(action === 'start' ? 'Гүйцэтгэгч засварын ажлыг эхлүүлснийг туршилтаар тэмдэглэлээ.' : 'Гүйцэтгэгч үр дүн, зурагт баримтаа хянуулахад илгээснийг туршилтаар тэмдэглэлээ.')
+  }
+
+  function reviewMaintenance(id: string, action: 'verify' | 'rework', note: string) {
+    setManagerBusiness(businessService.reviewMaintenance(id, action, note))
+    setMessage(action === 'verify' ? 'Засварын үр дүнг баталгаажуулж хаалаа.' : 'Засварыг менежерийн тайлбартайгаар дахин ажиллуулахаар буцаалаа.')
+  }
+
+  function updateComplaint(id: string, action: 'triage' | 'handoff' | 'resolve') {
+    setManagerBusiness(businessService.updateComplaint(id, action))
+    setMessage(action === 'triage' ? 'Үйлчилгээний асуудлыг ангилж хүлээн авлаа.' : action === 'handoff' ? 'Хүсэлтийг эрх бүхий эзэнд шилжүүллээ.' : 'Үйлчилгээний асуудлыг шийдвэрлэсэн төлөвт орууллаа.')
+  }
+
+  function markNotificationRead(id: string) {
+    setManagerBusiness(businessService.markNotificationRead(id))
+    setMessage('Мэдэгдлийг уншсан төлөвт орууллаа.')
+  }
+
+  function recordNotificationEscalation(id: string) {
+    setManagerBusiness(businessService.recordNotificationEscalation(id))
+    setMessage('Шат ахиулах дотоод баримтыг тэмдэглэлээ. Гадаад суваг руу бодитоор илгээгээгүй.')
+  }
+
+  function createNotice(input: CreateFormalNoticeInput) {
+    setManagerBusiness(businessService.createNotice(input))
+    setMessage('Албан зааврыг хүлээн авагчид болон баталгаажуулах хугацаатайгаар үүсгэлээ.')
+  }
+
+  function acknowledgeNotice(noticeId: string, memberId: string) {
+    setManagerBusiness(businessService.acknowledgeNotice(noticeId, memberId))
+    setMessage('Багийн гишүүний хүлээн авсан баталгаажуулалтыг туршилтаар тэмдэглэлээ.')
+  }
+
+  function createCrmHandoff(input: CreateCrmHandoffInput) {
+    setManagerBusiness(businessService.createCrmHandoff(input))
+    setMessage('Сегмент, харилцааны хүсэлтийг CRM багийн хяналтад шилжүүллээ. Кампанит ажил илгээгээгүй.')
+  }
+
+  function createRecommendation(input: CreateRecommendationInput) {
+    setManagerBusiness(businessService.createRecommendation(input))
+    setMessage('Шийдвэрийн санал, нотолгооны нооргийг хадгаллаа.')
+  }
+
+  function submitRecommendation(id: string) {
+    setManagerBusiness(businessService.submitRecommendation(id))
+    setMessage('Менежерийн саналыг эрх бүхий эцсийн шийдвэрт илгээлээ. Зэрэглэл эсвэл түвшин өөрчлөгдөөгүй.')
+  }
+
   return (
     <div className="app-shell">
       <aside className={menuOpen ? 'sidebar sidebar--open' : 'sidebar'}>
         <div className="brand"><span>V</span><div><strong>VIP Club</strong><small>Дотоод</small></div><button className="sidebar-close" type="button" aria-label="Навигацыг хаах" onClick={() => setMenuOpen(false)}><X size={19} /></button></div>
         <nav aria-label="Менежерийн навигац">
           <a className={activeView === 'overview' ? 'active' : ''} href="#overview" aria-current={activeView === 'overview' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('overview') }}><LayoutDashboard size={19} />Тойм</a>
+          <a className={activeView === 'tasks' ? 'active' : ''} href="#tasks" aria-current={activeView === 'tasks' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('tasks') }}><ListChecks size={19} />Даалгавар <b>{openTasks}</b></a>
+          <a className={activeView === 'goal-planning' ? 'active' : ''} href="#goal-planning" aria-current={activeView === 'goal-planning' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('goal-planning') }}><Target size={19} />Зорилгын төлөвлөгөө</a>
+          <a className={activeView === 'operations' ? 'active' : ''} href="#operations" aria-current={activeView === 'operations' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('operations') }}><ClipboardCheck size={19} />Үйл ажиллагаа <b>{openOperations}</b></a>
+          <a className={activeView === 'inbox' ? 'active' : ''} href="#inbox" aria-current={activeView === 'inbox' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('inbox') }}><Inbox size={19} />Мэдэгдэл <b>{unreadNotifications}</b></a>
+          <a className={activeView === 'recommendations' ? 'active' : ''} href="#recommendations" aria-current={activeView === 'recommendations' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('recommendations') }}><ShieldCheck size={19} />Шийдвэрийн санал</a>
           <a className={activeView === 'schedule' ? 'active' : ''} href="#schedule" aria-current={activeView === 'schedule' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('schedule') }}><CalendarDays size={19} />Долоо хоногийн хуваарь</a>
           <a className={activeView === 'coverage' ? 'active' : ''} href="#coverage" aria-current={activeView === 'coverage' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('coverage') }}><CircleGauge size={19} />Хангалт <b>{openGaps}</b></a>
           <a className={activeView === 'attendance' ? 'active' : ''} href="#attendance" aria-current={activeView === 'attendance' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('attendance') }}><ClipboardCheck size={19} />Ирц</a>
@@ -565,9 +710,9 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
           <a className={activeView === 'rankings' ? 'active' : ''} href="#rankings" aria-current={activeView === 'rankings' ? 'page' : undefined} onClick={(event) => { event.preventDefault(); navigate('rankings') }}><Gem size={19} />Зэрэглэл</a>
         </nav>
         <div className="sidebar-foot">
-          <div className="avatar">АМ</div>
-          <div><strong>{roster.managerName}</strong><span>Салбарын менежер</span></div>
-          <MoreHorizontal size={18} />
+          <div className="avatar">{session.initials}</div>
+          <div><strong>{session.displayName}</strong><span>{managementRoleLabels[session.role]}</span></div>
+          {onSignOut ? <button className="sidebar-signout" type="button" aria-label="Системээс гарах" title="Системээс гарах" onClick={onSignOut}><LogOut size={17} /></button> : <MoreHorizontal size={18} />}
         </div>
       </aside>
 
@@ -575,11 +720,16 @@ export function WeeklySchedulePage({ service, insightsService = defaultInsightsS
         <header className="topbar">
           <button className="icon-button mobile-menu" type="button" aria-label="Навигацыг нээх эсвэл хаах" onClick={() => setMenuOpen((current) => !current)}><Menu size={21} /></button>
           <div className="branch-scope"><span className="scope-mark">ТС</span><div><strong>{roster.branchName}</strong><small>Зөвшөөрөгдсөн салбарын хүрээ</small></div></div>
-          <div className="topbar-actions"><button className="icon-button" type="button" aria-label={`${attendanceExceptions.filter((item) => item.status === 'open').length + pendingLeaveRequests + responseQueue.length} нээлттэй мэдэгдэл`} onClick={() => navigate('attendance')}><Bell size={20} /><i /></button><div className="avatar avatar--small">АМ</div></div>
+          <div className="topbar-actions"><button className="icon-button" type="button" aria-label={`${unreadNotifications} уншаагүй мэдэгдэл`} onClick={() => navigate('inbox')}><Bell size={20} />{unreadNotifications ? <i /> : null}</button><div className="avatar avatar--small">{session.initials}</div></div>
         </header>
 
         <main id={activeView}>
-          {activeView === 'overview' ? <ManagerOverviewView roster={roster} dashboard={dashboard} salesGoal={managerInsights.salesGoal} readiness={readiness} openAttendance={attendanceExceptions.filter((item) => item.status === 'open').length + pendingLeaveRequests} openResponses={responseQueue.length} openGaps={openGaps} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
+          {activeView === 'overview' ? <ManagerOverviewView roster={roster} dashboard={dashboard} salesGoal={managerInsights.salesGoal} readiness={readiness} openAttendance={attendanceExceptions.filter((item) => item.status === 'open').length + pendingLeaveRequests} openResponses={responseQueue.length} openGaps={openGaps} openTasks={openTasks} tasksToReview={tasksToReview} openOperations={openOperations} unreadNotifications={unreadNotifications} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
+          {activeView === 'tasks' ? <ManagerTasksView snapshot={managerOperations} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onCreate={createManagerTask} onComment={addTaskComment} onReview={reviewManagerTask} onSimulateProgress={simulateTaskProgress} /> : null}
+          {activeView === 'goal-planning' ? <ManagerGoalPlanningView snapshot={managerOperations} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onSave={saveGoalProposal} onSubmit={submitGoalProposal} /> : null}
+          {activeView === 'operations' ? <ManagerBranchOperationsView snapshot={managerBusiness} message={message} onDismissMessage={() => setMessage('')} onCreateReservation={createReservation} onReservationAction={updateReservation} onCreateMaintenance={createMaintenance} onAssignMaintenance={assignMaintenance} onSimulateMaintenance={simulateMaintenance} onReviewMaintenance={reviewMaintenance} onComplaintAction={updateComplaint} /> : null}
+          {activeView === 'inbox' ? <ManagerInboxView snapshot={managerBusiness} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onReadNotification={markNotificationRead} onEscalateNotification={recordNotificationEscalation} onCreateNotice={createNotice} onAcknowledgeNotice={acknowledgeNotice} onCreateCrmHandoff={createCrmHandoff} onNavigate={navigate} /> : null}
+          {activeView === 'recommendations' ? <ManagerRecommendationsView snapshot={managerBusiness} insights={managerInsights} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onCreate={createRecommendation} onSubmit={submitRecommendation} /> : null}
           {activeView === 'coverage' ? <CoverageReadinessView roster={roster} readiness={readiness} message={message} onDismissMessage={() => setMessage('')} onNavigate={navigate} /> : null}
           {activeView === 'attendance' ? <AttendanceReviewView roster={roster} exceptions={attendanceExceptions} leaveRequests={leaveRequests} penaltyReviews={penaltyReviews} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onDecision={decideAttendance} onLeaveDecision={decideLeaveRequest} /> : null}
           {activeView === 'team' ? <TeamMembersView roster={roster} teamMembers={teamMembers} message={message} onDismissMessage={() => setMessage('')} onOverrideAvailability={overrideAvailability} /> : null}

@@ -179,7 +179,7 @@ describe('Branch Manager weekly scheduling rules', () => {
 
     expect(service.getManagerDashboard(weekStart)).toMatchObject({
       onShift: 6,
-      available: 2,
+      available: 3,
       reserved: 1,
       serving: 3,
       break: 1,

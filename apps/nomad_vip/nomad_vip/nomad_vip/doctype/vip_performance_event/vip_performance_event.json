@@ -1,0 +1,34 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:VIP-EVT-{YYYY}-{#####}",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["entertainer","event_type","occurred_at","verified","source_section","source","external_id","deduplication_key","source_document_type","source_document_name"],
+ "fields": [
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"event_type","fieldtype":"Select","label":"Event Type","options":"Readiness Ready\nReadiness Not Ready\nAttendance Present\nAttendance Late\nAttendance No Show\nReservation Completed\nCustomer Repeat\nManual Adjustment\nReversal","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"occurred_at","fieldtype":"Datetime","label":"Occurred At","reqd":1,"in_list_view":1},
+  {"fieldname":"verified","fieldtype":"Check","label":"Verified","default":"0","in_list_view":1},
+  {"fieldname":"source_section","fieldtype":"Section Break","label":"Source"},
+  {"fieldname":"source","fieldtype":"Data","label":"Source","reqd":1},
+  {"fieldname":"external_id","fieldtype":"Data","label":"External ID","reqd":1},
+  {"fieldname":"deduplication_key","fieldtype":"Data","label":"Deduplication Key","unique":1,"read_only":1,"hidden":1},
+  {"fieldname":"source_document_type","fieldtype":"Link","label":"Source Document Type","options":"DocType","read_only":1},
+  {"fieldname":"source_document_name","fieldtype":"Dynamic Link","label":"Source Document","options":"source_document_type","read_only":1}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Performance Event",
+ "naming_rule": "Expression",
+ "permissions": [
+  {"role":"System Manager","read":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1},
+  {"role":"Entertainer Supervisor","read":1},
+  {"role":"Entertainer","read":1}
+ ],
+ "sort_field": "occurred_at",
+ "sort_order": "DESC",
+ "track_changes": 0
+}

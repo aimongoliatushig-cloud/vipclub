@@ -1,0 +1,51 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "entertainer", "employee", "branch", "status", "requested_by", "requested_at",
+  "proposal_section", "base_profile_modified", "base_values", "changed_fields",
+  "proposed_stage_name", "proposed_skills", "proposed_languages", "proposed_service_tags",
+  "proposed_style_tags", "proposed_profile_photo", "idempotency_key",
+  "decision_section", "decided_by", "decided_at", "decision_reason", "applied_profile_modified"
+ ],
+ "fields": [
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Бүжигчний профайл","options":"VIP Entertainer Profile","reqd":1,"read_only":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"employee","fieldtype":"Link","label":"Ажилтан","options":"Employee","reqd":1,"read_only":1,"in_standard_filter":1},
+  {"fieldname":"branch","fieldtype":"Link","label":"Салбар","options":"Branch","reqd":1,"read_only":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"status","fieldtype":"Select","label":"Төлөв","options":"Pending\nApproved\nRejected\nWithdrawn","default":"Pending","reqd":1,"read_only":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"requested_by","fieldtype":"Link","label":"Хүсэлт гаргасан хүн","options":"User","reqd":1,"read_only":1},
+  {"fieldname":"requested_at","fieldtype":"Datetime","label":"Хүсэлт гаргасан огноо","reqd":1,"read_only":1,"in_list_view":1},
+  {"fieldname":"proposal_section","fieldtype":"Section Break","label":"Санал болгосон өөрчлөлт"},
+  {"fieldname":"base_profile_modified","fieldtype":"Data","label":"Профайлын суурь хувилбар","reqd":1,"read_only":1},
+  {"fieldname":"base_values","fieldtype":"Code","label":"Өмнөх утга","options":"JSON","reqd":1,"read_only":1},
+  {"fieldname":"changed_fields","fieldtype":"Small Text","label":"Өөрчлөх талбар","reqd":1,"read_only":1},
+  {"fieldname":"proposed_stage_name","fieldtype":"Data","label":"Санал болгосон тайзны нэр","read_only":1},
+  {"fieldname":"proposed_skills","fieldtype":"Small Text","label":"Санал болгосон ур чадвар","read_only":1},
+  {"fieldname":"proposed_languages","fieldtype":"Small Text","label":"Санал болгосон хэл","read_only":1},
+  {"fieldname":"proposed_service_tags","fieldtype":"Small Text","label":"Санал болгосон үйлчилгээ","read_only":1},
+  {"fieldname":"proposed_style_tags","fieldtype":"Small Text","label":"Санал болгосон хэв маяг","read_only":1},
+  {"fieldname":"proposed_profile_photo","fieldtype":"Attach Image","label":"Санал болгосон профайлын зураг","read_only":1},
+  {"fieldname":"idempotency_key","fieldtype":"Data","label":"Давхардал хамгаалах түлхүүр","unique":1,"read_only":1,"no_copy":1},
+  {"fieldname":"decision_section","fieldtype":"Section Break","label":"Шийдвэр"},
+  {"fieldname":"decided_by","fieldtype":"Link","label":"Шийдвэр гаргасан хүн","options":"User","read_only":1},
+  {"fieldname":"decided_at","fieldtype":"Datetime","label":"Шийдвэр гаргасан огноо","read_only":1},
+  {"fieldname":"decision_reason","fieldtype":"Small Text","label":"Шийдвэрийн үндэслэл","read_only":1},
+  {"fieldname":"applied_profile_modified","fieldtype":"Data","label":"Хэрэгжүүлсэн профайлын хувилбар","read_only":1}
+ ],
+ "module": "NOMAD VIP",
+ "name": "VIP Entertainer Profile Change Request",
+ "naming_rule": "Random",
+ "permissions": [
+  {"role":"System Manager","read":1,"report":1,"export":1},
+  {"role":"VIP Admin","read":1,"report":1,"export":1},
+  {"role":"HR Manager","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1},
+  {"role":"Entertainer","read":1}
+ ],
+ "sort_field": "requested_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

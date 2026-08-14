@@ -33,6 +33,18 @@ A role responsibility describes what a person owns. Individual capabilities—su
 
 The final role-permission matrix must define branch scope, data visibility, approval rights, and segregation of duties for each role. Job titles do not automatically grant unrestricted financial or customer-data access.
 
+## Role-aware management application
+
+| ID | Requirement |
+| --- | --- |
+| FR-MGMT-001 | The internal management PWA must resolve the authenticated user's role, permissions, and authorized branch identifiers before rendering the default workspace. |
+| FR-MGMT-002 | A CEO session must default to a company-wide dashboard and may view designated cross-branch sales, workforce, CRM/ranking, and approval summaries. |
+| FR-MGMT-003 | A Branch Manager session must default to the manager's authorized branch overview and must not receive another branch's or company-wide data without a separately granted permission. |
+| FR-MGMT-004 | Navigation, route access, service methods, and mutations must enforce the same permission model; hiding a control alone is not authorization. |
+| FR-MGMT-005 | A Manager submission and the corresponding CEO approval, revision request, or rejection must update one shared versioned record with actor, time, state, and decision comment. |
+| FR-MGMT-006 | The Manager workspace must show the CEO's latest decision state and comment while preserving the Manager's inability to approve or override the final decision. |
+| FR-MGMT-007 | Production authentication and branch/permission checks must be enforced server-side even when the PWA also applies client-side guards. |
+
 ## Branch workforce planning and weekly scheduling
 
 | ID | Requirement |
@@ -130,6 +142,43 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-MCRM-003 | The customer directory must support ordering by membership level, total expenditure, average expenditure, and latest visit. |
 | FR-MCRM-004 | Full phone numbers must not be included in the browser read model; production full-number lookup must normalize and match server-side, then return only authorized masked fields. |
 | FR-MCRM-005 | Search, filtering, sorting, and customer detail access must remain restricted to the manager's authorized branch and must not grant membership-level editing or approval authority. |
+
+## Branch Manager operational service workspace
+
+| ID | Requirement |
+| --- | --- |
+| FR-MOPS-001 | A Branch Manager must be able to view the manager's own-branch reservation queue and distinguish Requested, Confirmed, Arrived, Completed, and Cancelled states. |
+| FR-MOPS-002 | A Branch Manager may create or support an own-branch reservation using a permitted masked customer identifier, visit date/time, party size, and special request; production full-phone matching remains server-side. |
+| FR-MOPS-003 | Reservation transitions must validate the current state and preserve branch, actor, source, and update timestamps rather than silently rewriting the lifecycle. |
+| FR-MOPS-004 | A Branch Manager must be able to report a maintenance issue with category, location, urgency, description, and created time; final categories, urgency rules, and service-level targets remain governed by CL-023. |
+| FR-MOPS-005 | The manager must be able to assign a maintenance request to an authorized technical or facilities role with a due date, while the assigned worker retains responsibility for diagnosis, progress, result, and completion evidence. |
+| FR-MOPS-006 | The manager may verify and close submitted maintenance work or return it for rework with a reason; verification must not erase the original request, result, or evidence. |
+| FR-MOPS-007 | The manager may receive and triage own-branch service/customer feedback and route it to the accountable owner. |
+| FR-MOPS-008 | A people-related or HR-restricted complaint must expose only safe routing metadata to a Branch Manager unless a separate case permission exists; the manager must not view or resolve restricted case content merely because it concerns the branch. |
+| FR-MOPS-009 | Branch operations must expose open reservation requests, submitted maintenance work, and unresolved service issues in the Manager's default decision queue. |
+
+## Manager notifications, orders, and CRM handoff
+
+| ID | Requirement |
+| --- | --- |
+| FR-MNOT-001 | The internal PWA must provide a Manager notification center for material workforce, task, reservation, maintenance, and decision events within the authorized branch. |
+| FR-MNOT-002 | Notification records must preserve severity, category, created time, related workflow, read state, and any recorded escalation action. |
+| FR-MNOT-003 | A browser-local or PWA notification record must not claim that Slack, SMS, email, or another external channel delivered a message unless provider delivery evidence exists. |
+| FR-MNOT-004 | A Branch Manager may issue an own-branch formal instruction to authorized team members with content, audience, due date, and per-recipient acknowledgement evidence. |
+| FR-MNOT-005 | Formal instruction acknowledgement is evidence that the recipient received/read the instruction; it must remain separate from attendance, task completion, or disciplinary outcome. |
+| FR-MNOT-006 | The Branch Manager CRM may show own-branch, field-projected communication history with masked customer identity, purpose, channel, consent state, delivery evidence, and time. |
+| FR-MNOT-007 | A Branch Manager may submit an evidence-based segment or communication request to the authorized CRM/marketing owner; this handoff must not grant the manager campaign-send, consent-override, export, or cross-branch access. |
+
+## Branch Manager rank and membership recommendations
+
+| ID | Requirement |
+| --- | --- |
+| FR-MREC-001 | The Branch Manager must be able to review the approved 14-day entertainer evaluation evidence and prepare a recommendation while keeping the current source rank separate from the proposed rank. |
+| FR-MREC-002 | An entertainer recommendation must preserve the evidence summary, manager reason, policy-version state, submission state, and later authorized decision comment. |
+| FR-MREC-003 | Only the CEO final-decision workflow may approve, return, or reject an entertainer rank recommendation; submission by a Branch Manager must not change the effective rank. |
+| FR-MREC-004 | For customer membership evaluation, a Branch Manager may support the calculated result or record a retain-current/exception reason according to policy, but must not directly assign or approve a membership level. |
+| FR-MREC-005 | Missing policy weights, thresholds, hard gates, branch ranges, or effective versions must remain visible as a decision lock and must not be invented in the client UI. |
+| FR-MREC-006 | Every recommendation workflow must remain branch-scoped, auditable, source-preserving, and protected against acting on stale evidence in production. |
 
 ## Branch setup and scalability
 

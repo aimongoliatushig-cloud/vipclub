@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:VIP-RES-{YYYY}-{#####}",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["customer_name","customer_contact","branch","entertainer","starts_at","ends_at","status","source","details_section","party_size","venue","notes","conflict_reason"],
+ "fields": [
+  {"fieldname":"customer_name","fieldtype":"Data","label":"Customer Name","reqd":1,"in_list_view":1},
+  {"fieldname":"customer_contact","fieldtype":"Data","label":"Customer Contact","permlevel":1},
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"starts_at","fieldtype":"Datetime","label":"Starts At","reqd":1,"in_list_view":1},
+  {"fieldname":"ends_at","fieldtype":"Datetime","label":"Ends At","reqd":1},
+  {"fieldname":"status","fieldtype":"Select","label":"Status","options":"Draft\nAssigned\nAcknowledged\nConflict\nCompleted\nCancelled\nCustomer No-show","default":"Draft","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"source","fieldtype":"Select","label":"Source","options":"Reception\nPWA\nPOS\nPhone\nWalk-in","default":"Reception","reqd":1},
+  {"fieldname":"details_section","fieldtype":"Section Break","label":"Details"},
+  {"fieldname":"party_size","fieldtype":"Int","label":"Party Size","default":"1"},
+  {"fieldname":"venue","fieldtype":"Data","label":"Venue / Room"},
+  {"fieldname":"notes","fieldtype":"Small Text","label":"Notes"},
+  {"fieldname":"conflict_reason","fieldtype":"Small Text","label":"Conflict Reason","read_only":1}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Reservation",
+ "naming_rule": "Expression",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1,"print":1},
+  {"role":"Reception","read":1,"write":1,"create":1,"report":1,"permlevel":0},
+  {"role":"Reception","read":1,"write":1,"create":1,"permlevel":1},
+  {"role":"Branch Manager","read":1,"write":1,"create":1,"report":1,"permlevel":0},
+  {"role":"Branch Manager","read":1,"write":1,"permlevel":1},
+  {"role":"Entertainer Supervisor","read":1},
+  {"role":"Entertainer","read":1},
+  {"role":"CEO","read":1,"report":1,"export":1}
+ ],
+ "sort_field": "starts_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
