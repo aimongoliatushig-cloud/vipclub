@@ -54,7 +54,7 @@ class TestManagementAPI(TestCase):
 
 	def test_guest_session_returns_a_login_signal_without_role_resolution(self):
 		with (
-			patch("nomad_vip.api.management.frappe.session.user", "Guest"),
+			patch("nomad_vip.api.management.frappe.session", frappe._dict(user="Guest")),
 			patch("nomad_vip.api.management._management_actor") as management_actor,
 		):
 			result = get_session()

@@ -280,7 +280,7 @@ class TestRosterReadinessAndContextContracts(TestCase):
 		actor = _actor("Branch Manager")
 		with (
 			patch("nomad_vip.api.supervisor.require_actor", return_value=actor),
-			patch("nomad_vip.api.supervisor.frappe.db.sql", side_effect=[[[0]], []]) as sql,
+			patch("nomad_vip.api.supervisor.frappe.db.sql", side_effect=[[], [[0]], []]) as sql,
 		):
 			result = get_readiness_queue()
 
