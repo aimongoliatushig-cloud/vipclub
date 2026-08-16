@@ -263,6 +263,42 @@ A Nomad branch manager cannot configure Sapphire thresholds or approve a Sapphir
 ### AS-CRM-08 — Policy version preservation
 A threshold changes prospectively. Earlier evaluations still display the prior policy and explanation; new evaluations use the new effective policy.
 
+
+## Customer 360 information architecture
+
+The CRM landing page must be a role-aware Customer Intelligence Dashboard, not the existing customer-list-left/detail-right layout. Preserve reusable brand styles, not the current page composition.
+
+Required progression:
+
+```text
+Dashboard → Insight Detail → Filtered Customer Explorer → Customer 360 → Source evidence
+```
+
+- CEO defaults to all four branches with comparison and drill-down.
+- Branch managers default to and remain constrained to their authorized branch.
+- Every meaningful card, chart element, alert, insight row, and customer name must be interactive.
+- Dashboard interactions preserve branch, date, and comparison filters.
+- The complete customer directory is a separate Customer Explorer.
+- Clicking any customer name opens one canonical full-page Customer 360 Profile.
+- Customer details must not be limited to a narrow side panel.
+- Required detail screens must be implemented; dashboard elements may not end at placeholders.
+- The canonical profile combines summary, management insights, unified timeline, visit/spend analytics, membership evidence and decisions, benefits/cashback, consent/communications, actions, and source/audit links.
+- Full navigation, screen responsibilities, states, and acceptance criteria are defined in [Internal PWA — Customer 360 Information Architecture](08-ux/INTERNAL_PWA.md).
+- Metrics and role-specific dashboard content are defined in [Dashboard Catalog](09-analytics/DASHBOARD_CATALOG.md).
+
+### Additional functional requirements
+
+| ID | Requirement |
+| --- | --- |
+| FR-CRM-029 | The CRM landing page must be a role-aware customer intelligence dashboard and must not retain the previous list-left/detail-right layout. |
+| FR-CRM-030 | Every actionable dashboard metric, chart element, alert, and insight must open the correct filtered detail view with context preserved. |
+| FR-CRM-031 | The Customer Explorer must be a separate route with server-side search, filters, sorting, and pagination. |
+| FR-CRM-032 | Every visible customer name must open one canonical full-page Customer 360 Profile. |
+| FR-CRM-033 | CEO must receive company-wide four-branch comparison and drill-down; branch managers must remain branch-scoped. |
+| FR-CRM-034 | Insight details must expose definitions, filters, trends, contributing customers, source totals, freshness, and permitted evidence links. |
+| FR-CRM-035 | Dashboard and detail screens must implement loading, empty, denied, partial, stale, error, and superseded-decision states. |
+| FR-CRM-036 | No dashboard insight or required detail screen may end at a dead link or placeholder. |
+
 ## Remaining policy decisions
 
 - Final five level names and threshold values for each branch.
