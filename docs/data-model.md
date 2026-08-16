@@ -58,8 +58,10 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
 | Loyalty Policy Version | Five levels, threshold formula, points/value rules, expiry, downgrade, and effective dates. | Branch, Evaluation, Benefit |
-| Membership Evaluation Snapshot | Explainable result that assigns a member level using approved policy and source values. | Customer, Loyalty Policy |
-| Membership Level Assignment | Current and historical level for a customer, branch scope, effective dates, and reason. | Customer, Membership Evaluation |
+| Membership Evaluation Snapshot | Immutable calculation after an eligible visit, correction, or policy trigger; stores eligible spend, eligible visit count, average spend per visit, evaluation window, current/calculated level, source records, reconciliation state, policy version, and explanation. | Customer, Loyalty Policy, Customer Visit, Bill |
+| Membership Change Recommendation | Active or historical proposed upgrade/downgrade with direction, severity, first/latest evaluation, consecutive count, pending age, supersession, and escalation status. At most one active recommendation per customer, branch, and direction. | Customer, Membership Evaluation Snapshot |
+| Membership Decision | Manager decision to approve, keep current, or review later, including actor, scope, reason, timestamp, referenced evaluation, and audit data. Keep current applies only to one evaluation. | Recommendation, Manager, Audit Event |
+| Membership Level Assignment | Current and historical approved level for a customer, branch scope, effective dates, reason, approving decision, and evaluation. A calculation alone never creates an assignment. | Customer, Membership Evaluation, Membership Decision |
 | Benefit Definition | Configurable privilege, eligibility, limits, value, and branch scope. | Loyalty Policy, Benefit Entitlement |
 | Benefit Entitlement | A customer’s available allowance for a benefit in a period. | Customer, Benefit Definition |
 | Benefit Redemption | What benefit was used, by whom, when, where, and any reversal. | Entitlement, Branch, Operator |
@@ -94,7 +96,7 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 ## Key relationship flows
 
 ```text
-Customer → Visit / Reservation → Customer Intelligence → Membership Evaluation
+Customer → Eligible completed Visit / correction → Membership Evaluation → Recommendation → Manager Decision → Membership Level Assignment
 Membership Level → Benefit Entitlement → Benefit Redemption
 Customer → Cashback Ledger Entry → Available Cashback Balance
 Employee / Entertainer → Attendance + Performance + Income → Rank / Settlement / Loan
@@ -103,7 +105,7 @@ CEO or Manager → Operational Task → Comment / Evidence → Review / Completi
 
 ## Important open data decisions
 
-- Exact customer membership formula, thresholds, evaluation frequency, and cross-branch scope.
+- Final branch thresholds, evaluation window, minimum visit count, eligible-expenditure treatment, approval levels, escalation SLA, and cross-branch scope. The authoritative metric is eligible net expenditure divided by eligible completed visits, recalculated after every eligible completed visit and relevant correction.
 - Final five membership-level names and benefit rules.
 - Cashback point-to-currency value, expiry, allowed items, and approval/reversal rules.
 - Source of truth and reconciliation method for POS sales, attendance, reservations, and messaging delivery.
