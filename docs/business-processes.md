@@ -42,7 +42,7 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 | ID | Process | Purpose | Primary owner |
 | --- | --- | --- | --- |
 | P30 | Customer visit and spend attribution | Link verified visits and eligible spend to a customer, branch, reservation, and entertainer when applicable. | Reception / Operations |
-| P31 | Membership-level evaluation | Apply approved branch-specific policy to assign one of five customer membership levels. | CRM manager |
+| P31 | Per-visit membership evaluation and approval | After each eligible completed visit or financial correction, calculate average eligible expenditure per visit using the effective branch policy, recommend any level change, and require an authorized manager decision before a new level becomes effective. | CRM manager / Branch manager |
 | P32 | Benefit and cashback lifecycle | Issue, use, expire, reverse, and audit privileges and cashback value. | CRM manager / Finance |
 | P33 | Customer segmentation and campaign | Build a segment, validate consent, send a campaign, and track communication history and outcomes. | Marketing / CRM manager |
 | P34 | Customer intelligence review | Analyze visit cadence, spend, value, loyalty, branch behavior, and entertainer affinity. | Manager / CEO |
@@ -64,11 +64,11 @@ Every detailed process must define its owner, roles, trigger, required inputs, n
 4. P20 Task assignment and acknowledgement
 5. P21 Task execution and completion
 6. P16 Reservation lifecycle
-7. P31 Membership-level evaluation
+7. P31 Per-visit membership evaluation and manager approval
 8. P32 Benefit and cashback lifecycle
 9. P33 Customer segmentation and campaign
 10. P40 CEO–Manager Goal Engine
 
 ## Open design decisions
 
-Detailed BPMN work must not invent policy. The main pending decisions are membership formula and thresholds, cross-branch classification, task approval/reopening, benefit/cashback controls, and channel-provider behavior.
+Detailed BPMN work must not invent policy. The main pending decisions are final threshold values, evaluation window, eligible expenditure treatment, cross-branch classification, task approval/reopening, benefit/cashback controls, and channel-provider behavior.
