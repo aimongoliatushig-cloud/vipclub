@@ -70,6 +70,21 @@ The final role-permission matrix must define branch scope, data visibility, appr
 | FR-BRANCH-003 | New branches must inherit approved default policies and templates, while preserving authorized branch-specific configuration. |
 | FR-BRANCH-004 | Historical records must retain the branch associated with the event at the time it occurred. |
 
+## Customer membership evaluation and approval
+
+| ID | Requirement |
+| --- | --- |
+| FR-CRM-017 | Every eligible completed visit and relevant financial correction must trigger membership reevaluation. |
+| FR-CRM-018 | Eligibility must use eligible net expenditure divided by eligible completed visits in the effective branch-policy window. |
+| FR-CRM-019 | The system must store an immutable calculation snapshot with source records, policy version, and explanation. |
+| FR-CRM-020 | When calculated and current approved levels differ, the system must create or refresh a manager recommendation. |
+| FR-CRM-021 | No upgrade or downgrade takes effect without an authorized manager decision. |
+| FR-CRM-022 | Managers must be able to approve, keep current, or review later within branch and approval scope. |
+| FR-CRM-023 | Keep current applies only to that evaluation and must not suppress later calculations or renewed recommendations. |
+| FR-CRM-024 | Pending recommendations must not change effective benefits, cashback rules, or customer-visible level. |
+| FR-CRM-025 | Recommendation history, repeated calculations, decisions, reasons, escalation, and level assignments must remain auditable. |
+| FR-CRM-026 | Authorized managers must configure versioned branch-specific membership thresholds and policy controls. |
+
 ## Open questions with material delivery impact
 
 - What task states are required beyond open and complete?
