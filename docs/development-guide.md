@@ -15,12 +15,14 @@ This guide defines how the VIP Club system should be built and changed safely. T
 
 ## Delivery workflow
 
-1. Read the relevant knowledge-base documents and linked Linear work item.
+GitHub Markdown is the source of truth; Linear is mandatory delivery tracking. Before implementation, create or locate the authorized Linear project and issue structure described in [Requirements Traceability](01-governance/REQUIREMENTS_TRACEABILITY.md). Every material Customer 360 slice must have stable requirement IDs, source-document links, acceptance criteria, dependencies, owner, status, and verification evidence.
+
+1. Read the relevant knowledge-base documents completely and open the linked Linear work item.
 2. Confirm whether each rule is confirmed, proposed, or an open decision.
 3. Map the change to ERPNext reuse, custom records, integration, workflow, user interface, reports, security, and tests.
 4. Implement the smallest complete vertical slice.
 5. Add or update unit, integration, permission, workflow, audit, and user-journey tests.
-6. Update documentation, diagrams, decision records, and the Linear item.
+6. Update documentation, diagrams, decision records, traceability mapping, and the Linear item with implementation and test evidence.
 7. Validate in staging/UAT before production release.
 
 ## Quality and safety standards
