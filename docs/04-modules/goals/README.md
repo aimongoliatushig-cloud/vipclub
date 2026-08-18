@@ -1,7 +1,7 @@
 ---
-type: module
-status: selected-baseline
-last_reviewed: 2026-08-07
+type: module-spec
+status: partial-approved
+last_reviewed: 2026-08-13
 ---
 
 # Goals, Manager KPI, and Rewards Module
@@ -10,26 +10,17 @@ last_reviewed: 2026-08-07
 
 Own CEO-set monthly targets, manager action planning, AI recommendations, ERPNext/Frappe project/task links, progress, manager KPI evidence, reward/penalty review, history, and branch-health inputs.
 
-## Selected workflow
+## Manager default projection
 
-- CEO sets the target at the beginning of the configurable planning cycle.
-- Manager prepares an action plan and decides which AI recommendations to adopt.
-- CEO approves or requests changes to the plan.
-- Execution is tracked through authorized projects/tasks.
-- Month-end review records sales, plan execution, KPI, reward/penalty, and lessons.
-- AI remains advisory.
+The Branch Manager default overview shows the active CEO-approved target for the manager's own branch, reconciled actual sales, remaining amount, achievement percentage, target version, approval evidence, and source freshness.
 
-## Financial and employment boundary
+Only an active approved target can be used as the denominator. Draft, submitted, revision-requested, rejected, missing, or expired targets are shown as pending/missing and are not silently treated as active. Actual sales must come from a reconciled authorized source for the same branch and month.
 
-Underperformance thresholds and above-target rewards are interview policy inputs, not approved constants. The system may calculate and flag; humans review. Termination is never automatic.
-
-## Open decisions
-
-**TBD — Business configuration required:** KPI components/weights, customer-experience use, target deadlines, penalty boundaries, salary base, reward pool formula, manager/team allocation, approval, branch-health formula, and accounting treatment.
+The browser-local prototype provides a read-only example. Target proposal, CEO review, approval, revision, action-plan editing, secure POS reconciliation, scheduled reminders, and production audit enforcement remain separate workflows.
 
 ## Related documents
 
-- [Monthly Sales Target Process](../../monthly-sales-goal-process.md)
-- [Functional Requirements](../../functional-requirements.md)
-- [KPI Dictionary](../../09-analytics/KPI_DICTIONARY.md)
-- [Segregation of Duties](../../03-roles/SEGREGATION_OF_DUTIES.md)
+- [Knowledge-base gap analysis](../../knowledge-base-gap-analysis.md)
+- [Stakeholder clarification register](../../stakeholder-clarification-register.md)
+- [Monthly sales goal approval process](../../monthly-sales-goal-process.md)
+- [Manager sales-goal and CRM default decision](../../decisions/2026-08-13-manager-sales-goal-crm-default.md)

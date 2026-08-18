@@ -6,24 +6,22 @@ This is an evidence-based working draft derived from project discussions and cli
 
 | Role | Primary responsibility |
 | --- | --- |
-| CEO | Company-wide oversight, cross-branch task assignment, monthly sales-target setting, final designated approvals, and authorized audit access. |
-| General Manager | Company-wide operations within delegated authority, downward task assignment, management review, and escalation to the CEO. |
-| Branch Manager | Branch operations, staff and service oversight, in-branch task assignment, local configuration within approved scope, monthly action planning, KPI review, and resolution of branch exceptions. |
-| Call Operator | Handles CallPro-assisted calls, limited customer lookup/creation, call classification, reservation creation, approved VIP recognition, and current-shift entertainer availability lookup. |
-| Receptionist / Host | Finds or creates customer profiles, manages consent, records arrival/check-in and drop-off outcomes, assigns room/session context, and supports reservations. |
-| Bartender / Floor Operations | Uses the consolidated operations workstation for current rooms, customer sessions, reservations, entertainer requests, and immediate service alerts without unrestricted CRM access. |
-| Entertainer | Uses the internal PWA for own schedule, attendance, incidents, KPI evidence, rank, income, loans, customer requests, tasks, messages, and assistant coaching. |
-| Lead Entertainer | Oversees entertainer standards, coaching, readiness, operational follow-up, and ranking evidence within approved authority. |
-| Customer / VIP Customer | Uses the Customer Assistant PWA for approved public entertainer information, room-aware requests, feedback, reservations, membership, points, privileges, and consent choices. |
+| CEO | Company-wide oversight, cross-branch task assignment, and designated approvals. |
+| Branch manager | Branch operations, team management, in-branch task assignment, branch-local workforce planning and weekly scheduling within approved scope, local configuration within approved scope, and proposing and executing monthly sales targets and action plans to improve branch sales. |
+| Entertainer | Uses the workforce portal for schedule, attendance, income, rank, reservations, benefits, tasks, and communication. |
+| Lead entertainer | Oversees entertainer standards, coaching, readiness, and operational follow-up; exact approval and disciplinary authority remains to be defined. |
 | Server | Supports branch service operations and receives role-appropriate tasks, schedules, and notifications. |
-| Marketing and Content Manager | Creates approved customer segments, campaigns, content, and marketing reporting. |
-| General Accountant | Oversees accounting records, reconciliations, financial controls, and approved reporting. |
-| Transaction Accountant | Records and reconciles operating transactions, settlements, point events, and supporting financial evidence. |
-| Payment Accountant | Prepares and records authorized payments and maintains payment evidence and status. |
-| Accounting Clerk | Supports transaction entry, record maintenance, evidence collection, and assigned reconciliation work under financial controls. |
-| Human Resources Manager | Owns employee lifecycle, people policy, staffing, personnel records, and authorized employment review workflows. |
-| Purchasing Manager | Manages approved procurement requests, suppliers, purchasing workflow, and purchasing records. |
-| Technical Assistant | Receives, diagnoses, updates, and closes assigned technical maintenance and equipment-support work with evidence. |
+| Bartender | Supports beverage/service operations and receives role-appropriate tasks, schedules, and notifications. |
+| Host or receptionist | Finds or creates customer profiles, manages customer onboarding and consent, and supports reservations. |
+| VIP customer | Has a member profile, consent preferences, reservations, membership level, approved benefits/points, and communications. |
+| Marketing and content manager | Creates approved customer segments, campaigns, content, and marketing reporting. |
+| General accountant | Oversees accounting records, reconciliations, financial controls, and approved reporting. |
+| Transaction accountant | Records and reconciles operating transactions, settlements, and supporting financial evidence. |
+| Payment accountant | Prepares and records authorized payments and maintains payment evidence and status. |
+| Accounting clerk | Supports transaction entry, record maintenance, evidence collection, and assigned reconciliation work under financial controls. |
+| Human resources manager | Owns employee lifecycle, people policy, staffing, personnel records, and approved HR workflows. |
+| Purchasing manager | Manages approved procurement requests, suppliers, purchasing workflow, and purchasing records. |
+| Technical assistant | Receives, diagnoses, updates, and closes assigned technical maintenance and equipment-support work with evidence. |
 | Carpenter | Receives and completes assigned branch facilities, fixture, and repair work with progress updates and completion evidence. |
 | Security Officer | Supports visitor and branch safety, incident reporting, and approved security procedures. |
 | Driver | Provides approved safe transport for eligible VIP visitors and records assigned trips according to privacy and safety rules. |
@@ -32,6 +30,77 @@ This is an evidence-based working draft derived from project discussions and cli
 ### Role-design note
 
 Role responsibility does not grant unrestricted access. The role-permission and field-masking specifications define branch, record, action, approval, export, and sensitive-field scope. All API access is enforced server-side.
+
+## Role-aware management application
+
+| ID | Requirement |
+| --- | --- |
+| FR-MGMT-001 | The internal management PWA must resolve the authenticated user's role, permissions, and authorized branch identifiers before rendering the default workspace. |
+| FR-MGMT-002 | A CEO session must default to a company-wide dashboard and may view designated cross-branch sales, workforce, CRM/ranking, and approval summaries. |
+| FR-MGMT-003 | A Branch Manager session must default to the manager's authorized branch overview and must not receive another branch's or company-wide data without a separately granted permission. |
+| FR-MGMT-004 | Navigation, route access, service methods, and mutations must enforce the same permission model; hiding a control alone is not authorization. |
+| FR-MGMT-005 | A Manager submission and the corresponding CEO approval, revision request, or rejection must update one shared versioned record with actor, time, state, and decision comment. |
+| FR-MGMT-006 | The Manager workspace must show the CEO's latest decision state and comment while preserving the Manager's inability to approve or override the final decision. |
+| FR-MGMT-007 | Production authentication and branch/permission checks must be enforced server-side even when the PWA also applies client-side guards. |
+
+## Branch workforce planning and weekly scheduling
+
+| ID | Requirement |
+| --- | --- |
+| FR-WORKFORCE-001 | A Branch Manager must be able to configure the minimum number of team members required for each approved branch role for each weekday, Monday through Sunday, within the manager's authorized branch. |
+| FR-WORKFORCE-002 | Staffing requirements must support roles including entertainers, servers, bartenders, hosts/receptionists, security, drivers, maintenance/technical roles, and other approved branch roles. |
+| FR-WORKFORCE-003 | Staffing requirement changes must be branch-scoped, effective-dated, and auditable with actor, previous value, new value, and timestamp. |
+| FR-WORKFORCE-004 | The system must preserve separate values for Required, Scheduled, and Checked In staffing by branch, date, shift/period, and role. |
+| FR-WORKFORCE-005 | The system must calculate scheduled coverage against the active minimum staffing requirement and identify shortages by role and date. |
+| FR-WORKFORCE-006 | The system must calculate actual readiness from verified attendance and identify actual operational shortages separately from scheduling shortages. |
+| FR-WORKFORCE-007 | Approved absence and unexpected no-show must remain distinguishable in workforce-readiness reporting. |
+| FR-WORKFORCE-008 | The system must alert the authorized Branch Manager when a weekly schedule is below the minimum requirement or when a later leave/status change causes a published shift to fall below requirement. |
+| FR-WORKFORCE-009 | The system must alert the authorized Branch Manager when actual attendance creates a critical role shortage during an operating shift. |
+| FR-WORKFORCE-010 | CEO-level workforce oversight must show publication timing, schedule version, unresolved gaps, overdue acknowledgements or change requests, the accountable manager, last action, next action, and due date using traceable workflow evidence. |
+| FR-WORKFORCE-011 | The system must support an executive drill-down to schedule evidence and an authorized message or tracked follow-up task without making the CEO the routine weekly schedule owner. |
+
+## Weekly shift scheduling
+
+| ID | Requirement |
+| --- | --- |
+| FR-SHIFT-001 | A Branch Manager must be able to create and publish a weekly shift schedule for team members in the manager's authorized branch. |
+| FR-SHIFT-002 | The weekly scheduler must support filtering team members by role and assigning eligible team members to dates and approved shift types. |
+| FR-SHIFT-003 | The manager must be able to see authorized leave/availability information needed to make a scheduling decision. |
+| FR-SHIFT-004 | Before publication, the system must compare the proposed weekly roster to the branch's active weekday/role staffing requirements and display unresolved shortages. |
+| FR-SHIFT-005 | The manager may publish a schedule with an unresolved shortage when business policy permits, but the shortage must remain visible and auditable. |
+| FR-SHIFT-006 | Changes to a published shift assignment must retain an audit trail rather than silently rewriting schedule history. |
+| FR-SHIFT-007 | Employees must be able to view their published schedule in the internal PWA according to role and branch permissions. |
+| FR-SHIFT-008 | A longer calendar view may be provided for planning, but the published weekly roster is the authoritative operational schedule for attendance classification. |
+| FR-SHIFT-009 | The system must support backfilling a shortage by assigning an eligible authorized branch team member to the affected shift. |
+| FR-SHIFT-010 | Weekly rosters must use explicit Draft, Published, Closed, and Superseded states; a draft does not create an attendance expectation. |
+| FR-SHIFT-011 | Publishing must validate branch scope, active employment, role eligibility, approved leave/availability, duplicate or overlapping shifts, and active minimum coverage. |
+| FR-SHIFT-012 | A policy-permitted publication below minimum coverage must require a manager reason and retain an open staffing exception. |
+| FR-SHIFT-013 | A material change to a published assignment must create an audited roster version, record a reason, notify the affected team member, and return the assignment to acknowledgement pending. |
+| FR-SHIFT-014 | Each published assignment must record Assigned, Acknowledged, or Change requested independently from attendance status. |
+
+## Leave and day-off requests
+
+| ID | Requirement |
+| --- | --- |
+| FR-LEAVE-001 | An authenticated team member must be able to submit a leave or day-off request only for the person's own active branch assignment, with type, start date, end date, reason, submitter, and submitted timestamp. |
+| FR-LEAVE-002 | Leave requests must use explicit Pending, Approved, or Rejected states. A pending or rejected request must not change schedule coverage, availability, attendance classification, or pay treatment. |
+| FR-LEAVE-003 | The authorized Branch Manager must be able to view and approve or reject requests for the manager's own branch, with a required decision reason, actor, timestamp, and retained source request. Any HR co-approval required by policy remains a separate workflow. |
+| FR-LEAVE-004 | Approval must mark the team member unavailable for the approved date range and recalculate affected coverage without deleting or silently rewriting a published assignment. Any resulting shortage remains visible for backfill and follow-up. |
+| FR-LEAVE-005 | A leave request, manager decision, attendance evidence, and approved-absence classification must remain separate linked records. Approval alone must not fabricate check-in/out evidence. |
+| FR-LEAVE-006 | The team member must be able to view the current state and manager decision reason for the person's own requests; the manager must be able to filter pending and historical requests for the authorized branch. |
+
+## Attendance relationship to schedule
+
+| ID | Requirement |
+| --- | --- |
+| FR-ATT-001 | A team member must not be classified as late or no-show for a shift unless a valid published shift assignment or other approved authoritative schedule record establishes that attendance was expected. |
+| FR-ATT-002 | Late minutes must be calculated from verified clock-in time against the scheduled shift start time. |
+| FR-ATT-003 | If a scheduled team member does not attend and no approved absence applies according to policy, the system must create an unexpected/unapproved no-show record. |
+| FR-ATT-004 | Branch Managers must be able to review branch attendance exceptions including lateness, unexpected no-show, approved absence, schedule/attendance mismatch, and correction requests. |
+| FR-ATT-005 | When policy permits a manager to excuse an incident, the system must retain the original attendance evidence and record a separate audited manager decision controlling downstream penalty treatment. |
+| FR-ATT-006 | Branch Managers must be able to inspect every branch lateness and no-show candidate with scheduled time, verified arrival where available, late minutes, source evidence, attendance decision, and downstream penalty-review state. |
+| FR-ATT-007 | The system must not calculate a penalty amount, create a deduction, or claim a payable outcome unless an approved effective-dated penalty policy version defines category, formula, evidence, authority, appeal path, and effective date. |
+| FR-ATT-008 | Attendance review states and penalty/deduction records must remain separate. Excused or rejected incidents are excluded from downstream penalty processing while confirmed incidents remain policy-pending until an authorized policy workflow acts. |
 
 ## Workforce task management
 
@@ -52,21 +121,67 @@ Role responsibility does not grant unrestricted access. The role-permission and 
 | FR-TASK-013 | Deadline reminders must be configurable by task type, with a working expectation of approximately one or two days before due date plus controlled overdue, reassignment, and approval notifications. |
 | FR-TASK-014 | Projects and tasks must retain supporting information and decisions in context rather than relying on unrelated messaging. |
 
-## Monthly sales goals and manager performance
+## Monthly sales goal approval
 
 | ID | Requirement |
 | --- | --- |
-| FR-GOAL-001 | The CEO must set the monthly sales target for each relevant branch or manager at the beginning of the planning cycle. |
-| FR-GOAL-002 | The Branch Manager must review the target and prepare an editable action plan, projects, tasks, owners, and proposed deadlines. |
-| FR-GOAL-003 | The Manager assistant may analyze the previous cycle and propose evidence-based actions; the manager chooses, edits, rejects, or supplements them. |
-| FR-GOAL-004 | The CEO must approve the submitted monthly action plan or request changes before it becomes active. |
-| FR-GOAL-005 | The system must retain target, plan versions, AI recommendations, manager decisions, review comments, approvals, and source-data summaries. |
-| FR-GOAL-006 | The system must display current sales, target, attainment percentage, forecast when supported, and plan execution throughout the month. |
-| FR-GOAL-007 | AI may advise, explain, forecast, and remind; it must not approve a target, compensation, penalty, or termination action. |
-| FR-GOAL-008 | CEO and managers must be able to review historical targets, actuals, attainment, target reached/missed months, reward/penalty outcome, and trend. |
-| FR-GOAL-009 | Configured underperformance thresholds may calculate and flag proposed salary deductions or employment review, but termination and other employment decisions require authorized human action. |
-| FR-GOAL-010 | Above-target performance may create a configurable reward pool with manager share, proposed team allocation, recipient amounts, explanation, review, and final status visible to the CEO. |
-| FR-GOAL-011 | The planning deadline and reminder timing must be configurable; a fixed three-day-before-month rule must not be hard-coded. |
+| FR-GOAL-001 | Each branch sales manager must be able to prepare a monthly sales target and action plan before the new month. |
+| FR-GOAL-002 | Hermes must generate evidence-based planning recommendations approximately three days before the new month, including focus areas and suggested actions. |
+| FR-GOAL-003 | The CEO must be able to review, question, return for revision, approve, or reject a submitted plan. |
+| FR-GOAL-004 | Only the CEO’s approval can activate the monthly branch sales target. |
+| FR-GOAL-005 | The system must keep each proposal, review comment, revision, approval, and source-data summary in an audit trail. |
+| FR-GOAL-006 | The system must display actual sales against the approved target as an achievement percentage and progress bar. |
+| FR-GOAL-007 | Hermes may advise, summarize, and remind; it must not approve or silently change a sales target or action plan. |
+| FR-GOAL-008 | The Branch Manager's default landing page must show the active CEO-approved monthly target, reconciled actual sales, remaining amount, achievement percentage, approval version, and source freshness for the manager's authorized branch only. |
+| FR-GOAL-009 | A draft, submitted, rejected, missing, or expired target must not be presented as an active sales goal or silently compared with actual sales. |
+| FR-GOAL-010 | The Branch Manager must not receive company-wide or another branch's target or sales progress unless separately granted an explicit cross-branch permission. |
+
+## Branch Manager customer intelligence
+
+| ID | Requirement |
+| --- | --- |
+| FR-MCRM-001 | A Branch Manager must be able to search own-branch customer records by name or a permitted phone identifier while the result remains masked and field-projected. |
+| FR-MCRM-002 | The manager CRM must show the current source membership level, total confirmed expenditure, average eligible expenditure per completed eligible visit, latest visit, and data freshness. |
+| FR-MCRM-003 | The customer directory must support ordering by membership level, total expenditure, average expenditure, and latest visit. |
+| FR-MCRM-004 | Full phone numbers must not be included in the browser read model; production full-number lookup must normalize and match server-side, then return only authorized masked fields. |
+| FR-MCRM-005 | Search, filtering, sorting, and customer detail access must remain restricted to the manager's authorized branch and must not grant membership-level editing or approval authority. |
+
+## Branch Manager operational service workspace
+
+| ID | Requirement |
+| --- | --- |
+| FR-MOPS-001 | A Branch Manager must be able to view the manager's own-branch reservation queue and distinguish Requested, Confirmed, Arrived, Completed, and Cancelled states. |
+| FR-MOPS-002 | A Branch Manager may create or support an own-branch reservation using a permitted masked customer identifier, visit date/time, party size, and special request; production full-phone matching remains server-side. |
+| FR-MOPS-003 | Reservation transitions must validate the current state and preserve branch, actor, source, and update timestamps rather than silently rewriting the lifecycle. |
+| FR-MOPS-004 | A Branch Manager must be able to report a maintenance issue with category, location, urgency, description, and created time; final categories, urgency rules, and service-level targets remain governed by CL-023. |
+| FR-MOPS-005 | The manager must be able to assign a maintenance request to an authorized technical or facilities role with a due date, while the assigned worker retains responsibility for diagnosis, progress, result, and completion evidence. |
+| FR-MOPS-006 | The manager may verify and close submitted maintenance work or return it for rework with a reason; verification must not erase the original request, result, or evidence. |
+| FR-MOPS-007 | The manager may receive and triage own-branch service/customer feedback and route it to the accountable owner. |
+| FR-MOPS-008 | A people-related or HR-restricted complaint must expose only safe routing metadata to a Branch Manager unless a separate case permission exists; the manager must not view or resolve restricted case content merely because it concerns the branch. |
+| FR-MOPS-009 | Branch operations must expose open reservation requests, submitted maintenance work, and unresolved service issues in the Manager's default decision queue. |
+
+## Manager notifications, orders, and CRM handoff
+
+| ID | Requirement |
+| --- | --- |
+| FR-MNOT-001 | The internal PWA must provide a Manager notification center for material workforce, task, reservation, maintenance, and decision events within the authorized branch. |
+| FR-MNOT-002 | Notification records must preserve severity, category, created time, related workflow, read state, and any recorded escalation action. |
+| FR-MNOT-003 | A browser-local or PWA notification record must not claim that Slack, SMS, email, or another external channel delivered a message unless provider delivery evidence exists. |
+| FR-MNOT-004 | A Branch Manager may issue an own-branch formal instruction to authorized team members with content, audience, due date, and per-recipient acknowledgement evidence. |
+| FR-MNOT-005 | Formal instruction acknowledgement is evidence that the recipient received/read the instruction; it must remain separate from attendance, task completion, or disciplinary outcome. |
+| FR-MNOT-006 | The Branch Manager CRM may show own-branch, field-projected communication history with masked customer identity, purpose, channel, consent state, delivery evidence, and time. |
+| FR-MNOT-007 | A Branch Manager may submit an evidence-based segment or communication request to the authorized CRM/marketing owner; this handoff must not grant the manager campaign-send, consent-override, export, or cross-branch access. |
+
+## Branch Manager rank and membership recommendations
+
+| ID | Requirement |
+| --- | --- |
+| FR-MREC-001 | The Branch Manager must be able to review the approved 14-day entertainer evaluation evidence and prepare a recommendation while keeping the current source rank separate from the proposed rank. |
+| FR-MREC-002 | An entertainer recommendation must preserve the evidence summary, manager reason, policy-version state, submission state, and later authorized decision comment. |
+| FR-MREC-003 | Only the CEO final-decision workflow may approve, return, or reject an entertainer rank recommendation; submission by a Branch Manager must not change the effective rank. |
+| FR-MREC-004 | For customer membership evaluation, a Branch Manager may support the calculated result or record a retain-current/exception reason according to policy, but must not directly assign or approve a membership level. |
+| FR-MREC-005 | Missing policy weights, thresholds, hard gates, branch ranges, or effective versions must remain visible as a decision lock and must not be invented in the client UI. |
+| FR-MREC-006 | Every recommendation workflow must remain branch-scoped, auditable, source-preserving, and protected against acting on stale evidence in production. |
 
 ## Branch setup and scalability
 
@@ -79,122 +194,12 @@ Role responsibility does not grant unrestricted access. The role-permission and 
 
 ## Call Operator and CallPro
 
-| ID | Requirement |
-| --- | --- |
-| FR-CALL-001 | The system must integrate with CallPro through verified available APIs without inventing unsupported endpoints or semantic classification. |
-| FR-CALL-002 | Where supported, store or associate incoming, answered, missed, or unanswered calls, caller number, timestamps, operator, duration, provider reference, and useful metadata. |
-| FR-CALL-003 | An operator must classify call purpose as reservation, general inquiry, location, menu/service, entertainer availability, prank/abusive, other, or an authorized configurable category, with an optional note. |
-| FR-CALL-004 | Routine reservations must not require unnecessary commentary. |
-| FR-CALL-005 | An authorized operator may mark a number as prank, abusive, or blocked according to policy; blocking and unblocking require reason and audit history. |
-| FR-CALL-006 | An operator may search an existing customer by normalized phone identity but must not receive unrestricted CRM access. |
-| FR-CALL-007 | The operator view may show service-required customer details and an operational VIP/member indicator while masking unrelated sensitive data. |
-| FR-CALL-008 | If no match exists, the operator may create a minimum customer/contact record and attach a reservation. |
-| FR-CALL-009 | A call-created reservation must capture customer, configured branch, date/time, guest count, source call, and relevant notes. |
-| FR-CALL-010 | The operator may view tonight/current-shift entertainer schedule and operational availability without unrelated private entertainer data. |
-| FR-CALL-011 | Call reporting must support calls handled, answer rate, booking conversion, purpose distribution, prank/blocked calls, and authorized operator drill-down. |
-| FR-CALL-012 | CallPro authentication, endpoint coverage, webhook/polling model, retention, rate limits, sandbox, and reconciliation remain **TBD — Business configuration required** pending provider documentation. |
-
-## Entertainer profile, ranking, and assistance
-
-| ID | Requirement |
-| --- | --- |
-| FR-ENT-001 | The internal entertainer profile may store structured height, weight, chest, waist/belly, hip, hair color, body type, nationality, languages, traits, talents, and other configured service-relevant attributes. |
-| FR-ENT-002 | Traits, talents, and similar variable attributes should use authorized tag/configuration records rather than inflexible hard-coded enumerations. |
-| FR-ENT-003 | Body measurements, private contact data, disciplinary data, financial data, and confidential KPI calculations must never be exposed through the Customer Assistant PWA. |
-| FR-ENT-004 | An approved public entertainer profile may expose photo, display identity, nationality, languages, short introduction, talents, current public rank, operational availability, approved extra-service capability, and explicitly approved fields. |
-| FR-ENT-005 | Entertainers use four ranks: Bronze, Silver, Gold, and Diamond. |
-| FR-ENT-006 | New entertainers begin at Gold under the current client direction; later movement follows the approved human-controlled ranking policy. |
-| FR-ENT-007 | Ranking evidence must cover four broad dimensions: sales/performance, attendance/reliability, repeat-customer loyalty, and verified behavioral incidents. |
-| FR-ENT-008 | The system may calculate an explainable promotion-readiness recommendation and unmet criteria, but an authorized human makes the final rank decision. |
-| FR-ENT-009 | Rank decisions must record recommendation, source evidence, approver, final decision, override reason when applicable, policy version, and effective date. |
-| FR-ENT-010 | The public profile may show only the current rank, not scoring details or confidential evidence. |
-| FR-ENT-011 | The Entertainer PWA must provide a permission-bound personal assistant using only the entertainer's own authorized schedule, attendance, incidents, feedback, KPI, rank, income, deduction, loan, and customer-request data. |
-| FR-ENT-012 | The assistant must distinguish objective evidence from management judgment and must not expose another entertainer's private data. |
-| FR-ENT-013 | Exact ranking weights, thresholds, work-night expectations, loyalty qualification, Diamond conditions, evaluation period, demotion rules, and approval authority are **TBD — Business configuration required**. |
-
-## Entertainer requests and extra services
-
-| ID | Requirement |
-| --- | --- |
-| FR-REQ-001 | A room-aware customer session may request an operationally available and customer-visible entertainer in near real time. |
-| FR-REQ-002 | A request must capture branch, room, customer/session, entertainer, request time, acknowledgement and status timestamps, arrival, completion, and outcome where applicable. |
-| FR-REQ-003 | Requests must be visible through the entertainer PWA, resting-area display, and authorized manager/bartender operations view as configured. |
-| FR-REQ-004 | The working response target is approximately two minutes; the system records response evidence and does not apply an automatic punishment. |
-| FR-REQ-005 | Unresolved and aging requests must be obvious to managers so they can physically alert an entertainer when necessary. |
-| FR-REQ-006 | Operational availability and customer visibility are separate states; shift attendance alone must not determine public availability. |
-| FR-REQ-007 | Extra service/performance types, entertainer capability, branch-specific price, approved customer-visible price, and availability rules must be configurable. |
-| FR-REQ-008 | Customer views must not expose internal margin or profit-sharing details for extra services. |
-| FR-REQ-009 | Official extra-service terminology, categories, payment flow, eligibility, and revenue-share impact are **TBD — Business configuration required**. |
-
-## Entertainer compensation and settlement
-
-| ID | Requirement |
-| --- | --- |
-| FR-INCOME-001 | Entertainer income must support customer-time/hourly share, normal tips, spreading tips, wine commission, and other approved categories. |
-| FR-INCOME-002 | Customer-time share rules must be branch-scoped, effective-dated, auditable, and historically reproducible; proposed rates are Bronze 50%, Silver 60%, Gold 70%, and Diamond 80%. |
-| FR-INCOME-003 | Spreading-tip unit value and entertainer share must be configurable; interview values are approximately MNT 2,000 per unit and 90% share. |
-| FR-INCOME-004 | The Entertainer PWA must show a transparent three-day income statement separating earnings from deductions. |
-| FR-INCOME-005 | Earnings must separately identify customer-time/hourly earnings, tips, spreading tips, wine commission, and other approved income. |
-| FR-INCOME-006 | Deductions must separately identify loan repayment, lateness, no-show, approved missed-request deductions, and other approved deductions. |
-| FR-INCOME-007 | Every line item must link to source evidence, policy version, calculation, effective rate, and any approval or adjustment. |
-| FR-INCOME-008 | Manual deductions and financial-rule changes require authorization, previous/new value, reason, effective date, and audit history. |
-| FR-INCOME-009 | Proposed percentages, tip terminology, penalty amounts, and missed-request deduction policy remain **TBD — Business configuration required** until approved. |
-
-## Customer Assistant, feedback, visits, and reconciliation
-
-| ID | Requirement |
-| --- | --- |
-| FR-CUST-001 | Extend the existing Customer Assistant PWA rather than create a redundant customer application. |
-| FR-CUST-002 | A room-specific QR code must establish authorized branch, room, and customer-session context without exposing another session. |
-| FR-CUST-003 | The Customer Assistant must show only entertainers who are both operationally available and approved for customer visibility. |
-| FR-CUST-004 | Customers may request an entertainer and receive simple status feedback such as Requested, Confirmed, On the way, or Unavailable. |
-| FR-CUST-005 | Membership theming may use discreet tier cues; it must not conspicuously expose a high-status member to companions. |
-| FR-CUST-006 | Customers may submit a compliment, complaint/criticism, or improvement suggestion and may optionally reference an entertainer. |
-| FR-CUST-007 | Compliments may become performance evidence; complaints require management review and must not automatically create a penalty or KPI deduction. |
-| FR-OPS-001 | Reception must record auditable customer/group arrival and check-in time separately from reservation, service entry, drop-off, and billing. |
-| FR-OPS-002 | Reception must record a no-service/drop-off outcome using structured reasons plus optional free text; known reasons include full capacity, preferred entertainer unavailable, too few options, price concern, and Other. |
-| FR-OPS-003 | Every checked-in group must reconcile to a bill/service outcome or a legitimate recorded drop-off. |
-| FR-OPS-004 | An unexplained check-in/bill difference must create a Reconciliation Exception for Branch Manager review and CEO cross-branch visibility. |
-| FR-OPS-005 | A reconciliation exception must not itself accuse or punish an employee; a verified resolution may become policy-approved KPI evidence. |
-| FR-OPS-006 | Managers and bartenders need one near-real-time operations workstation for room occupancy, customer sessions, reservations, entertainer requests, and immediate alerts. |
-| FR-OPS-007 | Bartenders may see only today's service-required customer details, membership status, approved preferences, and a masked identifier—not unrestricted CRM or full phone number. |
-| FR-OPS-008 | The final branch health-score formula, weights, severity, period, and alert rules are **TBD — Business configuration required**. |
-
-## Internal messaging and escalation
-
-| ID | Requirement |
-| --- | --- |
-| FR-MSG-001 | Authorized employees must be able to send direct internal messages according to organizational and branch permissions. |
-| FR-MSG-002 | Entertainers may communicate with teammates and authorized Lead Entertainer, Branch Manager, General Manager, CEO, and other staff. |
-| FR-MSG-003 | Employees may submit concerns or incident-related feedback upward to a selected authorized recipient. |
-| FR-MSG-004 | An approved feedback submission may hide the sender from the normal recipient while retaining the true identity for tightly permissioned CEO/audit access. |
-| FR-MSG-005 | The product must clearly disclose that recipient-anonymous feedback is not technically untraceable. |
-| FR-MSG-006 | Every access to a protected sender identity must be audited. |
-
-## AI authorization and reporting
-
-| ID | Requirement |
-| --- | --- |
-| FR-AI-001 | CEO, Manager, and Entertainer assistants must operate as distinct role contexts over backend-authorized data and tools. |
-| FR-AI-002 | AI may summarize, explain, detect anomalies, recommend actions, estimate trajectories, identify promotion readiness, and draft projects/tasks. |
-| FR-AI-003 | AI must not secretly determine compensation, ranking, punishment, termination, financial approval, or policy activation. |
-| FR-AI-004 | An assistant request must not bypass backend role, branch, ownership, action, or field-level authorization. |
-| FR-REPORT-001 | Reporting must support authorized drill-down by date, branch, manager/employee, entertainer, customer cohort, call operator, feedback category, drop-off reason, and target period. |
-| FR-REPORT-002 | Required report families include CallPro/operator, target history, branch health, check-in/bill reconciliation, drop-off, feedback, entertainer-request response, entertainer KPI/rank review, income statement, reward allocation, and monthly plan execution. |
-| FR-REPORT-003 | KPI calculations must retain formula/policy version, source records, refresh time, and drill-down evidence. |
-
-## Governance and audit
-
-High-impact changes and decisions—including rank, KPI override, financial rule, deduction, reward allocation, phone blocking, incident verification, target, monthly plan, protected sender-identity access, and reconciliation resolution—must record actor, timestamp, previous/new value where applicable, reason, approval state, and effective policy version.
-
-All changing business values use effective-dated/versioned configuration where historical calculations must remain reproducible.
-
-## Open decisions with material delivery impact
-
-- **Entertainer ranking:** final four-dimension weights, thresholds, repeat-customer rule, late/no-show limits, work nights, evaluation period, Diamond conditions, demotion, and approval authority.
-- **Manager KPI:** final components, weights, customer-experience use, task and attendance weight, penalty boundary semantics, and reward formula.
-- **Branch health:** final metrics, weights, period, severity, red/amber/green thresholds, and critical alerts.
-- **Extra services:** official terminology, categories, eligibility, pricing workflow, payment behavior, and revenue share.
-- **CallPro:** verified API scope, authentication, event delivery, historical retrieval, retention, sandbox, rate limits, and data-processing terms.
-- **Operations:** exact entertainer-request status language, two-minute SLA policy, escalation timing, room/session identity, and reconciliation resolution authority.
-- **Task management:** final states, result acceptance, reopening authority, evidence retention, and notification timing by task type.
+- What task states are required beyond open and complete?
+- Can managers assign across branches, or only within their own branch?
+- Who verifies or accepts a submitted result?
+- Can a completed task be reopened, and who can do so?
+- Which notification channels, escalation rules, and reminder timing are required?
+- What image size, retention, privacy, and access rules apply?
+- What exact dashboard metrics are required for employees, managers, and the CEO?
+- Should the business require a minimum lead time before a weekly schedule is published, and what is the cutoff for ordinary schedule changes?
+- Which approved roles, if any, may edit another branch's staffing template or weekly schedule?

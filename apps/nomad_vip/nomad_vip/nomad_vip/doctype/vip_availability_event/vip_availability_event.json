@@ -1,0 +1,37 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["entertainer", "employee", "branch", "work_date", "status", "previous_event", "previous_status", "previous_version", "state_version", "occurred_at", "note", "actor", "idempotency_key"],
+ "fields": [
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"employee","fieldtype":"Link","label":"Employee","options":"Employee","reqd":1,"in_standard_filter":1},
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"work_date","fieldtype":"Date","label":"Work Date","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"status","fieldtype":"Select","label":"Status","options":"Unavailable\nAvailable\nScheduled\nReserved\nWorking\nBreak\nLeave","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"previous_event","fieldtype":"Link","label":"Previous Event","options":"VIP Availability Event","read_only":1,"no_copy":1},
+  {"fieldname":"previous_status","fieldtype":"Select","label":"Previous Status","options":"Unavailable\nAvailable\nScheduled\nReserved\nWorking\nBreak\nLeave","read_only":1,"no_copy":1},
+  {"fieldname":"previous_version","fieldtype":"Int","label":"Previous Version","default":"0","read_only":1,"no_copy":1},
+  {"fieldname":"state_version","fieldtype":"Int","label":"State Version","default":"0","read_only":1,"no_copy":1},
+  {"fieldname":"occurred_at","fieldtype":"Datetime","label":"Occurred At","reqd":1,"read_only":1,"in_list_view":1},
+  {"fieldname":"note","fieldtype":"Small Text","label":"Note"},
+  {"fieldname":"actor","fieldtype":"Link","label":"Actor","options":"User","reqd":1,"read_only":1},
+  {"fieldname":"idempotency_key","fieldtype":"Data","label":"Idempotency Key","unique":1,"read_only":1,"no_copy":1}
+ ],
+ "module": "NOMAD VIP",
+ "name": "VIP Availability Event",
+ "naming_rule": "Random",
+ "permissions": [
+  {"role":"System Manager","read":1,"report":1,"export":1},
+  {"role":"VIP Admin","read":1,"report":1,"export":1},
+  {"role":"HR Manager","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1},
+  {"role":"Entertainer Supervisor","read":1,"report":1},
+  {"role":"Entertainer","read":1}
+ ],
+ "sort_field": "occurred_at",
+ "sort_order": "DESC",
+ "track_changes": 0
+}

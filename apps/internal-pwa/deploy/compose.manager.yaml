@@ -1,0 +1,11 @@
+services:
+  manager-web:
+    image: ${MANAGER_IMAGE:-nomad-manager-web:latest}
+    container_name: nomad-manager-web
+    restart: unless-stopped
+    networks:
+      - frappe_docker_default
+
+networks:
+  frappe_docker_default:
+    external: true

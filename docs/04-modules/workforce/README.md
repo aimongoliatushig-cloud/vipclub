@@ -1,39 +1,250 @@
 ---
-type: module
-status: selected-baseline
-last_reviewed: 2026-08-07
+type: module-spec
+status: approved
+last_reviewed: 2026-08-13
 ---
 
 # Workforce Module
 
 ## Purpose
 
-Own employee and entertainer identity, role/branch assignment, schedule, attendance, internal entertainer profile, operational availability, incident evidence, ranking inputs, and personnel lifecycle.
+Manage branch workforce operations using ERPNext/Frappe employee and shift records, extended with VIP Club-specific staffing requirements, weekly scheduling, coverage/readiness, attendance exceptions, and manager accountability.
 
-## Entertainer profile boundary
+## Ownership
 
-- Structured internal measurements and configurable traits/talents belong to the internal service profile.
-- Public profile fields are explicitly approved and serialized separately.
-- Body measurements, private contacts, incidents, financials, and confidential KPI evidence are never customer-visible.
-- Operational availability and customer visibility are separate effective states.
+- **HR** owns formal employee lifecycle, employment status, contracts, employment type, company-wide personnel policy, and offboarding unless authority is explicitly delegated.
+- **Branch Manager** owns operational workforce planning for the manager's authorized branch: staffing minimums, weekly shifts, coverage, and daily attendance exception review.
+- **CEO-level users** have company-wide oversight according to executive permissions.
 
-## Ranking boundary
+A Branch Manager's scheduling authority does not grant unrestricted HR authority.
 
-The module supplies verified sales/performance, attendance/reliability, repeat-customer loyalty, and reviewed incident evidence. The ranking domain creates an explainable recommendation; an authorized human decides the rank.
+## Core operating model
 
-New entertainers start at Gold under the latest client direction.
+The workforce module separates three questions:
 
-## Personal assistant
+```text
+Required -> Scheduled -> Checked In
+```
 
-The Entertainer assistant may explain the acting entertainer's own authorized schedule, attendance, incidents visible under policy, feedback, KPI evidence, rank, income, loans, and requests. It cannot access another entertainer's private records.
+1. **Required** — how many people the branch needs by weekday and role.
+2. **Scheduled** — which specific people the manager assigned to published shifts.
+3. **Checked In** — who actually attended according to verified attendance evidence.
 
-## Policy boundaries
+This allows the system to distinguish planning shortage from attendance failure.
 
-**TBD — Business configuration required:** public fields, internal matching fields, ranking weights/thresholds, work-night expectation, Diamond conditions, incident authority, availability transitions, and final rank approver.
+## Branch minimum staffing template
+
+Each branch has a recurring Monday-through-Sunday minimum staffing template.
+
+The Branch Manager can configure minimum headcount for each approved branch role, such as:
+
+- entertainer;
+- server;
+- bartender;
+- host/receptionist;
+- security;
+- driver;
+- maintenance/technical roles;
+- other approved branch roles.
+
+Example:
+
+```text
+Monday
+  Entertainer: 20
+  Server: 4
+  Bartender: 2
+  Receptionist: 2
+  Security: 2
+
+Saturday
+  Entertainer: 28
+  Server: 6
+  Bartender: 3
+  Receptionist: 3
+  Security: 3
+```
+
+The template is branch-scoped, effective-dated, and auditable.
+
+## Weekly shift scheduling
+
+The Branch Manager builds and publishes the actual team roster weekly.
+
+The manager can:
+
+- view authorized branch team members;
+- filter by role;
+- see authorized availability/leave information;
+- assign employees to dates and shift types;
+- edit unpublished assignments;
+- make audited changes after publication;
+- publish the weekly schedule;
+- identify coverage shortages before publication;
+- backfill a shortage when an eligible team member is available.
+
+A month or longer calendar view may be provided for planning, but the published weekly roster is the authoritative operational schedule.
+
+### Roster and assignment states
+
+The weekly roster state is `Draft`, `Published`, `Closed`, or `Superseded`. Published changes create a new version with a reason and audit event; they do not silently replace history.
+
+Each team-member assignment separately records `Assigned`, `Acknowledged`, or `Change requested`. Acknowledgement means the person received the schedule. Attendance is still established only by verified check-in/out or another approved attendance record.
+
+Publication checks must cover:
+
+- authorized branch and active employment;
+- role and shift eligibility;
+- approved leave/availability conflicts;
+- duplicate or overlapping assignments;
+- active weekday/role minimum coverage.
+
+Where policy allows publication below minimum coverage, the manager must record a reason and the staffing exception remains open.
+
+## Leave and day-off request workflow
+
+A team member may submit a leave or day-off request only for the person's own active branch assignment. The request records type, start/end date, reason, submitter, branch, and submitted time.
+
+The operational states are `Pending`, `Approved`, and `Rejected`:
+
+- `Pending` is visible to the authorized Branch Manager but does not change availability, coverage, attendance, or pay treatment.
+- `Approved` records a separate manager decision with reason, actor, and time; it marks the person unavailable for the approved period and recalculates coverage.
+- `Rejected` retains the request and decision reason but does not change availability or coverage.
+
+If approved leave overlaps a published shift, keep the original assignment and publication version as evidence. Open a visible coverage impact for backfill rather than silently deleting the assignment. The leave request, manager decision, attendance evidence, and approved-absence classification remain separate linked records. Any HR co-approval or leave-balance rule required by final policy must be implemented as a separate authorization step.
+
+## Coverage and readiness
+
+For every branch/date/role, show at least:
+
+- required headcount;
+- scheduled headcount;
+- schedule shortage;
+- checked-in headcount;
+- approved leave/absence;
+- unexpected no-show;
+- late arrivals;
+- actual readiness shortage.
+
+Suggested calculations:
+
+```text
+Scheduled coverage = Scheduled / Required
+Actual readiness = Checked In / Required
+```
+
+When the required count is zero, present the role as not required for that period rather than dividing by zero.
+
+## Shortage handling
+
+Warn the manager when:
+
+- the weekly roster is below minimum staffing;
+- a published roster later falls below minimum because of approved leave, transfer, suspension, or another known change;
+- actual check-in is below minimum during the shift;
+- an unexpected no-show creates a critical shortage.
+
+Shortages must be visible by date and role.
+
+## Attendance relationship
+
+The published Shift Assignment or equivalent approved schedule record is the source of the employee's attendance expectation.
+
+### Lateness
+
+```text
+Late minutes = verified clock-in time - scheduled start time
+```
+
+### No-show
+
+A no-show can only be created when the employee was scheduled to attend and no approved absence applies according to policy.
+
+Approved absence and unexpected no-show remain separate statuses because they have different operational, penalty, KPI, and Branch Health effects.
+
+## Daily manager review
+
+Branch Managers review attendance exceptions daily, including:
+
+- late arrivals;
+- unexpected no-shows;
+- approved absences;
+- attendance/schedule mismatches;
+- correction requests.
+
+Where policy permits, a manager may excuse an incident. The original attendance evidence remains unchanged; the excusal is a separate audited decision that controls downstream penalty treatment.
+
+### Penalty-review boundary
+
+The manager attendance workspace may show all lateness and no-show candidates with the published shift, verified arrival, late minutes, source evidence, attendance decision, and downstream state. The UI uses these states:
+
+- `Attendance decision pending` — the source incident still requires manager review;
+- `Penalty policy pending` — the incident is confirmed, but no amount is calculated because no approved effective policy version is available;
+- `Excluded from penalty processing` — the incident was excused or otherwise rejected for downstream treatment.
+
+CL-013 remains open. Until CEO, HR, and legal owners approve penalty categories, formulas, evidence, appeal, authority, and effective dates, the system must display `Amount not calculated`, must not create a deduction, and must not allow a Branch Manager to invent or enter a monetary penalty. A later penalty/deduction record must reference the attendance evidence, manager decision, effective policy version, authorized approver, and appeal outcome without rewriting those records.
+
+## ERPNext/Frappe reuse
+
+Reuse standard records where appropriate:
+
+- Employee;
+- Shift Type;
+- Shift Assignment;
+- Employee Checkin;
+- Attendance;
+- Leave Application.
+
+VIP Club custom records/services should cover only the missing business logic, including:
+
+- branch staffing template;
+- staffing requirement by weekday/role;
+- coverage/readiness snapshots;
+- shortage alerts;
+- branch-specific configuration audit.
+
+## Manager PWA workspace
+
+The Branch Manager Workforce area must include:
+
+1. **Staffing Requirements** — Monday-Sunday role minimums.
+2. **Weekly Schedule** — weekly employee-to-shift planning calendar.
+3. **Coverage / Readiness** — Required vs Scheduled vs Checked In.
+4. **Attendance and Leave** — attendance exceptions, leave/day-off approval, and penalty-review evidence in separate tabs.
+5. **Team Members** — operational roster and authorized availability information.
+
+## Reporting and KPI use
+
+Persist enough history to distinguish:
+
+- manager planning shortage;
+- attendance failure despite adequate planning;
+- planned approved shortage;
+- unexpected shortage.
+
+These records may feed Branch Health, manager KPI, workforce forecasting, and Hermes recommendations.
+
+CEO-level oversight should connect each exception to observable management workflow evidence: publication deadline and time, schedule version, unresolved gaps, pending acknowledgements, open change/leave requests, the accountable manager, last action, next action, and due date. Executive users may drill down, message the manager, or create a follow-up task without becoming the routine schedule owner.
+
+## Audit
+
+Audit at minimum:
+
+- staffing-template changes;
+- schedule publication;
+- post-publication schedule changes;
+- manager attendance decisions;
+- leave/day-off submissions and manager decisions;
+- penalty-policy evaluation and deduction linkage when an approved policy exists;
+- shortage events and resolution where available.
+
+Record actor, branch, timestamp, previous value, new value, and effective date where applicable.
 
 ## Related documents
 
-- [Functional Requirements](../../functional-requirements.md)
-- [Entertainer Ranking Policy](../../entertainer-ranking-policy.md)
-- [Field Masking](../../03-roles/FIELD_MASKING.md)
-- [Data and Domain Model](../../data-model.md)
+- [Branch workforce scheduling decision](../../decisions/2026-08-13-branch-workforce-scheduling.md)
+- [Functional requirements](../../functional-requirements.md)
+- [Data model](../../data-model.md)
+- [Business processes](../../business-processes.md)
+- [Role permission matrix](../../03-roles/ROLE_PERMISSION_MATRIX.md)
+- [Internal PWA](../../08-ux/INTERNAL_PWA.md)

@@ -1,0 +1,42 @@
+{
+ "app": "nomad_vip",
+ "charts": [],
+ "content": "[{\"id\":\"staff-heading\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Ажилтны апп</b></span>\",\"col\":12}},{\"id\":\"staff-launcher\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Ажилтны апп нээх\",\"col\":4}}]",
+ "creation": "2026-08-12 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 1,
+ "icon": "users",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "NOMAD Staff",
+ "links": [],
+ "modified": "2026-08-12 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "NOMAD VIP",
+ "name": "NOMAD Staff",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {"role": "Branch Manager"},
+  {"role": "Entertainer"},
+  {"role": "Lead Entertainer"},
+  {"role": "Entertainer Supervisor"}
+ ],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "color": "Yellow",
+   "label": "Ажилтны апп нээх",
+   "type": "URL",
+   "url": "/staff/"
+  }
+ ],
+ "title": "NOMAD Staff",
+ "type": "Workspace"
+}

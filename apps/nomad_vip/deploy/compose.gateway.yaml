@@ -1,0 +1,21 @@
+name: vipclub
+
+services:
+  web:
+    container_name: vipclub-web
+    image: vipclub-web:20260813-manager-v1
+    pull_policy: never
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /opt/vipclub-registration/letsencrypt:/etc/letsencrypt:ro
+      - /opt/vipclub-registration/certbot-webroot:/var/www/certbot
+    networks:
+      - default
+      - frappe_docker_default
+
+networks:
+  frappe_docker_default:
+    external: true

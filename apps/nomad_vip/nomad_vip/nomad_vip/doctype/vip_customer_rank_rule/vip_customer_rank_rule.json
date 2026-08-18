@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:VIP-CRR-{branch}-{membership_rank}",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["branch", "membership_rank", "rank_order", "threshold_section", "minimum_total_spend", "minimum_visit_count", "minimum_average_bill", "active", "audit_section", "updated_by", "applied_at"],
+ "fields": [
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"membership_rank","fieldtype":"Select","label":"Membership Rank","options":"Bronze\nSilver\nGold\nDiamond\nBlack Diamond","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"rank_order","fieldtype":"Int","label":"Rank Order","reqd":1,"in_list_view":1},
+  {"fieldname":"threshold_section","fieldtype":"Section Break","label":"Customer Thresholds"},
+  {"fieldname":"minimum_total_spend","fieldtype":"Currency","label":"Minimum Total Spend","default":"0","reqd":1,"hidden":1},
+  {"fieldname":"minimum_visit_count","fieldtype":"Int","label":"Minimum Visit Count","default":"0","reqd":1,"hidden":1},
+  {"fieldname":"minimum_average_bill","fieldtype":"Currency","label":"Minimum Average Bill","default":"0","reqd":1},
+  {"fieldname":"active","fieldtype":"Check","label":"Active","default":"1","in_list_view":1},
+  {"fieldname":"audit_section","fieldtype":"Section Break","label":"Audit"},
+  {"fieldname":"updated_by","fieldtype":"Link","label":"Updated By","options":"User","read_only":1},
+  {"fieldname":"applied_at","fieldtype":"Datetime","label":"Last Applied At","read_only":1}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Customer Rank Rule",
+ "naming_rule": "Expression",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1},
+  {"role":"VIP Admin","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1}
+ ],
+ "sort_field": "rank_order",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

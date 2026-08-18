@@ -1,7 +1,7 @@
 ---
-type: permissions
-status: selected-baseline
-last_reviewed: 2026-08-07
+type: permission-spec
+status: partial-approved
+last_reviewed: 2026-08-13
 ---
 
 # Role Permission Matrix
@@ -10,64 +10,112 @@ last_reviewed: 2026-08-07
 
 Define minimum role, branch, record, action, approval, export, and field-level access. This is a deny-by-default baseline; final DocType actions and sensitive fields require implementation mapping and approval.
 
-All permissions are enforced in Frappe/backend APIs. Menu or field hiding is not a security control.
+This document currently records the approved workforce-planning and scheduling permissions. Other domain permissions remain to be completed from approved business decisions.
 
-## Baseline matrix
+## Permission principles
 
-| Role | Scope | Allowed capabilities | Restricted capabilities |
-| --- | --- | --- | --- |
-| CEO | Company-wide | Executive dashboards; all-branch targets and approved audits; downward task assignment; designated rank, plan, reward, policy, and exception decisions | Must not bypass financial segregation or silently edit finalized history |
-| General Manager | Delegated company scope | Cross-branch operations, subordinate assignment, review, escalation, approved dashboards | No undelegated CEO-only or accounting approval |
-| Branch Manager | Assigned branches | Branch operations, staff schedule/availability, customer feedback, incidents, reconciliation exceptions, local tasks, action plans, approved configuration proposals | No other-branch private data; no unilateral high-risk financial policy activation unless explicitly delegated |
-| Call Operator | Call-handling scope | CallPro call list/metadata, masked caller lookup, minimum customer creation, reservation, current-shift entertainer availability, VIP service indicator, purpose classification, block proposal/action per policy | No unrestricted CRM, full customer history, entertainer private/financial/disciplinary data, or confidential KPI |
-| Receptionist / Host | Assigned branch and current service | Customer lookup/create, consent, reservation, arrival/check-in, room/session association, drop-off reason, approved preferences | No unrelated finance, confidential entertainer data, or unrestricted exports |
-| Bartender / Floor Operations | Assigned branch and current day/shift | Operations workstation, rooms, active sessions, reservations, entertainer requests, service-required membership and preference data, masked customer identifier | No full phone number, unrestricted CRM history, marketing export, or private entertainer records |
-| Lead Entertainer | Assigned branch/team | Entertainer schedule/readiness, coaching, assigned evidence and incidents, authorized ranking review input | No other-branch/private finance unless separately granted; no final rank decision unless approved |
-| Entertainer | Own records plus assigned operational work | Own schedule, attendance, incidents visible under policy, feedback, KPI evidence, rank, income statement, loan, requests, tasks, messages, assistant | No other entertainer private data, manager confidential notes, or unrestricted customer CRM |
-| Customer / VIP Customer | Authenticated or room-scoped service context | Own membership/points/privileges; approved public entertainer profiles; current visible availability; room request; feedback; own reservation/consent | No body measurements, private contacts, incidents, financials, KPI calculations, or another customer/session |
-| HR Manager | Authorized people scope | Employment records, attendance/discipline workflows, approved employment review, policy administration | No unrelated customer CRM or accounting approval |
-| General Accountant | Authorized financial scope | Financial policy review, settlements, reconciliation, liabilities, reports, approvals under segregation | No unreviewed self-approval where separation is required |
-| Transaction Accountant | Assigned transaction scope | Source transaction, settlement, point, reward, and reconciliation evidence | No final policy approval unless delegated |
-| Payment Accountant | Assigned payment scope | Authorized payment preparation/posting and payment evidence | No unauthorized calculation or self-approved policy |
-| Marketing / Content Manager | Approved customer/campaign scope | Segments, consented campaigns, customer-visible content, aggregate reporting | No unrestricted sensitive customer or entertainer internal profile data |
-| System Administrator | Technical administration | Users, roles, integration/configuration setup, policy deployment, audit support | Cannot grant self business approval or alter finalized records outside correction workflow |
+- Permissions are deny-by-default.
+- Branch scope is enforced server-side.
+- A visible menu or hidden button is never the security boundary.
+- Operational scheduling authority does not imply unrestricted HR authority.
+- Consequential configuration changes and post-publication schedule changes must be auditable.
 
-Other existing roles retain their authorized module scope and inherit the same branch, ownership, field, and audit controls.
+## Workforce planning and scheduling
 
-## Sensitive-action controls
+| Capability | CEO-level | Branch Manager | HR Manager | Team Member |
+| --- | --- | --- | --- | --- |
+| View staffing requirements | All authorized branches | Own authorized branch | All authorized branches | No, unless separately granted |
+| Edit weekday/role minimum staffing template | Oversight/override only where separately authorized | Yes, own authorized branch | View/advise; edit only if separately authorized | No |
+| View weekly schedule | All authorized branches | Own authorized branch | All authorized branches as required for HR work | Own published schedule |
+| Create/edit unpublished weekly shift assignments | No routine operational ownership; override only where separately authorized | Yes, own authorized branch | Only if separately authorized | No |
+| Publish weekly schedule | No routine operational ownership; override only where separately authorized | Yes, own authorized branch | Only if separately authorized | No |
+| Change published schedule | Executive override where authorized | Yes, own branch with audit trail | HR intervention where authorized | No |
+| Acknowledge published assignment | No | Own assignment only if separately assigned a shift | Own assignment only if separately assigned a shift | Yes, own assignment |
+| Request change to published assignment | No | Own assignment only if separately assigned a shift | Own assignment only if separately assigned a shift | Yes, own assignment |
+| View coverage/readiness | All authorized branches | Own authorized branch | All authorized branches | Own shift status only |
+| Review daily attendance exceptions | Oversight/drill-down | Yes, own authorized branch | HR review/escalation according to policy | Own attendance and correction request |
+| Excuse attendance incident | Only where executive policy permits | Yes where policy permits, own branch | Yes where HR policy permits | No |
+| Submit leave/day-off request | Own request only if acting as a team member | Own request only if acting as a team member | Own request only if acting as a team member | Yes, own request only |
+| Approve/reject branch leave request | Oversight/override only where policy permits | Yes, own authorized branch; HR co-approval remains separate where required | Yes according to HR policy | No |
+| View penalty-review evidence | Oversight/drill-down | Own authorized branch | HR review according to policy | Own incident and decision only |
+| Create monetary penalty/deduction | Only through approved policy workflow | No authority from branch scheduling role alone | Only where approved policy delegates | No |
+| Create/terminate employment record | No routine action unless separately delegated | No | Yes, according to HR authority | No |
+| Change employment type/contract | No routine action unless separately delegated | No | Yes, according to HR authority | No |
 
-| Action | Minimum control |
-| --- | --- |
-| Rank change | Explainable recommendation/evidence plus authorized human decision and audit |
-| Financial-rule change | Effective-dated version, previous/new value, reason, and approved segregation |
-| Manual deduction | Source evidence, proposer, approver, reason, and adjustment path |
-| Reward allocation | Policy calculation, manager proposal where permitted, CEO visibility/review, and audit |
-| Customer-phone block/unblock | Policy reason, actor, time, status history, and review/appeal rule |
-| Verified incident | Structured evidence, review status, resolution, and restricted visibility |
-| Monthly target/plan | CEO-set target, manager plan, CEO approval, full version history |
-| Anonymous sender identity access | CEO/audited authority only, explicit reason, and immutable access log |
-| Reconciliation exception resolution | Branch-scoped investigation, reason/evidence, manager action, and CEO visibility |
+## Sales-goal and customer-intelligence visibility
 
-## Assignment hierarchy
+| Capability | CEO-level | Branch Manager | Marketing / CRM role | Team Member |
+| --- | --- | --- | --- | --- |
+| View active monthly sales target and progress | All authorized branches | Own authorized branch only | As separately granted | No |
+| Propose branch monthly target/action plan | Review/return/approve; not routine proposal owner | Own authorized branch | No unless separately assigned as branch sales manager | No |
+| Approve or activate monthly sales target | Yes, with decision evidence | No | No | No |
+| View customer membership level | Authorized company/branch scope | Own authorized branch, read-only | Authorized customer scope | Own level only where customer self-service permits |
+| Search customer by phone | Authorized projected search | Own branch; masked result only | Authorized projected search | No |
+| View customer total/average expenditure | Authorized analytical scope | Own branch, operationally necessary fields only | Authorized analytical scope | Own history only where separately permitted |
+| Edit membership level or branch ranges | CEO approval/override according to policy | Propose/support only | Propose according to policy | No |
+| Export full customer/contact data | Only if separately granted | No from manager role alone | Only if separately granted and consent/privacy controls pass | No |
 
-- CEO may assign downward within authorized company scope.
-- General Manager may assign to delegated subordinate scope.
-- Branch Manager may assign within authorized branch/team.
-- Subordinates normally cannot assign mandatory work upward.
-- Any authorized user may comment, ask questions, submit updates, request clarification, or propose changes within a task/project.
+A full phone number may be accepted by an authorized production search endpoint for normalized matching, but it must not be returned to or retained in the Branch Manager browser projection. The browser-local prototype therefore searches the visible last four digits only.
 
-## Open decisions
+## Branch Manager workforce authority
 
-- **TBD — Business configuration required:** exact create/read/update/delete/submit/approve/export permissions by DocType.
-- Confirm separate Sales Manager and Host role mappings.
-- Confirm final rank, financial policy, reward, block/unblock, incident, and reconciliation approval authorities.
-- Confirm cross-branch access for General Manager, accounting, HR, marketing, and technical support.
-- Confirm customer/session authentication and room-QR authorization lifetime.
-- Confirm data export, audit-log, and anonymous-identity access retention.
+A Branch Manager may, for the manager's authorized branch:
+
+- configure minimum staffing requirements by weekday and role;
+- build and publish weekly shift schedules;
+- assign eligible branch team members to approved shifts;
+- view authorized leave/availability information required for scheduling;
+- identify and backfill staffing shortages;
+- review daily attendance exceptions;
+- approve or reject own-branch leave/day-off requests with an audited reason;
+- view own-branch lateness/no-show evidence and downstream penalty-review state;
+- make audited excusal decisions where policy allows.
+
+The Branch Manager may not, solely because of this authority:
+
+- activate or terminate employment;
+- alter contracts or employment type;
+- grant unrestricted access to private HR data;
+- alter company-wide HR policy;
+- access another branch's workforce configuration without explicit cross-branch authority.
+
+## HR boundary
+
+HR owns formal personnel lifecycle and company-wide HR policy. HR must be able to see branch staffing risk and published schedules where needed for staffing, transfer, leave, onboarding, and offboarding workflows.
+
+## CEO-level oversight
+
+CEO-level users may view company-wide staffing readiness and workforce risks according to executive authorization. CEO-level access should support oversight, escalation, and approved override without making the CEO the routine weekly scheduler.
+
+Executive oversight may expose roster deadlines, publication timestamps, version history, unresolved gaps, overdue acknowledgements/change requests, the accountable manager, last action, next action, and due date. An executive may message the Branch Manager or create a tracked follow-up task. Subjective inactivity labels are not authorized without a defined measurable breach.
+
+## Team-member scope
+
+A team member can view the person's own published schedule and attendance information, plus submit approved leave/correction requests according to policy. Team members cannot alter branch staffing requirements or publish schedules.
+
+## Audit-sensitive actions
+
+Audit at minimum:
+
+- staffing-template edits;
+- weekly schedule publication;
+- post-publication assignment change;
+- manager attendance excusal;
+- executive/HR override.
+
+## Remaining permission gaps
+
+The following still require broader approved decisions:
+
+- complete customer/CRM field visibility by role;
+- financial approval and export matrix;
+- cross-branch task-assignment permissions;
+- campaign/broadcast approval permissions;
+- final cross-branch manager access model;
+- exact HR override rules for operational schedules.
 
 ## Related documents
 
-- [Functional Requirements](../functional-requirements.md)
-- [Field Masking](FIELD_MASKING.md)
-- [Segregation of Duties](SEGREGATION_OF_DUTIES.md)
-- [Technical Architecture](../technical-architecture.md)
+- [Branch workforce scheduling decision](../decisions/2026-08-13-branch-workforce-scheduling.md)
+- [Workforce module](../04-modules/workforce/README.md)
+- [Functional requirements](../functional-requirements.md)

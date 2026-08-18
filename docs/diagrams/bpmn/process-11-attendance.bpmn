@@ -1,35 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_process-11-attendance" targetNamespace="https://vipclub.example/bpmn">
-  <bpmn:process id="process-11-attendance" name="Schedule and Attendance" isExecutable="false">
-    <bpmn:StartEvent id="process-11-attendance_start" name="Start" />
-    <bpmn:Task id="process-11-attendance_task1" name="Assign schedule" />
-    <bpmn:Task id="process-11-attendance_task2" name="Record check-in or check-out" />
-    <bpmn:Task id="process-11-attendance_task3" name="Classify attendance" />
-    <bpmn:Task id="process-11-attendance_task4" name="Review correction if required" />
-    <bpmn:Task id="process-11-attendance_task5" name="Publish verified attendance" />
-    <bpmn:EndEvent id="process-11-attendance_end" name="Complete" />
+  <bpmn:process id="process-11-attendance" name="Branch Workforce Planning, Weekly Schedule and Attendance" isExecutable="false">
+    <bpmn:StartEvent id="process-11-attendance_start" name="Start planning cycle" />
+    <bpmn:Task id="process-11-attendance_task1" name="Maintain weekday and role staffing requirements" />
+    <bpmn:Task id="process-11-attendance_task2" name="Build weekly team schedule" />
+    <bpmn:Task id="process-11-attendance_task3" name="Validate required versus scheduled coverage" />
+    <bpmn:Task id="process-11-attendance_task4" name="Resolve or record staffing shortage" />
+    <bpmn:Task id="process-11-attendance_task5" name="Publish weekly schedule" />
+    <bpmn:Task id="process-11-attendance_task6" name="Record verified check-in and check-out" />
+    <bpmn:Task id="process-11-attendance_task7" name="Classify late, absence, and no-show" />
+    <bpmn:Task id="process-11-attendance_task8" name="Manager reviews attendance exceptions" />
+    <bpmn:Task id="process-11-attendance_task9" name="Publish verified attendance and readiness" />
+    <bpmn:EndEvent id="process-11-attendance_end" name="Cycle complete" />
+
     <bpmn:sequenceFlow id="process-11-attendance_flow1" sourceRef="process-11-attendance_start" targetRef="process-11-attendance_task1" />
     <bpmn:sequenceFlow id="process-11-attendance_flow2" sourceRef="process-11-attendance_task1" targetRef="process-11-attendance_task2" />
     <bpmn:sequenceFlow id="process-11-attendance_flow3" sourceRef="process-11-attendance_task2" targetRef="process-11-attendance_task3" />
     <bpmn:sequenceFlow id="process-11-attendance_flow4" sourceRef="process-11-attendance_task3" targetRef="process-11-attendance_task4" />
     <bpmn:sequenceFlow id="process-11-attendance_flow5" sourceRef="process-11-attendance_task4" targetRef="process-11-attendance_task5" />
-    <bpmn:sequenceFlow id="process-11-attendance_flow6" sourceRef="process-11-attendance_task5" targetRef="process-11-attendance_end" />
+    <bpmn:sequenceFlow id="process-11-attendance_flow6" sourceRef="process-11-attendance_task5" targetRef="process-11-attendance_task6" />
+    <bpmn:sequenceFlow id="process-11-attendance_flow7" sourceRef="process-11-attendance_task6" targetRef="process-11-attendance_task7" />
+    <bpmn:sequenceFlow id="process-11-attendance_flow8" sourceRef="process-11-attendance_task7" targetRef="process-11-attendance_task8" />
+    <bpmn:sequenceFlow id="process-11-attendance_flow9" sourceRef="process-11-attendance_task8" targetRef="process-11-attendance_task9" />
+    <bpmn:sequenceFlow id="process-11-attendance_flow10" sourceRef="process-11-attendance_task9" targetRef="process-11-attendance_end" />
   </bpmn:process>
+
   <bpmndi:BPMNDiagram id="process-11-attendance_diagram">
     <bpmndi:BPMNPlane id="process-11-attendance_plane" bpmnElement="process-11-attendance">
-      <bpmndi:BPMNShape id="process-11-attendance_start_di" bpmnElement="process-11-attendance_start"><dc:Bounds x="80" y="120" width="36" height="36" /></bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="process-11-attendance_task1_di" bpmnElement="process-11-attendance_task1"><dc:Bounds x="265" y="120" width="140" height="80" /></bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="process-11-attendance_task2_di" bpmnElement="process-11-attendance_task2"><dc:Bounds x="450" y="120" width="140" height="80" /></bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="process-11-attendance_task3_di" bpmnElement="process-11-attendance_task3"><dc:Bounds x="635" y="120" width="140" height="80" /></bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="process-11-attendance_task4_di" bpmnElement="process-11-attendance_task4"><dc:Bounds x="820" y="120" width="140" height="80" /></bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="process-11-attendance_task5_di" bpmnElement="process-11-attendance_task5"><dc:Bounds x="1005" y="120" width="140" height="80" /></bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="process-11-attendance_end_di" bpmnElement="process-11-attendance_end"><dc:Bounds x="1190" y="120" width="36" height="36" /></bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge id="process-11-attendance_flow1_di" bpmnElement="process-11-attendance_flow1"><di:waypoint x="116" y="138" /><di:waypoint x="265" y="138" /></bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="process-11-attendance_flow2_di" bpmnElement="process-11-attendance_flow2"><di:waypoint x="405" y="138" /><di:waypoint x="450" y="138" /></bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="process-11-attendance_flow3_di" bpmnElement="process-11-attendance_flow3"><di:waypoint x="590" y="138" /><di:waypoint x="635" y="138" /></bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="process-11-attendance_flow4_di" bpmnElement="process-11-attendance_flow4"><di:waypoint x="775" y="138" /><di:waypoint x="820" y="138" /></bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="process-11-attendance_flow5_di" bpmnElement="process-11-attendance_flow5"><di:waypoint x="960" y="138" /><di:waypoint x="1005" y="138" /></bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="process-11-attendance_flow6_di" bpmnElement="process-11-attendance_flow6"><di:waypoint x="1145" y="138" /><di:waypoint x="1190" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="process-11-attendance_start_di" bpmnElement="process-11-attendance_start"><dc:Bounds x="40" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task1_di" bpmnElement="process-11-attendance_task1"><dc:Bounds x="120" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task2_di" bpmnElement="process-11-attendance_task2"><dc:Bounds x="310" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task3_di" bpmnElement="process-11-attendance_task3"><dc:Bounds x="500" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task4_di" bpmnElement="process-11-attendance_task4"><dc:Bounds x="690" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task5_di" bpmnElement="process-11-attendance_task5"><dc:Bounds x="880" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task6_di" bpmnElement="process-11-attendance_task6"><dc:Bounds x="1070" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task7_di" bpmnElement="process-11-attendance_task7"><dc:Bounds x="1260" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task8_di" bpmnElement="process-11-attendance_task8"><dc:Bounds x="1450" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_task9_di" bpmnElement="process-11-attendance_task9"><dc:Bounds x="1640" y="100" width="150" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-11-attendance_end_di" bpmnElement="process-11-attendance_end"><dc:Bounds x="1830" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+
+      <bpmndi:BPMNEdge id="process-11-attendance_flow1_di" bpmnElement="process-11-attendance_flow1"><di:waypoint x="76" y="138" /><di:waypoint x="120" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow2_di" bpmnElement="process-11-attendance_flow2"><di:waypoint x="270" y="138" /><di:waypoint x="310" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow3_di" bpmnElement="process-11-attendance_flow3"><di:waypoint x="460" y="138" /><di:waypoint x="500" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow4_di" bpmnElement="process-11-attendance_flow4"><di:waypoint x="650" y="138" /><di:waypoint x="690" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow5_di" bpmnElement="process-11-attendance_flow5"><di:waypoint x="840" y="138" /><di:waypoint x="880" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow6_di" bpmnElement="process-11-attendance_flow6"><di:waypoint x="1030" y="138" /><di:waypoint x="1070" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow7_di" bpmnElement="process-11-attendance_flow7"><di:waypoint x="1220" y="138" /><di:waypoint x="1260" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow8_di" bpmnElement="process-11-attendance_flow8"><di:waypoint x="1410" y="138" /><di:waypoint x="1450" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow9_di" bpmnElement="process-11-attendance_flow9"><di:waypoint x="1600" y="138" /><di:waypoint x="1640" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-11-attendance_flow10_di" bpmnElement="process-11-attendance_flow10"><di:waypoint x="1790" y="138" /><di:waypoint x="1830" y="138" /></bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
 </bpmn:definitions>

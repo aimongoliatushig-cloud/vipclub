@@ -19,18 +19,73 @@ Every detailed process defines owner, roles, trigger, inputs, normal flow, excep
 
 | ID | Process | Purpose | Primary owner |
 | --- | --- | --- | --- |
-| P10 | Employee and entertainer onboarding | Create identity, branch, role, schedule, bank/contract records, starting Gold entertainer rank, and acknowledgements. | HR |
-| P11 | Schedule and attendance | Assign shifts, record check-in/out, classify attendance, and manage corrections. | Branch Manager |
-| P12 | Entertainer ranking recommendation and decision | Convert verified four-dimension evidence into an explainable recommendation and authorized human rank decision. | Operations / Authorized Management |
-| P13 | Three-day entertainer settlement | Calculate category earnings, deductions, loan repayment, review, approve, pay, and audit. | Accounting |
-| P14 | Performance-based loan | Check eligibility, approve, disburse, and repay through settlements. | CEO / Accounting |
-| P15 | Customer registration and consent | Find/create a customer and record consent and channel preferences. | Reception / Call Operator |
-| P16 | Reservation lifecycle | Request, confirm, assign, arrive, complete, cancel, and attribute revenue. | Reception / Branch Manager |
-| P17 | CallPro-assisted call to reservation | Import/record a call, match/create customer, classify purpose, check service availability, create reservation, and close/reconcile the call. | Call Operator |
-| P18 | Check-in, room session, drop-off, and bill reconciliation | Record arrival, bind room/session, record service or drop-off, reconcile bill, and resolve unexplained sessions. | Reception / Branch Manager |
-| P19 | Entertainer availability and room request | Publish approved availability, request an entertainer, acknowledge, escalate, arrive, complete, and measure response. | Branch Manager / Floor Operations |
+| P10 | Employee and entertainer onboarding | Create identity, branch, role, schedule, bank/contract records, and required acknowledgements. | HR |
+| P11 | Branch workforce planning, weekly schedule, and attendance | Maintain weekday/role minimum staffing, build and publish weekly shifts, validate coverage, record check-in/out, classify attendance, and manage corrections. | Branch manager |
+| P12 | Entertainer performance and rank evaluation | Convert verified performance events into explainable rank outcomes. | Operations / Branch manager |
+| P13 | Three-day income settlement | Calculate earnings, deductions, loan repayment, review, approve, and record settlement. | Accounting |
+| P14 | Performance-based loan | Check eligibility, obtain approval, disburse, and repay through settlements. | CEO / Accounting |
+| P15 | Customer registration and consent | Find or create customer profile and record marketing consent and channel preferences. | Host / Reception |
+| P16 | Reservation lifecycle | Request, confirm, assign, arrive, complete, cancel, and attribute revenue. | Reception / Branch manager |
 
-## Phase 2 — Workforce, Tasks, and Internal Communication
+### P11 — Branch workforce planning, weekly schedule, and attendance
+
+**Owner:** Branch Manager for the authorized branch.
+
+**Purpose:** Ensure each operating day has an explicit minimum workforce requirement, a published weekly roster, and verified attendance that can be compared to what the branch required and planned.
+
+**Core flow:**
+
+```text
+Maintain weekday/role staffing template
+→ Build weekly roster
+→ Compare Required vs Scheduled
+→ Resolve or record shortage
+→ Publish schedule
+→ Employee attends / approved absence applies
+→ Record verified check-in/out
+→ Compare Scheduled vs Checked In
+→ Classify late / no-show / approved absence
+→ Manager reviews exceptions
+→ Publish verified attendance/readiness
+```
+
+**Leave/day-off request subflow:**
+
+```text
+Team member submits own request with date range and reason
+→ Request remains Pending with no schedule/attendance effect
+→ Authorized Branch Manager reviews branch scope and coverage
+→ Approve with reason / Reject with reason
+→ If approved, mark unavailable and recalculate coverage
+→ Preserve any published assignment and open a backfill gap
+→ Keep request, decision, attendance, and pay treatment as separate records
+```
+
+**Key records:**
+
+- branch staffing template;
+- staffing requirement;
+- ERPNext/Frappe Shift Assignment;
+- Employee Checkin;
+- Attendance;
+- Leave Application;
+- shift coverage/readiness snapshot;
+- staffing exception;
+- attendance correction/manager excusal decision.
+
+**Key rule:** a valid published shift assignment or equivalent approved schedule record is required before a person can be classified as late or no-show for that shift.
+
+**Penalty boundary:** manager confirmation preserves the lateness/no-show evidence but does not itself create a monetary penalty. Until CL-013 has an approved effective policy version, all penalty candidates remain amount-not-calculated and cannot become deductions.
+
+**Coverage model:**
+
+```text
+Required -> Scheduled -> Checked In
+```
+
+The process must keep planning shortages separate from attendance failures.
+
+## Phase 2 — Workforce Task Management
 
 | ID | Process | Purpose | Primary owner |
 | --- | --- | --- | --- |
@@ -46,15 +101,11 @@ Every detailed process defines owner, roles, trigger, inputs, normal flow, excep
 
 | ID | Process | Purpose | Primary owner |
 | --- | --- | --- | --- |
-| P30 | Customer visit and spend attribution | Reconcile verified visits and eligible spend to customer, branch, reservation, and entertainer. | Reception / Operations |
-| P31 | Unified membership evaluation | Maintain one Bronze-to-Black-Diamond customer status across all branches. | CRM Manager |
-| P32 | Point earn, redemption, and correction | Maintain one cross-branch point ledger from verified POS events. | CRM Manager / Finance |
-| P33 | Privilege entitlement and use | Issue branch-eligible quotas, use/reverse them, reset periods, and audit events. | CRM Manager / Branch Manager |
-| P34 | Customer segmentation and campaign | Build consent-valid segments, send campaigns, and track outcomes. | Marketing / CRM Manager |
-| P35 | Customer intelligence review | Analyze visit cadence, spend, points, status, service behavior, branch mix, and entertainer affinity. | Manager / CEO |
-| P36 | Membership launch migration and manual approval | Classify from history or manager nomination with CEO approval and source tags. | CEO / CRM Manager |
-| P37 | Customer feedback and incident review | Receive compliment/complaint/suggestion, review, resolve, and create a verified entertainer incident only when warranted. | Branch Manager / CEO |
-| P38 | Extra service configuration and fulfillment | Approve service type/capability, set branch price, expose approved customer information, fulfill, bill, and reconcile. | Branch Manager / Finance |
+| P30 | Customer visit and spend attribution | Link verified visits and eligible spend to a customer, branch, reservation, and entertainer when applicable. | Reception / Operations |
+| P31 | Membership-level evaluation | Apply approved branch-specific policy to assign one of five customer membership levels. | CRM manager |
+| P32 | Benefit and approved value-ledger lifecycle | Earn/issue, use, expire, adjust, reverse, and audit approved privileges, points, or value without assuming a standalone cashback balance. | CRM manager / Finance |
+| P33 | Customer segmentation and campaign | Build a segment, validate consent, send a campaign, and track communication history and outcomes. | Marketing / CRM manager |
+| P34 | Customer intelligence review | Analyze visit cadence, spend, value, loyalty, branch behavior, and entertainer affinity. | Manager / CEO |
 
 ## Phase 4 — Management, Finance, and Optimization
 
@@ -98,24 +149,17 @@ CEO target → Manager/AI action plan → ERPNext Projects/Tasks
 
 ## BPMN delivery order
 
-1. P17 CallPro-assisted call to reservation
-2. P18 Check-in, room session, drop-off, and bill reconciliation
-3. P19 Entertainer availability and room request
-4. P37 Customer feedback and incident review
-5. P12 Entertainer ranking recommendation and decision
-6. P13 Three-day entertainer settlement
-7. P40 CEO target and manager monthly plan
-8. P44 Manager KPI, reward, and penalty review
-9. P20/P21 ERPNext task assignment and execution
-10. P31/P32/P33 Membership, points, and privileges
-
-Existing reservation, ranking, settlement, feedback, task, goal, membership, and benefit/cashback BPMN diagrams must be revised where they conflict with these latest rules.
+1. P15 Customer registration and consent
+2. P11 Branch workforce planning, weekly schedule, and attendance
+3. P13 Three-day income settlement
+4. P20 Task assignment and acknowledgement
+5. P21 Task execution and completion
+6. P16 Reservation lifecycle
+7. P31 Membership-level evaluation
+8. P32 Benefit and approved value-ledger lifecycle
+9. P33 Customer segmentation and campaign
+10. P40 CEO–Manager Goal Engine
 
 ## Open design decisions
 
-- **CallPro:** API/auth/event model, data fields, provider limitations, retention, and reconciliation.
-- **Ranking:** four-dimension weights, thresholds, Diamond conditions, cadence, demotion, and final authority.
-- **Operations:** room/session identity, request SLA/escalation, drop-off reasons, bill matching, and reconciliation resolution.
-- **Manager performance:** KPI/health formulas, penalty boundaries, reward allocation, and customer-experience weighting.
-- **Extra services:** official term, categories, capability, pricing/payment, and revenue sharing.
-- **Tasks/messaging:** final states, reminder timing, result acceptance, reopening, anonymous disclosure, and audit authority.
+Detailed BPMN work must not invent policy. The completed-eligible-visit membership formula is approved; the main pending decisions are eligible-spend treatment, branch ranges, cross-branch classification, task approval/reopening, benefit/value-ledger controls, channel-provider behavior, and the final weekly schedule publication/change cutoff.

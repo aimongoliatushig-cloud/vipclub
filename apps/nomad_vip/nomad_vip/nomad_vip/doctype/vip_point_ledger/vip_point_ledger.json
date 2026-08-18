@@ -1,0 +1,34 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:VIP-PTS-{YYYY}-{#####}",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["entertainer","performance_event","metric","points","ranking_policy","posted_at","reversal_section","is_reversal","reversal_of","reason"],
+ "fields": [
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"performance_event","fieldtype":"Link","label":"Performance Event","options":"VIP Performance Event","reqd":1,"unique":1,"in_list_view":1},
+  {"fieldname":"metric","fieldtype":"Select","label":"Metric","options":"Readiness\nAttendance\nReservation\nLoyalty\nSales\nAdjustment","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"points","fieldtype":"Float","label":"Points","reqd":1,"in_list_view":1},
+  {"fieldname":"ranking_policy","fieldtype":"Link","label":"Ranking Policy","options":"VIP Ranking Policy","reqd":1},
+  {"fieldname":"posted_at","fieldtype":"Datetime","label":"Posted At","reqd":1,"in_list_view":1},
+  {"fieldname":"reversal_section","fieldtype":"Section Break","label":"Reversal"},
+  {"fieldname":"is_reversal","fieldtype":"Check","label":"Is Reversal","default":"0"},
+  {"fieldname":"reversal_of","fieldtype":"Link","label":"Reversal Of","options":"VIP Point Ledger"},
+  {"fieldname":"reason","fieldtype":"Small Text","label":"Reason"}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Point Ledger",
+ "naming_rule": "Expression",
+ "permissions": [
+  {"role":"System Manager","read":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1},
+  {"role":"Entertainer Supervisor","read":1},
+  {"role":"Entertainer","read":1}
+ ],
+ "sort_field": "posted_at",
+ "sort_order": "DESC",
+ "track_changes": 0
+}

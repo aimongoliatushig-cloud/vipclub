@@ -27,13 +27,45 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 | --- | --- | --- |
 | Employee / Entertainer Profile | Identity, branch, status, bank verification, rank, and privacy profile. | Employee, User, Club Branch |
 | Employee Lifecycle Event | Onboarding, change, suspension, resignation, or offboarding history. | Employee |
+| Branch Staffing Template | Effective-dated recurring staffing policy for one branch, defining required headcount by weekday and approved role. | Club Branch, Staffing Requirement, Policy Version |
+| Staffing Requirement | Minimum headcount for a specific branch, weekday, role, and effective period. | Branch Staffing Template, Role |
+| Weekly Schedule Period | Operational weekly roster window and publication state used to group Shift Assignments for a branch. | Club Branch, Shift Assignment, Manager |
+| Schedule Publication | Immutable publication/version event with validation result, shortage reason where allowed, actor, and timestamp. | Weekly Schedule Period, Manager, Staffing Exception |
+| Shift Assignment Response | Team-member receipt state: Assigned, Acknowledged, or Change requested, with time and optional request reference. | Shift Assignment, Employee, Schedule Publication |
+| Shift Coverage Snapshot | Time-bound comparison of Required, Scheduled, Checked In, approved absence, unexpected no-show, and shortage by branch/date/role. | Staffing Requirement, Shift Assignment, Attendance Evidence Event |
+| Staffing Exception | Records a planning or attendance shortage, severity, cause, manager action, and resolution where available. | Shift Coverage Snapshot, Club Branch, Role |
 | Operational Task | Assigned work with deadline, state, evidence, blockers, comments, and approval. | Assignee, Branch, Task Evidence |
 | Task Comment / Evidence | Conversation, result notes, images, or other completion proof. | Operational Task |
 | Attendance Evidence Event | Check-in/out or attendance signal with source and original time. | Employee, Shift |
 | Attendance Correction Request | Evidence-backed correction, decision, and adjustment reference. | Attendance Event |
+| Leave / Day-off Request | Team-member self-service request with branch, date range, reason, Pending/Approved/Rejected state, and separate manager decision. Reuse ERPNext Leave Application where appropriate. | Employee, Club Branch, Shift Assignment, Manager Decision |
+| Penalty Review Candidate | Read-only bridge from confirmed lateness/no-show evidence to an effective policy workflow; contains no amount until an approved policy applies. | Attendance Evidence Event, Shift Assignment, Manager Decision, Policy Version |
+| Penalty / Deduction Record | Authorized, effective-policy result with category, formula inputs, amount, approver, appeal state, and payroll/settlement reference. It never replaces source attendance evidence. | Penalty Review Candidate, Policy Version, Payroll/Settlement |
 | Maintenance Request | Branch issue, urgency, assignee, due date, and completion evidence. | Club Branch, Task |
 | Entertainer Service Profile | Structured internal measurements, nationality, languages, configurable traits/talents, public-profile fields, and field visibility classification. | Employee / Entertainer Profile, Trait/Tag |
 | Entertainer Incident | Structured category, description, time, branch, reporter, severity, evidence, review, resolution, and status used only after authorized review. | Entertainer, Manager, Evidence, Ranking Snapshot |
+
+### ERPNext/Frappe workforce reuse
+
+Reuse ERPNext/Frappe Employee, Shift Type, Shift Assignment, Employee Checkin, Attendance, and Leave Application where they satisfy the requirement.
+
+The VIP Club custom workforce model should add branch-specific staffing requirements, weekly publication/coverage semantics, readiness snapshots, and shortage/audit records rather than duplicating ERPNext core HR records.
+
+### Workforce relationship flow
+
+```text
+Branch Staffing Template
+→ Staffing Requirement by weekday/role
+→ Weekly Schedule Period
+→ ERPNext Shift Assignments
+→ Employee Checkin / Attendance / Leave
+→ Shift Coverage Snapshot
+→ Staffing Exception / manager action
+```
+
+The published Shift Assignment or equivalent approved schedule record establishes the operational attendance expectation for lateness and no-show classification.
+
+`Weekly Schedule Period` retains status (`Draft`, `Published`, `Closed`, `Superseded`), version, publication deadline, published timestamp, published-by actor, last material change, and branch scope. Published changes append a `Schedule Publication` version rather than overwriting prior schedule history. Assignment acknowledgement is receipt evidence and remains separate from attendance evidence.
 
 ## Customers, visits, reservations, and consent
 
@@ -47,66 +79,37 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 | Club Reservation | Requested, confirmed, assigned, arrived, completed, cancelled, or no-show reservation. | Customer, Branch, Entertainer |
 | Branch Customer Transfer | Cross-branch alternative, acceptance, receiving reservation, and attribution. | Customer, Origin/Receiving Branch |
 
-## Calls and real-time service operations
-
-| Entity | Purpose | Key relationships |
-| --- | --- | --- |
-| Call Event | Provider or manual call record with direction/outcome, caller identity, timestamps, operator, duration, provider reference, sync state, and raw-metadata reference. | CallPro Integration, User, Customer Identity Match |
-| Call Classification | Operator-applied purpose, optional note, classification time, and source; semantic purpose is not assumed from CallPro. | Call Event, Reservation |
-| Blocked Contact Decision | Auditable prank/abusive/block status, reason, actor, dates, review, unblock, and policy version. | Customer Identity Match, Call Event, Audit Event |
-| Club Room | Configured branch room, public QR identifier, operational state, capacity, and service settings. | Club Branch, Customer Session, Reservation |
-| Customer Session | A room-aware group visit from reservation/check-in through service, bill, drop-off, or unresolved outcome. | Customer, Club Room, Reservation, Visit, Bill |
-| Customer Drop-off | Structured no-service reason, optional comment, receptionist, time, and session outcome. | Customer Session, Club Branch |
-| Visit Reconciliation Exception | Difference between check-in and bill/drop-off outcomes with detection evidence, owner, investigation, resolution, and audit. | Customer Session, Bill, Branch Manager |
-| Entertainer Availability State | Separate operational availability and customer-visibility flags with reason, source, actor, and effective time. | Entertainer, Shift, Branch |
-| Entertainer Service Request | Room/session request with entertainer, request, acknowledgement, arrival, completion, outcome, response metrics, and escalation. | Customer Session, Entertainer, Availability, Notification |
-| Extra Service Definition | Configurable approved service/performance type and customer description. | Branch Price, Entertainer Capability |
-| Entertainer Extra Capability | Effective entertainer eligibility, customer visibility, availability rule, and approval. | Entertainer, Extra Service Definition |
-| Branch Extra Service Price | Effective-dated customer price by branch without exposing margin/share. | Club Branch, Extra Service Definition, Financial Policy |
-
 ## CRM, segmentation, and messaging
 
 | Entity | Purpose | Key relationships |
-| --- | --- | --- |
+| --- | --- | ---|
 | Customer Segment | Saved behavioral or profile-based group of eligible customers. | Segment Membership, Campaign |
-| Segment Membership | A customer's membership in a segment and how it was determined. | Customer, Customer Segment |
+| Segment Membership | A customer’s membership in a segment and how it was determined. | Customer, Customer Segment |
 | Campaign | Consent-aware broadcast definition, audience, channel, content, approval, and outcome. | Segment, Message Delivery |
 | Message Delivery | Per-customer message history: channel, send time, delivery state, and provider reference. | Customer, Campaign, Consent |
-| Customer Intelligence Snapshot | Calculated customer metrics such as recency, frequency, spend, point activity, status, visit cadence, and entertainer affinity. | Customer, Visits, Reservations, Membership |
-| Customer Feedback | Compliment, complaint/criticism, or suggestion with branch, session, optional entertainer, customer context, review status, resolution, and restricted evidence. | Customer, Customer Session, Entertainer, Incident |
-| Internal Message / Feedback Submission | Direct message or upward concern with recipient, visibility mode, protected sender identity, content, evidence, and delivery/read state. | User, Branch, Task, Audit Event |
-| Protected Identity Access Event | Immutable record of who revealed an anonymous-to-recipient sender, why, when, and for which submission. | Internal Feedback, Authorized User |
+| Customer Intelligence Snapshot | Calculated customer metrics such as recency, frequency, spend, visit cadence, and entertainer affinity. | Customer, Visits, Reservations |
 
-## Unified membership, points, and privileges
+## Five-level membership, benefits, and approved value ledgers
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
-| Membership Account | The member's single company-wide loyalty identity, anniversary date, current visible status reference, and lifecycle state. | Customer, Status Assignment, Point Account |
-| Membership Policy Version | Five status names, 12-month qualification rules, eligible-spend logic, threshold inputs, grace and downgrade rules, and effective dates. | Evaluation, Branch Threshold Input, Status Assignment |
-| Branch Threshold Input | Effective-dated branch manager input used by the approved normalization formula; it must not create a separate visible branch rank. | Club Branch, Membership Policy |
-| Membership Evaluation Snapshot | Explainable 12-month anniversary or approved upgrade evaluation with source spend, policy version, shortfall, result, and next review dates. | Membership Account, Policy, Source Transactions |
-| Membership Status Assignment | Current and historical Bronze, Silver, Gold, Diamond, or Black Diamond status for the member across all branches. | Membership Account, Evaluation |
-| Membership Grace Period | Start, expiry, retention threshold, remaining spend, completion result, and any one-level downgrade. | Membership Evaluation, Status Assignment |
-| Membership Assignment Decision | Automatic, Manager Recommended, or CEO Approved launch/override decision with proposer, reason, approver, evidence, and effective date. | Membership Account, Evaluation, Audit Event |
-| Point Account | The member's single cross-branch point account and derived available balance. | Membership Account, Point Ledger Entry |
-| Point Ledger Entry | Immutable earn, redemption, expiry, reversal, or adjustment with MNT value, branch, source, policy, and reconciliation state. | Point Account, Transaction, Redemption |
-| Branch Privilege Policy | Effective-dated branch eligibility and operating terms by company-wide status. | Club Branch, Membership Policy, Benefit Definition |
-| Benefit Definition | Configurable privilege, eligibility, quota period, limits, value, terms, and branch scope. | Branch Privilege Policy, Benefit Entitlement |
-| Benefit Entitlement | A member's available allowance for a privilege in a defined monthly, annual, or other policy period. | Membership Account, Benefit Definition |
-| Benefit Redemption | What privilege was used, by whom, when, where, and any reversal or no-show outcome. | Entitlement, Branch, Operator |
-
-Cashback is not a separate balance in the selected model. Any legacy cashback label maps to the Point Account and Point Ledger Entry unless a later approved decision explicitly creates a distinct product.
+| Loyalty Policy Version | Bronze/Silver/Gold/Diamond/Black Diamond ranges, completed-eligible-visit average formula, points/value rules if approved, transition controls, and effective dates. | Branch, Evaluation, Benefit |
+| Membership Evaluation Snapshot | Explainable completed eligible visits, included/excluded spend, average per eligible visit, active branch range, calculated level, and policy version. | Customer, Loyalty Policy |
+| Membership Level Assignment | Current and historical level for a customer, branch scope, effective dates, and reason. | Customer, Membership Evaluation |
+| Membership Manager Position / CEO Decision | Manager support or retain exception followed by CEO approve, return, reject, or override with reason. | Evaluation, Assignment, Actors |
+| Benefit Definition | Configurable privilege, eligibility, limits, value, and branch scope. | Loyalty Policy, Benefit Entitlement |
+| Benefit Entitlement | A customer’s available allowance for a benefit in a period. | Customer, Benefit Definition |
+| Benefit Redemption | What benefit was used, by whom, when, where, and any reversal. | Entitlement, Branch, Operator |
+| Approved Value Ledger Entry | Immutable earn, use, expire, adjust, or reverse entry for an explicitly approved points/privilege/value mechanism; no standalone balance is assumed. | Customer, Policy, Source Record |
 
 ## Performance, rank, income, and loans
 
 | Entity | Purpose | Key relationships |
 | --- | --- | --- |
 | Performance Event | Verified attendance, loyalty, sales, reservation, or training signal used in rank calculations. | Entertainer, Source Record |
-| Ranking Policy Version | Rank weights, thresholds, gates, benefits, and effective date. | Performance Event, Ranking Snapshot |
-| Ranking Snapshot / Rank History | Explainable metric evidence and four-dimension evaluation without itself changing rank. | Entertainer, Ranking Policy, Incidents |
-| Rank Recommendation / Decision | Promotion readiness, satisfied/unmet criteria, human approver, final decision, override reason, previous/new rank, and effective date. | Ranking Snapshot, Entertainer, Audit Event |
-| Compensation Policy Version | Effective-dated branch/rank rules for customer-time share, normal tips, spreading tips, wine commission, deductions, and other approved categories. | Club Branch, Ranking, Income Event |
-| Income Event | Customer-time earning, normal tip, spreading tip, wine commission, bonus, adjustment, or deduction source record. | Entertainer, Branch, Compensation Policy |
+| Ranking Policy Version | Rank 1/2/3, 14-day cadence, weights, thresholds, gates, benefits, missing-data handling, and effective date. | Performance Event, Ranking Snapshot |
+| Ranking Snapshot / Rank History | Explainable 14-day evaluation, manager recommendation, CEO decision, and resulting rank change. | Entertainer, Ranking Policy |
+| Income Event | Revenue, tips, commission, bonus, adjustment, or deduction source record. | Entertainer, Branch |
 | Payout Period / Settlement | Three-day calculation period and entertainer settlement with line items. | Income Event, Loan Repayment |
 | Payout Line Item | One explained component of a settlement. | Settlement, Source Record |
 | Loan Eligibility Snapshot | Eligible income, multipliers, gates, maximum, and explanation. | Entertainer, Loan Policy |
@@ -119,6 +122,7 @@ Cashback is not a separate balance in the selected model. Any legacy cashback la
 | Branch Sales History | Reconciled historical monthly sales for a branch, including period, gross/net amount, source system, import status, and reconciliation evidence. | Branch, Goal Cycle, Source System |
 | Sales Target Policy Version | Effective-dated default and branch-specific improvement percentage, baseline method, override authority, and formula. | Branch, Goal Cycle, Branch Sales History |
 | Goal Cycle / Proposal / Action | Monthly branch target, proposal, owner actions, progress, and review. | Branch, Manager, KPI Snapshot, Branch Sales History, Sales Target Policy |
+| Goal Progress Snapshot | Branch/month projection of the active approved target, reconciled actual sales, remaining/above-target amount, achievement percentage, approval version, source state, and refresh time. | Branch, Goal Cycle, CEO Decision, Branch Sales History |
 | KPI / Reporting Snapshot | Time-bound calculated management metric with traceable source values. | Branch, Customer, Employee |
 | Notification | In-app or external delivery request, state, priority, and deep link. | Recipient, Source Entity |
 | Integration Cursor | Synchronization position, success/failure, retry, and reconciliation details. | External System |
@@ -148,13 +152,10 @@ Company-wide Status + Branch Privilege Policy → Entitlement → Redemption
 
 ## Important open data decisions
 
-- CallPro verified API schema, authentication, event delivery, retention, sandbox, rate limits, and reconciliation.
-- Final public/staff/internal entertainer-field classification and authorized matching use.
-- Entertainer ranking weights, thresholds, evidence windows, Diamond conditions, and decision authority.
-- Exact compensation rates, spreading-tip terminology/value, penalties, reward formulas, and branch override authority.
-- Room/session identity, QR authorization, availability transitions, two-minute request policy, and escalation.
-- Drop-off reasons, bill-linking method, reconciliation tolerances, resolution authority, and KPI use.
-- Extra-service terminology, capability approval, branch pricing, payment, availability, and revenue share.
-- Manager KPI, branch health formula, customer-experience metrics, severity, and compensation relationship.
-- Anonymous-feedback identity access, disclosure, retention, and audit review.
-- Final point economics, membership thresholds, privacy, retention, masking, and ERPNext reuse mapping.
+- Exact customer membership formula, thresholds, evaluation frequency, and cross-branch scope.
+- Final five membership-level names and benefit rules.
+- Cashback point-to-currency value, expiry, allowed items, and approval/reversal rules.
+- Source of truth and reconciliation method for POS sales, attendance, reservations, and messaging delivery.
+- Customer and entertainer privacy, retention, masking, and role visibility.
+- Final ERPNext reuse versus custom DocType mapping after repository audit.
+- Final publication cutoff and ordinary post-publication schedule-change policy for weekly rosters.

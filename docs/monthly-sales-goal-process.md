@@ -42,7 +42,30 @@ Do not hard-code a three-days-before-month rule.
 13. At month-end, management reviews target attainment, plan execution, reward/penalty proposal, exceptions, and lessons.
 14. The result feeds the next cycle.
 
-## ERPNext/Frappe project and task reuse
+## Branch Manager default overview
+
+The Branch Manager's first/default PWA page shows only the active goal for the manager's authorized branch. It includes:
+
+- month and branch;
+- CEO approval state, target version, and approval evidence;
+- approved target amount;
+- reconciled actual sales;
+- remaining amount or amount above target;
+- achievement percentage and progress bar;
+- actual-sales source, reconciliation state, and last refresh time;
+- a quick path to the same branch's customer-level and CRM context.
+
+The progress calculation is:
+
+```text
+Achievement percentage
+= reconciled actual sales for the authorized branch and goal month
+÷ active CEO-approved target for the same branch and month
+× 100
+```
+
+The displayed percentage may exceed 100%. The visual progress track may stop at 100%, while the numeric achievement remains accurate. If the target is not active and CEO-approved, or actual sales are not reconciled, the UI must show the missing/pending state instead of treating the target or sales as zero. The branch view must not expose company-wide or other-branch goals.
+
 
 Use existing ERPNext/Frappe Project and Task records where practical. AI-generated projects and tasks are proposals until backend permissions and required approvals succeed.
 
