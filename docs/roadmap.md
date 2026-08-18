@@ -1,42 +1,55 @@
 # Unified Four-Phase Delivery Roadmap
 
-This roadmap merges the ERPNext/Frappe knowledge package with the priority sequence confirmed in the VIP Club project conversations. GitHub Markdown is the business source of truth; Linear tracks delivery work.
+GitHub Markdown is the business source of truth; Linear tracks delivery work. This roadmap reconciles the latest client interview delta with the existing ERPNext/Frappe and membership baselines.
 
-## Phase 1 — Foundation Operations and Customer Onboarding
+## Phase 1 — Foundation Operations and Customer Service
 
-- Audit the existing repository, ERPNext/Frappe version, custom apps, infrastructure, integrations, and current documentation.
-- Confirm company and four-branch model, source systems, data ownership, user roles, and legal/financial constraints.
-- Establish policy versioning, role and branch permissions, audit logging, data migration, integration, and test foundations.
-- Implement workforce identity, entertainer and staff branch assignment, scheduling, attendance, lateness/no-show handling, and approved penalties.
-- Implement entertainer rank, income, three-day settlement, and controlled performance-based loan vertical slice.
-- Implement customer registration by host or reception, duplicate checking, profile creation, marketing consent, preferred channels, and reservation foundations.
+- Audit repository, ERPNext/Frappe version, custom apps, infrastructure, integrations, and current Customer Assistant.
+- Confirm company/branch model, data ownership, roles, legal/financial constraints, and source systems.
+- Establish policy versioning, backend permissions, field masking, segregation, audit, migration, integration, realtime, and test foundations.
+- Implement workforce identity, entertainer internal/public profile separation, Gold starting rank, schedule, attendance, and four-dimension ranking evidence with human decisions.
+- Implement category-based entertainer income, transparent three-day statements, loans, deductions, adjustments, and effective-dated financial rules.
+- Implement customer registration/consent, reservation, Call Operator, provider-neutral CallPro adapter discovery, arrival/check-in, room/session, drop-off, bill reconciliation, and operational exceptions.
+- Extend the existing Customer Assistant and internal PWA scaffolds rather than create redundant applications.
 
-## Phase 2 — Workforce Operations and Accountability
+## Phase 2 — Real-Time Service, Tasks, and Internal Communication
 
-- Implement four-branch organizational structure, specific job roles, and role-based assignment.
-- Deliver tasks, acknowledgement, comments, attachments, completion evidence, results, rework, approvals, notifications, and audit history.
-- Deliver deadline escalation, dashboards, individual and manager completion statistics, formal orders, policy acknowledgement, maintenance, feedback, complaints, and retention workflows.
-- Implement the monthly sales-goal workflow: manager proposal, Hermes recommendations, CEO review and approval, action plans, PWA reminders, and branch progress tracking.
+- Deliver separate operational availability and customer visibility.
+- Deliver room-QR context, public entertainer profiles, realtime entertainer requests, multi-channel notification, manager escalation, response evidence, and extra-service capability/pricing.
+- Deliver the consolidated manager/bartender operations workstation for rooms, sessions, reservations, requests, and reconciliation.
+- Deliver customer feedback and management/incident review.
+- Reuse ERPNext/Frappe Project and Task for hierarchy, discussion, evidence, completion, rework, deadlines, and configurable reminders.
+- Deliver direct internal messaging, upward feedback, recipient-anonymous submissions, audited identity reveal, and role-scoped notifications.
+- Deliver CEO, Manager, and Entertainer assistants over backend-authorized tools.
 
-## Phase 3 — CRM, Loyalty, Benefits, and Customer Intelligence
+## Phase 3 — CRM, Unified Membership, Points, Privileges, and Intelligence
 
-- Deliver customer 360 profiles, visits, reservations, spend, entertainer affinity, segments, and loyalty analytics.
-- Implement five-level membership policy with branch-specific configurable thresholds.
-- Deliver benefits and privilege management, benefit-use tracking, and an auditable cashback ledger.
-- Deliver consent-based rich-media campaigns, communication history, opt-outs, and campaign outcomes.
-- Deliver customer loyalty, value, visit-cadence, lapsed-member, and branch-level insights.
+- Deliver customer 360, calls, visits, reservations, spend, drop-off, feedback, entertainer affinity, segments, and loyalty analytics.
+- Implement one membership account and one Bronze-to-Black-Diamond customer status across branches.
+- Implement the 12-month anniversary review, 30-day grace, at-most-one-level downgrade, history, and shortfall notification.
+- Implement one cross-branch point account and immutable ledger.
+- Integrate verified POS transactions without depending on permanent membership discount.
+- Deliver branch privilege policies, quota tracking/reset, reservation priority, and audited use.
+- Deliver launch classification from April 2026 onward history plus manager nomination and CEO approval.
+- Deliver consented campaigns, communication history, opt-outs, and outcomes.
+- Revise membership, benefit/cashback, reservation, feedback, ranking, settlement, and request BPMN diagrams to current rules.
 
-## Phase 4 — Finance, Optimization, and Production Readiness
+## Phase 4 — Goals, Manager KPI, Finance, and Production Readiness
 
-- Expand payroll, statutory rules, accounting reconciliation, E-Barimt evidence, and approved bank/payment integration.
-- Deliver cross-branch capacity, customer transfer, entertainer transfer, referral/commission attribution, and forecasting.
-- Complete security, privacy, reporting, monitoring, backup/recovery, training, pilot, support, and production rollout.
-- Continue Hermes as an explainable, permission-bound advisor across approved workflows.
+- Implement CEO-set monthly targets, AI-assisted manager plans, CEO plan approval, ERPNext projects/tasks, progress coaching, and monthly history.
+- Implement configurable manager KPI evidence, human-reviewed underperformance flags, above-target reward allocation, and audit.
+- Implement candidate branch-health snapshots with the final formula marked **TBD — Business configuration required** until approved.
+- Validate membership point economics, entertainer compensation, extra-service revenue, manager reward/penalty accounting, payroll, statutory rules, E-Barimt, bank/payment, and reconciliation.
+- Deliver reporting for CallPro/operator, service conversion/drop-off, requests, feedback, ranking, income, rewards, plans, and branch operations.
+- Complete security, privacy, monitoring, backup/recovery, training, pilot, support, and production rollout.
 
 ## Reconciliation principles
 
-- The detailed entertainer vertical slice is preserved in Phase 1.
-- Workforce task management and the Goal Engine are consolidated in Phase 2 because managers need both accountability and sales execution tools.
-- Customer core and loyalty are consolidated in Phase 3 to avoid splitting dependent customer data and policy work.
-- Finance, cross-branch optimization, compliance, and rollout are consolidated in Phase 4.
-- Legal, tax, policy, integration, and data-retention details remain open decisions until formally approved.
+- Latest client interview requirements replace conflicting older rules.
+- New entertainers start at Gold, replacing the provisional starting-rank assumption.
+- CEO sets monthly sales targets; managers build plans, replacing manager-proposed targets.
+- Planning deadlines are configurable, replacing the hard-coded three-days-before-month rule.
+- Ranking, compensation, discipline, employment, targets/plans, rewards, and policies remain human-authorized.
+- CallPro endpoint details, KPI/health formulas, exact financial values, extra-service rules, and operational SLAs are marked **TBD — Business configuration required**.
+- ERPNext/Frappe remains the business system of record; PWA and AI are authorized interaction layers.
+- One visible customer membership status and point balance remain company-wide; branch variation applies to privileges.

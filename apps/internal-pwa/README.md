@@ -1,19 +1,29 @@
 # Internal PWA
 
-The internal VIP Club PWA serves all employees and team members through one application. Every user has individual credentials; the workspace adapts by role, branch, ownership scope, and permissions.
+The internal VIP Club PWA serves employees and team members through one application with individual credentials and backend-enforced role, branch, ownership, action, and field scope.
+
+## Role-aware capabilities
+
+Features include tasks/projects, attendance, goals, manager KPI, settlements, CRM service work, Call Operator, Reception, consolidated branch operations, entertainer requests, messaging/feedback, maintenance, and role-scoped AI assistants.
+
+CEO, Manager, and Entertainer assistants use separate allowlisted tool contexts. They call the same permission-checked Frappe services as ordinary UI actions and cannot approve consequential actions automatically.
 
 ## Intended structure
 
-- `src/` — application routes, features, components, and service clients
-- `src/features/` — role-aware business capabilities such as tasks, attendance, goals, payroll, CRM, and maintenance
-- `src/shared/` — shared UI, permission-aware navigation, notifications, and API utilities
-- `tests/` — unit, permission, integration, and user-journey tests
-- `public/` — PWA manifest, icons, and static assets
+- src — routes, features, components, and service clients
+- src/features — role-aware business capabilities
+- src/shared — UI, permission-aware navigation, realtime, notifications, and API utilities
+- tests — unit, permission, integration, realtime, and user-journey tests
+- public — PWA manifest, icons, and static assets
 
 ## Security
 
-The interface must never be the only access control. Every API and data request must be authorized server-side by role, branch, ownership, action, and field sensitivity.
+The interface is never the only access control. Every API, realtime subscription, report, export, and AI tool is authorized server-side.
 
 ## Relationship to Frappe
 
-This PWA will consume approved Frappe/ERPNext APIs from the VIP Club custom app. Framework, build tooling, and deployment details are intentionally pending the repository and VPS audit.
+The PWA consumes approved Frappe/ERPNext APIs from the VIP Club custom app and reuses ERPNext/Frappe Project and Task records where practical. Use the selected Frappe realtime/event mechanism for rooms, check-in, reservations, availability, and entertainer requests.
+
+Framework, build tooling, and deployment details remain pending repository and VPS audit.
+
+See [Internal PWA requirements](../../docs/08-ux/INTERNAL_PWA.md).
