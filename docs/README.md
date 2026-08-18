@@ -10,6 +10,7 @@ Use this folder as the maintained source of truth for VIP Club.
 | `diagrams/bpmn/` | Version-controlled BPMN source files and rendered diagrams |
 | `technical-architecture.md` | System components, decisions, security, and operations |
 | `data-model.md` | Domain vocabulary, entities, relationships, and rules |
+| `entertainer-ranking-policy.md` | Canonical entertainer factors, weights, calculation, audit, and approval contract |
 | `development-guide.md` | Setup, delivery workflow, and quality standards |
 | `decisions/` | Short records of material product or technical decisions |
 

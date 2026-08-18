@@ -5,7 +5,7 @@ The internal VIP Club PWA serves all employees and team members through one appl
 ## Intended structure
 
 - `src/` — application routes, features, components, and service clients
-- `src/features/` — role-aware business capabilities such as tasks, attendance, goals, payroll, CRM, and maintenance
+- `src/features/` — role-aware business capabilities such as tasks, attendance, entertainer ranking, goals, payroll, CRM, and maintenance
 - `src/shared/` — shared UI, permission-aware navigation, notifications, and API utilities
 - `tests/` — unit, permission, integration, and user-journey tests
 - `public/` — PWA manifest, icons, and static assets

@@ -1,0 +1,231 @@
+{
+  "policy": "entertainer-ranking",
+  "schemaVersion": 4,
+  "status": "eight-factor-ranking-branch-settings-financial-penalties-and-message-evidence-contracts-specified",
+  "dailyScoring": true,
+  "scoreFormula": "sum(normalizedScore * weightPercent / 100)",
+  "scoreScale": {
+    "minInclusive": 0,
+    "maxInclusive": 100
+  },
+  "rankClassificationInput": "unrounded_daily_weighted_score",
+  "outOfRangeScoreTreatment": "validation_error_no_rank",
+  "rankThresholds": [
+    {
+      "id": "level_1",
+      "label": "Level 1",
+      "description": "Highest performer",
+      "ranked": true,
+      "minInclusive": 90,
+      "maxInclusive": 100
+    },
+    {
+      "id": "level_2",
+      "label": "Level 2",
+      "ranked": true,
+      "minInclusive": 80,
+      "maxExclusive": 90
+    },
+    {
+      "id": "level_3",
+      "label": "Level 3",
+      "ranked": true,
+      "minInclusive": 70,
+      "maxExclusive": 80
+    },
+    {
+      "id": "rookie",
+      "label": "Rookie / unranked entertainer",
+      "ranked": false,
+      "minInclusive": 0,
+      "maxExclusive": 70
+    }
+  ],
+  "salesBenchmarkSettings": {
+    "configurationSchema": "entertainer-ranking-sales-benchmarks.schema.json",
+    "illustrativeExample": "entertainer-ranking-sales-benchmarks.example.json",
+    "settingsArea": "Entertainer Ranking Settings",
+    "authorizedRoles": ["branch_manager"],
+    "authorizationScope": "authorized_branch_only",
+    "requiredCalendarMonths": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    "requiredRankedLevels": ["level_1", "level_2", "level_3"],
+    "rookieHandlingRequired": true,
+    "requiredMetadata": [
+      "branchId",
+      "currency",
+      "calendarYear",
+      "effectiveFrom",
+      "effectiveTo",
+      "version",
+      "configuredBy",
+      "configuredAt",
+      "auditHistory"
+    ],
+    "validationRules": [
+      "exactly_one_entry_for_each_calendar_month",
+      "all_ranked_level_ranges_present_for_each_month",
+      "rookie_handling_explicit_for_each_month",
+      "amounts_non_negative",
+      "minimum_not_greater_than_maximum",
+      "level_1_endpoints_not_lower_than_level_2",
+      "level_2_endpoints_not_lower_than_level_3"
+    ],
+    "dailySalesNormalization": {
+      "input": "verified_daily_entertainer_attributed_pos_sales",
+      "benchmarkLookup": ["branchId", "calendarYear", "calendarMonth", "rankLevel"],
+      "formulaStatus": "open_requires_versioned_policy_rule"
+    }
+  },
+  "normalizationDirection": "Each policy-version rule must map raw evidence to the intended performance direction; raw adverse-event counts are not weighted directly.",
+  "rounding": "Sum all eight unrounded contributions before applying the effective policy version's rounding rule.",
+  "missingData": "The effective policy version must define treatment; do not assume full, zero, or rebalanced weights.",
+  "components": [
+    {
+      "id": "attendance",
+      "label": "Attendance",
+      "weightPercent": 10,
+      "financialPenaltySettings": {
+        "configurationSchema": "entertainer-ranking-attendance-penalties.schema.json",
+        "settingsArea": "Entertainer Ranking Settings",
+        "authorizedRoles": ["branch_manager"],
+        "authorizationScope": "authorized_branch_only",
+        "selectionKey": ["branchId", "shiftConfigurationId", "scoringDateTime"],
+        "latenessFormula": "latenessMinutes * effectiveBranchAmountPerMinuteLate",
+        "noShowFormula": "effectiveBranchFixedNoShowAmount",
+        "precedence": "no_show_suppresses_lateness_for_same_shift",
+        "amountValidation": "non_negative_currency_values",
+        "nonRetroactivity": "retain_setting_version_and_calculated_amounts_on_attendance_result",
+        "financialPostingDestination": "entertainer_three_day_settlement_payout_line_items",
+        "rankingSeparation": "attendance_no_show_lateness_remain_raw_ranking_inputs_independent_of_money"
+      },
+      "sourceSignals": ["attendance", "no_show", "lateness"]
+    },
+    {
+      "id": "customer_complaints",
+      "label": "Customer complaints",
+      "weightPercent": 15,
+      "potentialEvidenceSchema": "customer-entertainer-messages.schema.json",
+      "customerPortalEvidenceRule": {
+        "sourceType": "customer_portal",
+        "anonymousSubmissionAllowed": false,
+        "requiredContext": ["customerId", "vipRoomId", "visitOrReservationOrSessionReference"],
+        "automaticScoreImpact": false,
+        "eligibilityTransition": "approved_verification_review_and_versioned_normalization_rule"
+      },
+      "sourceSignals": ["verified_customer_complaint"]
+    },
+    {
+      "id": "sales",
+      "label": "Sales",
+      "weightPercent": 40,
+      "entryMode": "point_of_sale_import",
+      "benchmarkSettings": "salesBenchmarkSettings",
+      "normalizationFormulaStatus": "open_requires_versioned_policy_rule",
+      "sourceSignals": ["verified_pos_attributed_sales"]
+    },
+    {
+      "id": "entertaining_skill",
+      "label": "Entertaining / pole-dancing skill",
+      "weightPercent": 5,
+      "entryMode": "latest_audited_level",
+      "dailyValueRule": "use_most_recent_approved_level",
+      "allowedEntryRoles": ["branch_manager", "lead_entertainer"],
+      "scoreRange": {"min": 0, "max": 100},
+      "sourceSignals": ["audited_skill_assessment"]
+    },
+    {
+      "id": "cleanliness_beauty",
+      "label": "Cleanliness and beauty",
+      "weightPercent": 5,
+      "entryMode": "manual_daily_assessment",
+      "allowedEntryRoles": ["branch_manager", "lead_entertainer"],
+      "scoreRange": {"min": 0, "max": 100},
+      "sourceSignals": ["approved_cleanliness_assessment", "approved_presentation_assessment"]
+    },
+    {
+      "id": "shift_effort",
+      "label": "Shift effort",
+      "weightPercent": 10,
+      "entryMode": "daily_shift_checklist",
+      "recordSchema": "entertainer-ranking-shift-effort.schema.json",
+      "requiredItemCount": 7,
+      "itemStateType": "boolean_completed",
+      "allowedSubmitterRoles": ["branch_manager", "lead_entertainer"],
+      "authorizationScope": "authorized_branch_only",
+      "uniquenessKey": ["entertainerId", "branchId", "shiftId", "scoringDate"],
+      "componentScoreFormula": "completedCount / 7 * 100",
+      "weightedContributionFormula": "componentScore * 10 / 100",
+      "countInvariant": "completedCount + missedCount = 7",
+      "extraPerformanceCredit": "none_score_capped_at_100",
+      "rounding": "retain_unrounded_component_and_contribution_values_until_all_eight_contributions_are_summed",
+      "monetaryPenaltySettings": {
+        "configurationSchema": "entertainer-ranking-shift-penalty.schema.json",
+        "settingsArea": "Entertainer Ranking Settings",
+        "authorizedRoles": ["branch_manager"],
+        "authorizationScope": "authorized_branch_only",
+        "formula": "missedCount * effectiveBranchAmountPerMiss",
+        "amountValidation": "non_negative_currency_value",
+        "selectionKey": ["branchId", "scoringDateTime"],
+        "nonRetroactivity": "retain_setting_version_and_calculated_amount_on_checklist_record",
+        "financialPostingDestination": "entertainer_three_day_settlement_payout_line_item",
+        "paystubDisplayTerm": "three_day_settlement_statement",
+        "approvalReversalAuthorityStatus": "open_requires_policy_decision",
+        "legalPolicyLimitsStatus": "open_requires_policy_decision"
+      },
+      "sourceSignals": ["submitted_seven_item_shift_checklist"]
+    },
+    {
+      "id": "personal_development",
+      "label": "Personal development",
+      "weightPercent": 5,
+      "entryMode": "latest_audited_level",
+      "dailyValueRule": "use_most_recent_approved_level",
+      "allowedEntryRoles": ["branch_manager", "lead_entertainer"],
+      "scoreRange": {"min": 0, "max": 100},
+      "sourceSignals": ["completed_training", "coaching_goal", "certification", "acknowledged_learning_activity"]
+    },
+    {
+      "id": "entertainer_attitude",
+      "label": "Entertainer attitude",
+      "weightPercent": 10,
+      "entryMode": "incident_based_deduction",
+      "defaultScore": 100,
+      "routineDailyEntryRequired": false,
+      "dailyValueRule": "default_100_for_each_scoring_day_minus_that_days_substantiated_incident_deduction",
+      "incidentDecisionRole": "branch_manager",
+      "scoreRange": {"min": 0, "max": 100},
+      "evidenceRequired": true,
+      "findings": ["substantiated", "unsubstantiated"],
+      "unsubstantiatedTreatment": "no_deduction_score_remains_100",
+      "substantiatedTreatment": "branch_manager_records_discretionary_deduction_and_resulting_score",
+      "requiredAuditFields": [
+        "incidentReferences",
+        "evidenceReferences",
+        "entertainerId",
+        "branchId",
+        "scoringDate",
+        "effectiveDate",
+        "managerUserId",
+        "managerRole",
+        "finding",
+        "deduction",
+        "resultingScore",
+        "reason",
+        "timestamp",
+        "correctionAppealHistory"
+      ],
+      "deductionRubricStatus": "open_requires_versioned_policy_rule",
+      "penaltyEffectiveWindow": "incident_scoring_day_only_no_carry_forward",
+      "appealAuthorityStatus": "open_requires_policy_decision",
+      "customerComplaintsInteractionStatus": "open_requires_policy_decision",
+      "potentialEvidenceSources": ["authorized_internal_team_complaint"],
+      "internalTeamComplaintRule": {
+        "recordSchema": "internal-team-messages.schema.json",
+        "automaticScoreImpact": false,
+        "customerComplaintsFactorImpact": "none_internal_employee_complaints_are_separate",
+        "requiredTransition": "branch_manager_deliberately_links_as_evidence_and_finalizes_separate_attitude_incident_review"
+      },
+      "sourceSignals": ["attitude_incident", "attitude_complaint", "incident_investigation"]
+    }
+  ]
+}

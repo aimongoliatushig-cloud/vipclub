@@ -20,12 +20,27 @@ For each eligible person, the system creates a draft calculation from verified s
 Eligible base pay or performance income
 + approved additional workdays and additions
 − approved lateness/no-show penalties
+− missed-public-performance penalties from shift checklists
 − approved loan repayment
 ± approved adjustment
 = proposed net payment
 ```
 
 The system must retain source records, calculation version, policy version, and explanation for every line.
+
+### Entertainer missed-performance deduction
+
+For entertainer subcontractors, the requested paycheck/paystub is the existing three-day settlement and its statement. Each missed-performance amount is an itemized deduction line calculated as `missed_count × effective branch amount_per_miss` and linked to the source shift checklist and branch setting/version.
+
+The line shows missed count, per-miss amount, total deduction, currency, source shift/checklist, setting/version, and net settlement impact. Shift-effort ranking score remains a separate non-monetary calculation. Corrections or reversals create linked adjustment/reversal lines in a later controlled calculation without rewriting the historical checklist, setting, or original settlement line.
+
+### Entertainer attendance deductions
+
+For each scheduled entertainer shift, use the branch-and-shift setting version effective at the scheduled/scoring time. An arrival after the configured required ready time creates a separate itemized lateness line equal to `lateness_minutes × effective branch amount_per_minute_late`. A shift classified as a no-show instead creates one itemized line for the effective fixed branch no-show amount.
+
+No-show and lateness are mutually exclusive for the same scheduled shift: once the shift is classified as a no-show, do not calculate lateness minutes and do not create a lateness charge. Each line retains the scheduled shift, branch, required ready time, actual arrival when present, no-show state, applicable setting/version, rate or fixed amount, currency, calculation, source evidence, and correction/reversal links. Later setting versions do not change a stored deduction.
+
+Attendance, no-show, and lateness continue to feed the separate 10% ranking component. Monetary settlement deductions must never be substituted for, or added to, that component score. Corrections and reversals flow through linked settlement adjustment lines without rewriting the historical attendance source or original line.
 
 ## Review and approval workflow
 

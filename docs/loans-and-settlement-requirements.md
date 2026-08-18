@@ -12,6 +12,9 @@ Entertainers are subcontractors rather than standard employees.
 - Income is processed in a three-day settlement cycle.
 - The calculation uses verified sales and other approved source records.
 - Approved penalties and deductions are applied to the settlement.
+- Missed-public-performance penalties from the seven-item shift checklist are itemized using the effective branch per-miss setting.
+- Late arrival is itemized as `lateness_minutes × effective branch amount_per_minute_late`; a no-show is itemized as the effective fixed branch no-show amount.
+- A no-show suppresses lateness for the same scheduled shift: do not calculate minutes or charge both deductions.
 - Loan repayment is deducted from the settlement according to the approved repayment rule.
 - Every line of the calculation must be explainable and auditable.
 
@@ -21,6 +24,8 @@ Entertainers are subcontractors rather than standard employees.
 Verified sales and income events
 → applicable shares and additions
 → approved penalties and adjustments
+→ itemized missed-performance checklist deduction
+→ itemized lateness or no-show attendance deduction
 → loan repayment deduction
 → net three-day settlement
 → review, approval, payment evidence, and audit
@@ -57,6 +62,8 @@ Base pay or eligible performance income
 ± approved adjustments
 = net payable amount
 ```
+
+For entertainers, the three-day settlement statement is the paystub-equivalent. A missed-performance line retains missed count, per-miss amount, total deduction, currency, source shift/checklist, applicable branch setting/version, and resulting net impact. An attendance line retains the scheduled shift, branch, required ready time, actual arrival when present, lateness minutes or no-show state, effective per-minute rate or fixed amount, currency, calculation, setting/version, source evidence, and correction/reversal links. No-show and lateness lines are mutually exclusive for one scheduled shift. Ranking score effects remain separate from all financial lines.
 
 ## Open decisions
 
