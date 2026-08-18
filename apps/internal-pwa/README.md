@@ -10,11 +10,11 @@ CEO, Manager, and Entertainer assistants use separate allowlisted tool contexts.
 
 ## Intended structure
 
-- src — routes, features, components, and service clients
-- src/features — role-aware business capabilities
-- src/shared — UI, permission-aware navigation, realtime, notifications, and API utilities
-- tests — unit, permission, integration, realtime, and user-journey tests
-- public — PWA manifest, icons, and static assets
+- `src/` — application routes, features, components, and service clients
+- `src/features/` — role-aware business capabilities such as tasks, attendance, entertainer ranking, goals, payroll, CRM, and maintenance
+- `src/shared/` — shared UI, permission-aware navigation, notifications, and API utilities
+- `tests/` — unit, permission, integration, and user-journey tests
+- `public/` — PWA manifest, icons, and static assets
 
 ## Security
 

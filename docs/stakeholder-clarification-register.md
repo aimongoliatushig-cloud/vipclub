@@ -31,7 +31,7 @@ Use this register to collect decisions and missing data from the CEO, branch man
 | CL-014 | Confirm which verified sales records and share rates determine entertainer three-day settlements. | General accountant / Branch managers | High | Open |
 | CL-015 | Confirm whether every employment type is loan-eligible and define minimum tenure, income history, maximum amount, repayment range, and departure treatment. | CEO / HR / General accountant | High | Open |
 | CL-016 | Confirm loan approval authority, bank/payment evidence requirements, and adjustment or reversal process. | CEO / Payment accountant | High | Open |
-| CL-017 | **Approved baseline (2026-08-11):** Rank 1/2/3, 14-day cadence, Branch Manager recommendation, and CEO final decision. BAT-96 must still publish the effective metric weights, thresholds, hard gates, benefits, missing-data treatment, and appeal/manual-adjustment rules. | CEO / General Manager / Lead entertainer | High | Approved baseline; parameters open |
+| CL-017 | **CEO or General Manager confirmation required for remaining lifecycle controls:** the 0-100 Level 1/2/3/Rookie thresholds are confirmed; approve rolling evaluation, repeated no-show hard gate/benefit suspension, sustained sales-decline demotion, grace rule, benefits, and appeal process. | CEO / General Manager / Lead entertainer | High | Open |
 
 ## 3. Tasks, maintenance, and management goals
 

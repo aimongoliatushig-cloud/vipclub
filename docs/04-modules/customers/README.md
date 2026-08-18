@@ -26,6 +26,8 @@ Customers may submit compliments, complaints/criticism, and improvement suggesti
 
 Customer data, phone, membership, preferences, and service history follow field masking, consent, purpose limitation, and backend authorization. A room QR cannot expose another room or customer session.
 
+The wider module remains pending. Customer entertainer messages require authenticated customer identity, VIP room, at least one visit/reservation/session reference, selected entertainer, branch, type/text, source portal, timestamps, delivery/read/review states, privacy/masking, and immutable history. Customer complaints are management-only; praise also delivers to the entertainer with policy-filtered customer/room fields. Submission has no automatic ranking impact.
+
 ## Related documents
 
 - [Functional Requirements](../../functional-requirements.md)

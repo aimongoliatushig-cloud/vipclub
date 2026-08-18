@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vipclub.example/schemas/entertainer-ranking-sales-benchmarks.schema.json",
+  "title": "Entertainer Ranking Monthly Sales Benchmarks",
+  "description": "Branch- and year-scoped monthly sales benchmark settings. Cross-field ordering and authorization rules are listed in x-cross-field-validations and must be enforced server-side.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "branchId",
+    "currency",
+    "calendarYear",
+    "effectiveFrom",
+    "effectiveTo",
+    "version",
+    "configuredBy",
+    "configuredAt",
+    "auditHistory",
+    "months"
+  ],
+  "properties": {
+    "branchId": {"type": "string", "minLength": 1},
+    "currency": {"type": "string", "minLength": 3, "maxLength": 3},
+    "calendarYear": {"type": "integer", "minimum": 2000},
+    "effectiveFrom": {"type": "string", "format": "date"},
+    "effectiveTo": {"type": "string", "format": "date"},
+    "version": {"type": "string", "minLength": 1},
+    "configuredBy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["userId", "role", "authorizedBranchId"],
+      "properties": {
+        "userId": {"type": "string", "minLength": 1},
+        "role": {"const": "branch_manager"},
+        "authorizedBranchId": {"type": "string", "minLength": 1}
+      }
+    },
+    "configuredAt": {"type": "string", "format": "date-time"},
+    "auditHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["actorUserId", "actorRole", "timestamp", "version", "action"],
+        "properties": {
+          "actorUserId": {"type": "string", "minLength": 1},
+          "actorRole": {"const": "branch_manager"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "version": {"type": "string", "minLength": 1},
+          "action": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "months": {
+      "type": "array",
+      "minItems": 12,
+      "maxItems": 12,
+      "items": {"$ref": "#/$defs/monthBenchmark"}
+    }
+  },
+  "$defs": {
+    "currencyRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum", "maximum"],
+      "properties": {
+        "minimum": {"type": "number", "minimum": 0},
+        "maximum": {"type": "number", "minimum": 0}
+      }
+    },
+    "rookieHandling": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["handling"],
+          "properties": {
+            "handling": {"const": "no_sales_benchmark"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["handling", "minimum", "maximum"],
+          "properties": {
+            "handling": {"const": "separate_range"},
+            "minimum": {"type": "number", "minimum": 0},
+            "maximum": {"type": "number", "minimum": 0}
+          }
+        }
+      ]
+    },
+    "monthBenchmark": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["month", "levels"],
+      "properties": {
+        "month": {"type": "integer", "minimum": 1, "maximum": 12},
+        "levels": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["level_1", "level_2", "level_3", "rookie"],
+          "properties": {
+            "level_1": {"$ref": "#/$defs/currencyRange"},
+            "level_2": {"$ref": "#/$defs/currencyRange"},
+            "level_3": {"$ref": "#/$defs/currencyRange"},
+            "rookie": {"$ref": "#/$defs/rookieHandling"}
+          }
+        }
+      }
+    }
+  },
+  "x-cross-field-validations": [
+    "Months 1 through 12 must each occur exactly once.",
+    "Every minimum must be less than or equal to its maximum.",
+    "For each month, Level 1 minimum and maximum must each be greater than or equal to Level 2, whose endpoints must each be greater than or equal to Level 3.",
+    "If Rookie handling is separate_range, its minimum must be less than or equal to its maximum.",
+    "configuredBy.authorizedBranchId must equal branchId and authorization must be checked server-side.",
+    "effectiveFrom and effectiveTo must cover the configured calendar period under the published policy version."
+  ]
+}

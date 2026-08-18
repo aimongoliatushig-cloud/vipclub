@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vipclub.example/schemas/entertainer-ranking-attendance-penalties.schema.json",
+  "title": "Entertainer Attendance Financial Penalty Setting",
+  "description": "Effective-dated branch and shift configuration for ready time, lateness rate, and fixed no-show amount.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "branchId",
+    "shiftConfigurationId",
+    "requiredReadyTime",
+    "currency",
+    "amountPerMinuteLate",
+    "fixedNoShowAmount",
+    "effectiveFrom",
+    "version",
+    "status",
+    "configuredBy",
+    "configuredAt",
+    "reason",
+    "auditHistory"
+  ],
+  "properties": {
+    "branchId": {"type": "string", "minLength": 1},
+    "shiftConfigurationId": {"type": "string", "minLength": 1},
+    "requiredReadyTime": {"type": "string", "minLength": 1},
+    "currency": {"type": "string", "minLength": 3, "maxLength": 3},
+    "amountPerMinuteLate": {"type": "number", "minimum": 0},
+    "fixedNoShowAmount": {"type": "number", "minimum": 0},
+    "effectiveFrom": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "minLength": 1},
+    "configuredBy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["userId", "role", "authorizedBranchId"],
+      "properties": {
+        "userId": {"type": "string", "minLength": 1},
+        "role": {"const": "branch_manager"},
+        "authorizedBranchId": {"type": "string", "minLength": 1}
+      }
+    },
+    "configuredAt": {"type": "string", "format": "date-time"},
+    "reason": {"type": "string", "minLength": 1},
+    "auditHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["actorUserId", "actorRole", "timestamp", "version", "action", "reason"],
+        "properties": {
+          "actorUserId": {"type": "string", "minLength": 1},
+          "actorRole": {"const": "branch_manager"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "version": {"type": "string", "minLength": 1},
+          "action": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "x-formulas": {
+    "latenessPenalty": "latenessMinutes * amountPerMinuteLate",
+    "noShowPenalty": "fixedNoShowAmount"
+  },
+  "x-cross-field-validations": [
+    "configuredBy.authorizedBranchId equals branchId and authorization is checked server-side.",
+    "amountPerMinuteLate and fixedNoShowAmount are non-negative.",
+    "The version effective for the scheduled shift/scoring time is retained on the attendance result.",
+    "no-show suppresses lateness for the same scheduled shift so both deductions cannot be charged.",
+    "Later setting versions never retroactively change stored attendance deductions."
+  ]
+}

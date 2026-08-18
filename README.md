@@ -9,6 +9,7 @@ This repository is the shared source of truth for the VIP Club product.
 - [Business processes](docs/business-processes.md)
 - [Technical architecture](docs/technical-architecture.md)
 - [Data and domain model](docs/data-model.md)
+- [Entertainer ranking policy](docs/entertainer-ranking-policy.md)
 - [Development guide](docs/development-guide.md)
 
 ## Contribution rules

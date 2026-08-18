@@ -1,7 +1,7 @@
 ---
 type: changelog
 status: active
-last_reviewed: 2026-08-07
+last_reviewed: 2026-08-18
 ---
 
 # Knowledge-Base Changelog

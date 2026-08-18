@@ -1,7 +1,7 @@
 ---
 type: analytics-specification
 status: approved-direction
-last_reviewed: 2026-08-16
+last_reviewed: 2026-08-18
 ---
 
 # Dashboard Catalog

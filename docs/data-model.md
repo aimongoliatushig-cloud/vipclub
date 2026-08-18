@@ -36,6 +36,8 @@ This is the logical data model for the VIP Club system. ERPNext/Frappe core reco
 | Staffing Exception | Records a planning or attendance shortage, severity, cause, manager action, and resolution where available. | Shift Coverage Snapshot, Club Branch, Role |
 | Operational Task | Assigned work with deadline, state, evidence, blockers, comments, and approval. | Assignee, Branch, Task Evidence |
 | Task Comment / Evidence | Conversation, result notes, images, or other completion proof. | Operational Task |
+| Internal Team Message | Complaint or compliment from any employee/team member about/to a selected team member, with server-derived branch scope, required text, created time, moderation state, and immutable audit/correction history. Complaint content is management-only; compliments are delivered to the praised person. | Sender Employee, Subject Employee, Club Branch, Message Delivery State, Attitude Incident Review |
+| Internal Team Message Delivery State | Per-authorized-audience delivery/read state. Complaint audiences are CEO and relevant authorized branch managers only; compliment audiences also include the praised employee. | Internal Team Message, User, Role Scope / Access Grant |
 | Attendance Evidence Event | Check-in/out or attendance signal with source and original time. | Employee, Shift |
 | Attendance Correction Request | Evidence-backed correction, decision, and adjustment reference. | Attendance Event |
 | Leave / Day-off Request | Team-member self-service request with branch, date range, reason, Pending/Approved/Rejected state, and separate manager decision. Reuse ERPNext Leave Application where appropriate. | Employee, Club Branch, Shift Assignment, Manager Decision |
@@ -78,6 +80,8 @@ The published Shift Assignment or equivalent approved schedule record establishe
 | Customer Visit | Verified visit, spend, branch, entertainer attribution, and reservation link. | Customer, Club Branch, Reservation, Entertainer |
 | Club Reservation | Requested, confirmed, assigned, arrived, completed, cancelled, or no-show reservation. | Customer, Branch, Entertainer |
 | Branch Customer Transfer | Cross-branch alternative, acceptance, receiving reservation, and attribution. | Customer, Origin/Receiving Branch |
+| Customer Entertainer Message | Identified customer complaint or praise about a selected entertainer from the customer helper portal, with required VIP room and visit/reservation/session context, branch, text, routing, delivery/read/review state, and immutable audit history. | Customer, Entertainer, Club Branch, VIP Room, Visit/Reservation/Session, Customer Message Delivery State |
+| Customer Message Delivery State | Per-audience delivery/read state. Complaints route only to CEO/relevant managers; praise also routes to the selected entertainer under field-level customer/room masking. | Customer Entertainer Message, User, Role Scope / Access Grant |
 
 ## CRM, segmentation, and messaging
 
@@ -110,6 +114,20 @@ The published Shift Assignment or equivalent approved schedule record establishe
 | Performance Event | Verified attendance, loyalty, sales, reservation, or training signal used in rank calculations. | Entertainer, Source Record |
 | Ranking Policy Version | Rank 1/2/3, 14-day cadence, weights, thresholds, gates, benefits, missing-data handling, and effective date. | Performance Event, Ranking Snapshot |
 | Ranking Snapshot / Rank History | Explainable 14-day evaluation, manager recommendation, CEO decision, and resulting rank change. | Entertainer, Ranking Policy |
+
+| Performance Event | Verified evidence classified into one canonical ranking factor: attendance (including no-show/lateness), customer complaints, sales, entertaining skill, cleanliness and beauty, shift effort, personal development, or entertainer attitude. A customer-portal complaint is only a candidate source until approved review/verification; its submission is not a performance event by itself. | Entertainer, Source Record, Customer Entertainer Message, Ranking Component Result |
+| Entertainer Score Entry | Versioned daily component score, including canonical factor, scoring date, source type, evidence, actor, role, branch, and correction history. Authorized branch managers or lead entertainers manually assess applicable factors; sales is derived from verified POS events and attitude comes from its incident rule. | Entertainer, Club Branch, Performance Event, Ranking Policy Version |
+| Attitude Incident Review | Incident allegation and evidence, entertainer/branch, manager investigation, substantiated/unsubstantiated finding, discretionary deduction, resulting 0-100 score, incident/scoring/effective date, reason, timestamp, and correction/appeal history. Only the incident day is affected; no record means the daily attitude score is 100. An authorized internal complaint may be referenced as evidence but never changes a score by itself. | Entertainer, Club Branch, Branch Manager, Performance Event, Internal Team Message, Ranking Snapshot |
+| Shift Effort Checklist | One canonical current seven-item boolean checklist per entertainer/branch/shift/scoring day, with item definitions/version, completed/missed counts, submitter/role, evidence/notes, unrounded component/contribution values, and audited correction history. | Entertainer, Club Branch, Shift, Ranking Component Result, Ranking Policy Version |
+| Missed-Performance Penalty Setting | Effective-dated branch-specific currency amount per miss with version/status, authorized manager, reason, timestamp, and audit history. | Club Branch, Branch Manager, Shift Effort Checklist |
+| Missed-Performance Penalty Calculation | Immutable checklist financial result containing missed count, effective setting/version, per-miss amount, currency, calculated penalty, evidence, correction/reversal links, and linked itemized three-day settlement deduction. | Shift Effort Checklist, Penalty Setting, Payout Line Item / Settlement |
+| Attendance Penalty Setting | Effective-dated branch/shift required ready time, per-minute lateness currency amount, fixed no-show amount, version/status, authorized manager, reason, and audit history. | Club Branch, Shift, Branch Manager, Attendance Penalty Calculation |
+| Attendance Penalty Calculation | Scheduled-shift result containing ready/actual time, lateness minutes or no-show, effective setting/version, mutually exclusive lateness/no-show currency calculation, evidence, correction/reversal links, and itemized settlement line. | Attendance Evidence Event, Shift, Penalty Setting, Payout Line Item / Settlement |
+| Ranking Policy Version | Effective-dated eight-factor policy with weights fixed at 10/15/40/5/5/10/5/10, daily score range 0-100, confirmed Level 1/2/3/Rookie boundaries, and versioned normalization, evidence, missing-data, rounding, gate, and benefit rules. | Performance Event, Ranking Snapshot, Branch Sales Benchmark Table |
+| Branch Sales Benchmark Table | Independent branch-specific `(branch, calendar year, version)` configuration containing currency, effective period, actor/time, publication state, audit history, and exactly 12 monthly rows. There is no company-wide fallback. | Club Branch, Ranking Policy Version, Monthly Sales Benchmark |
+| Monthly Sales Benchmark | One month with Level 1, Level 2, and Level 3 currency min/max ranges plus explicit Rookie handling. Higher-level range endpoints cannot be lower than lower-level endpoints. | Branch Sales Benchmark Table, Ranking Snapshot |
+| Ranking Component Result | Auditable per-factor result containing factor ID, source references/raw values, normalized score, weight percentage, unrounded weighted contribution, data-quality state, and explanation. Exactly eight belong to every complete ranking snapshot. | Ranking Snapshot, Score Entry, Performance Event, Ranking Policy |
+| Ranking Snapshot / Rank History | Explainable evaluation containing all eight component results, unrounded 0-100 daily weighted score, matched threshold classification, displayed total, policy version, branch/month sales-benchmark version, evaluation window, gate result, resulting rank change, and correction/appeal/override history. | Entertainer, Score Entry, Ranking Policy, Ranking Component Result, Monthly Sales Benchmark |
 | Income Event | Revenue, tips, commission, bonus, adjustment, or deduction source record. | Entertainer, Branch |
 | Payout Period / Settlement | Three-day calculation period and entertainer settlement with line items. | Income Event, Loan Repayment |
 | Payout Line Item | One explained component of a settlement. | Settlement, Source Record |
@@ -143,6 +161,9 @@ Membership Level → Benefit Entitlement → Benefit Redemption
 Customer → Cashback Ledger Entry → Available Cashback Balance
 Employee / Entertainer → Attendance + Performance + Income → Rank / Settlement / Loan
 CEO or Manager → Operational Task → Comment / Evidence → Review / Completion
+Employee → Complaint → CEO + authorized subject-branch manager message center → optional separate attitude review
+Employee → Compliment → praised employee + CEO + authorized subject-branch manager visibility
+Customer helper portal → identified customer + VIP room/experience → complaint to management only or praise to entertainer + management
 ```
 
 ## Important open data decisions
@@ -151,6 +172,7 @@ CEO or Manager → Operational Task → Comment / Evidence → Review / Completi
 - Final five membership-level names and benefit rules.
 - Cashback point-to-currency value, expiry, allowed items, and approval/reversal rules.
 - Source of truth and reconciliation method for POS sales, attendance, reservations, and messaging delivery.
-- Customer and entertainer privacy, retention, masking, and role visibility.
+- Exact field-level customer identity/VIP-room context visible to an entertainer receiving praise; authenticated identity and room/experience capture are confirmed and anonymous submission is excluded.
+- Customer and entertainer privacy, retention, masking, and role visibility. For internal team messages, complaint-subject non-visibility is confirmed; sender anonymity/confidentiality, retention, appeal/escalation, compliment response rights, and attachment enablement remain open.
 - Final ERPNext reuse versus custom DocType mapping after repository audit.
 - Final publication cutoff and ordinary post-publication schedule-change policy for weekly rosters.
