@@ -1,275 +1,196 @@
 ---
-type: ux-spec
-status: partial-approved
-last_reviewed: 2026-08-13
+type: ux-specification
+status: approved-direction
+last_reviewed: 2026-08-16
 ---
 
-# Internal PWA
+# Internal PWA — Customer 360 Information Architecture
 
 ## Purpose
 
-Define one role-aware internal PWA for employees and team members. Each user has individual credentials; navigation, data, actions, notifications, and AI tools adapt to backend-authorized role, branch, ownership, and field scope.
+Define the role-aware Customer 360 navigation, screens, drill-down behavior, and UI acceptance rules for CEO and branch managers.
 
-The application is one role-aware internal PWA. Server-side permissions determine available data and actions.
+## Mandatory layout decision
 
-## Role-aware entry and shared decision flow
+The existing CRM master-detail layout—customer directory on the left and a selected-customer summary on the right—must not be retained or incrementally extended.
 
-After authentication, one session shell resolves the user's role and authorized branch scope:
+Preserve reusable brand tokens, typography, accessible components, navigation patterns, and Mongolian-first wording where useful. Replace the CRM page structure with an intelligence-dashboard-first information architecture.
 
-- **CEO** lands on a company-wide dashboard with branch sales progress, branch risks, executive workforce evidence, masked CRM/ranking evidence, and the final approval queue.
-- **Branch Manager** lands on the manager overview for the assigned branch with the branch sales goal first, followed by tasks, operations, workforce, attendance, CRM, and recommendations.
+The landing page answers **what is happening**. Insight details explain **why**. Filtered lists show **who is involved**. Customer 360 shows **complete evidence and available action**.
 
-The navigation and actions are permission-filtered, not merely hidden by page styling. A Branch Manager session cannot call CEO approval operations, and a CEO session does not receive the routine weekly schedule editor as its default workspace.
+## Primary destinations
 
-Manager goal and rank/membership submissions and CEO decisions use one shared record. The flow must preserve:
+1. Customer Intelligence Dashboard
+2. Insight Detail
+3. Customer Explorer
+4. Membership Recommendations
+5. Customer Segments
+6. Campaigns and Communications
+7. Benefits and Cashback
+8. Data Quality
+9. Membership Policy Settings
+10. Individual Customer 360 Profile
 
-1. manager draft and submission state;
-2. the source value, proposal, evidence, version, actor, and timestamp;
-3. CEO approve, revision-request, or reject authority;
-4. the CEO decision state and comment on the same record;
-5. the decision result in the Manager workspace without granting the Manager an approval override.
+Suggested routes, adapted to repository conventions:
 
-The browser prototype persists this contract in a shared local store for interaction testing. Production must replace it with an authenticated server session, server-side branch/permission enforcement, and transactional API persistence.
+- `/crm`
+- `/crm/insights/[insight-type]`
+- `/crm/customers`
+- `/crm/customers/[customer-id]`
+- `/crm/recommendations`
+- `/crm/segments`
+- `/crm/campaigns`
+- `/crm/loyalty`
+- `/crm/data-quality`
+- `/crm/settings/membership`
 
-## Branch Manager default overview
+## Required navigation journeys
 
-The default page for a Branch Manager is the manager overview for the authenticated manager's authorized branch. The first business panel must show the current active monthly sales goal before operational workforce cards:
+- Dashboard → Insight Detail → Filtered Customer Explorer → Customer 360 → Source visit/bill/evaluation
+- Dashboard → Recommendation Queue → Recommendation Detail → Customer 360
+- Dashboard → Data Quality Insight → Reconciliation Queue → Customer 360
+- Any visible customer name → the canonical full-page Customer 360 Profile
 
-- month and branch;
-- CEO-approved state and target version;
-- approved target amount;
-- reconciled actual sales;
-- remaining amount or amount above target;
-- numeric achievement percentage and progress bar;
-- actual-sales source, reconciliation state, and refresh time;
-- a direct path to the branch customer-level and CRM view.
+Preserve filter, date, branch, and comparison context through drill-down. Provide breadcrumbs and reliable back navigation. No dashboard element may end at a placeholder or dead link.
 
-Do not show a company-wide target, other branches, or an unapproved proposal as the manager's active goal. If approval or reconciled sales evidence is missing, show a clear pending/unavailable state rather than a misleading zero.
+## CRM landing dashboard
 
-### Manager CRM discovery
+The first CRM page is an intelligence dashboard, not a customer directory. It must not contain the old left-list/right-detail composition or a large primary customer table.
 
-The branch customer view should support fast lookup by customer name or the permitted phone identifier. The browser shows masked phone data; a production full-number lookup is performed and normalized server-side, then returns only masked authorized fields.
+### Header controls
 
-The customer directory should expose, without opening every record:
+- Company or branch scope
+- Permission-aware branch selector
+- Date range
+- Comparison period
+- Data freshness and last successful synchronization
+- Search
+- Permission-controlled export
 
-- current source membership level;
-- total confirmed expenditure;
-- average eligible expenditure per completed eligible visit;
-- last visit;
-- ordering by membership level, total expenditure, average expenditure, and latest visit.
+### Management attention queue
 
-Opening a customer preserves the detailed visit, spend range, affinity, consent, benefit-use, and policy evidence already defined for the manager CRM. Search and sorting do not grant membership editing, approval, export, or cross-branch access.
+Show urgent, clickable items near the top:
 
-## Branch Manager operations workspace
+- Membership decisions awaiting approval
+- Repeated or urgent downgrade recommendations
+- High-value customers becoming at risk
+- VIP customers outside their normal visit interval
+- Expiring benefits
+- Identity-resolution work
+- POS/CRM synchronization or data-quality failures
 
-The Branch Manager navigation provides one branch-scoped operations center with three queues:
+### Key insight cards
 
-1. **Reservations** — request, confirm, mark arrived, complete, or cancel using the permitted lifecycle. New records use a masked phone identifier in the browser; full identity matching remains a production server responsibility.
-2. **Maintenance** — report a problem, assign a technical/facilities owner and due date, inspect result/evidence, verify closure, or return for rework. The worker performs the repair; the manager verifies the submitted outcome.
-3. **Service feedback and complaints** — triage normal service concerns, route them to the responsible owner, and close branch-service issues. HR-restricted complaint details remain hidden and can only be handed to the authorized HR owner.
+Use a limited set of decision-relevant cards. Each contains value, comparison, direction, short explanation, freshness, and a drill-down target.
 
-The default overview queue includes requested reservations, maintenance results waiting for verification, and unresolved service issues.
+Recommended cards:
 
-## Manager information center
+- Total customers
+- Active customers
+- Returning-customer rate
+- Returning-customer revenue
+- Average expenditure per visit
+- At-risk high-value customers
+- Pending membership decisions
+- Identified-customer revenue rate
 
-The Manager information center separates three kinds of evidence:
+### Visualizations and insight lists
 
-- internal PWA notifications with severity, read state, related work, and recorded escalation;
-- formal branch instructions with audience, due date, and per-person acknowledgement;
-- customer communication history with masked identity, purpose, channel, consent state, delivery evidence, and date.
+Support customer growth, new versus returning, membership distribution and movement, retention, average expenditure per visit, branch comparison, campaign outcomes, and at-risk value.
 
-A Branch Manager may prepare a segment/communication handoff for the CRM/marketing owner. The screen must clearly state that the handoff does not send a campaign. No external channel may be shown as delivered without provider evidence.
+Charts are interactive evidence navigation, not decoration. A meaningful card, chart segment, point, legend, alert, or customer row must open the related filtered detail.
 
-## Manager decision recommendations
+## Role-aware landing state
 
-The Branch Manager can prepare and submit:
+### CEO
 
-- an entertainer rank recommendation based on the approved 14-day evaluation evidence; and
-- a support/retain-current recommendation for customer membership evaluation.
+Default scope is all four branches: Nomad, Sapphire, Neva, and Monarch. Show company totals, four-branch comparison, customer growth, returning revenue, retention, membership movement, pending/overdue decisions, at-risk high-value customers, cross-branch behavior, benefits/cashback exposure, campaign outcomes, identified-customer revenue, and integration health.
 
-Each card keeps the current source value, proposed value, evidence, reason, policy status, and submission/decision state separate. The Manager interface has no approve or override action. CEO final rank decisions and authorized CRM/CEO membership decisions remain separate workflows.
+Support Company → Branch → Segment → Customer drill-down.
 
-## Branch Manager workforce workspace
+### Branch manager
 
-The Branch Manager must have a Workforce area for the manager's authorized branch.
+Default and maximum customer-data scope is the authorized branch. Show local customer growth, returning customers, dormancy/risk, average expenditure per visit, membership distribution, pending/repeated recommendations, upcoming VIP reservations, expiring benefits, unused cashback, campaign outcomes, incomplete identities, and data freshness.
 
-### 1. Staffing Requirements
+## Insight Detail
 
-Purpose: configure the branch's recurring minimum workforce by weekday and role.
+Each detail screen includes:
 
-The screen should provide a Monday-through-Sunday grid with approved branch roles as rows or an equivalent mobile-friendly editor.
+- Insight name and human-readable definition
+- Current branch/date/comparison filters
+- Trend or distribution
+- Contributing customer list
+- Source totals and freshness
+- Permission-controlled export
+- Links to Customer 360 and authorized source records
 
-Managers can:
+Required insight families include growth, retention, risk, dormancy, returning revenue, average expenditure per visit, membership movement, branch comparison, campaigns, benefits/cashback, and data quality.
 
-- view the active minimum staffing requirement;
-- edit minimum headcount for each weekday/role;
-- reuse the same value across multiple days when convenient;
-- save an effective-dated configuration;
-- view configuration history where authorized.
+## Customer Explorer
 
-Example:
+The complete searchable customer list is a separate screen. Support server-side pagination, sorting, saved filters, branch/date filters, current and calculated levels, recommendation status/severity, customer status, last visit, visit count, average expenditure per visit, lifetime value, risk, and data quality.
 
-```text
-Role            Mon Tue Wed Thu Fri Sat Sun
-Entertainer      20  20  20  22  25  28  24
-Server             4   4   4   4   5   6   5
-Bartender          2   2   2   2   3   3   3
-Receptionist       2   2   2   2   2   3   2
-Security           2   2   2   2   2   3   2
-```
+Every customer name and row opens the canonical Customer 360 Profile. Do not trap full customer details in a side panel. A quick preview may exist only as an optional convenience.
 
-### 2. Weekly Schedule
+## Canonical Customer 360 Profile
 
-Purpose: assign specific team members to actual shifts for the operating week.
+Use one full-page profile reachable from every dashboard, insight, recommendation, segment, campaign, and customer list.
 
-The scheduler should support:
+Sections:
 
-- week calendar view;
-- role filters;
-- team-member search;
-- shift-type selection;
-- authorized availability/leave indicators;
-- assignment and reassignment;
-- unresolved-shortage indicators;
-- publish action;
-- audited post-publication changes.
+1. Profile summary
+2. Management insights and recommended action
+3. Unified chronological timeline
+4. Visit and spending analytics
+5. Membership calculation, recommendation, and decision history
+6. Benefits and cashback
+7. Consent and communications
+8. Notes, tasks, complaints, reservations, transfers, and authorized actions
+9. Source evidence and audit links
 
-The manager should be able to scan team members as rows and operating days as columns on desktop, with a compact day-by-day view on mobile. Each assignment should show shift time and acknowledgement state. Publishing opens a review that lists validation problems and coverage gaps; a policy-permitted gap requires a reason.
+The profile shows current approved level separately from calculated level. Pending recommendations never appear as effective customer status.
 
-A monthly/calendar overview may be offered for planning, but weekly scheduling is the authoritative operational workflow.
+## Membership Recommendations
 
-### 3. Coverage / Readiness
+Provide a dedicated queue with All Pending, Upgrades, Downgrades, Repeated, Kept Current, Review Later, Escalated, Recently Approved, and No Longer Applicable filters.
 
-Purpose: show what the branch needs, what the manager planned, and what actually happened.
+Each row shows customer, branch, current/calculated level, average expenditure per visit, threshold difference, consecutive count, first/latest evaluation dates, severity, prior decision, and pending age.
 
-Use the model:
+Customer name opens Customer 360. Recommendation opens its full calculation, source, and decision history.
 
-```text
-Required -> Scheduled -> Checked In
-```
+## UX states and concurrency
 
-For each role/date show at least:
+Every major screen implements loading, empty, no result, denied, partial, stale, integration unavailable, calculation pending, recommendation pending, decision processing, success, validation error, retry-safe failure, and superseded/stale-decision conflict.
 
-- required;
-- scheduled;
-- schedule shortage;
-- checked in;
-- approved absence;
-- unexpected no-show;
-- late;
-- actual readiness shortage.
+If a newer evaluation supersedes an open recommendation, block approval of the stale view and reload the current state.
 
-Example:
+## Design-before-code deliverables
 
-```text
-Entertainers
-Required 25 | Scheduled 23 | Checked in 21
-Planning shortage 2 | Approved leave 1 | Unexpected no-show 1
-Actual readiness shortage 4
-```
+Before implementation, create and review:
 
-Use clear status semantics so the manager can distinguish a planning problem from an attendance problem.
+1. CRM sitemap
+2. Role-based dashboard content map
+3. Dashboard-to-detail navigation map
+4. Low-fidelity wireframes for primary screens
+5. Reusable component inventory
+6. API/data dependency map for every dashboard component
+7. State matrix
+8. Permission map
 
-### 4. Attendance Review
+## UX acceptance criteria
 
-Purpose: let the manager review operational attendance exceptions daily.
-
-Include:
-
-- late arrivals and late minutes;
-- unexpected no-shows;
-- approved absences;
-- schedule/attendance mismatches;
-- correction requests;
-- source shift and attendance evidence;
-- excuse/decision action where policy permits.
-
-An excusal must not erase the original attendance evidence.
-
-The attendance workspace should provide three clearly separated tabs:
-
-- attendance exceptions requiring evidence review;
-- leave/day-off requests requiring manager approval;
-- penalty review showing lateness/no-show evidence and downstream status.
-
-The penalty review must show `Amount not calculated` while CL-013 is open and explain that an approved effective-dated policy is required before any monetary deduction can be produced.
-
-### 5. Team Members
-
-Purpose: provide the manager with the operational roster needed for scheduling.
-
-Show only authorized information, such as:
-
-- name;
-- operational role;
-- active branch assignment;
-- rank where applicable;
-- schedule status;
-- authorized leave/availability indicators;
-- upcoming shifts.
-
-Do not expose private HR or financial fields merely because the user is a Branch Manager.
-
-## Employee workforce experience
-
-Employees and entertainers should be able to view their own published weekly schedule and attendance state in the same PWA according to permissions.
-
-They should also be able to submit a leave or day-off request for themselves, including a date range and reason, and view Pending, Approved, or Rejected status plus the manager's decision reason. A pending request must be visually distinguished from approved leave and must not imply that the shift is cancelled.
-
-The employee schedule view should make clear:
-
-- date;
-- shift start/end;
-- branch/location;
-- current attendance state;
-- approved leave or schedule change;
-- relevant notifications.
-
-## Notifications
-
-Notify the Branch Manager about material workforce exceptions, including:
-
-- weekly roster below minimum staffing;
-- published roster falling below minimum after leave/status change;
-- critical unexpected no-show shortage;
-- unresolved scheduling shortage approaching the affected day.
-
-Notify the affected employee when a published schedule is created or materially changed according to notification policy.
-
-### Executive workforce follow-up
-
-The CEO-level view should surface schedule-management exceptions using objective evidence:
-
-- late or missing weekly publication;
-- unresolved coverage gaps;
-- pending acknowledgements past the reminder threshold;
-- open leave/change requests that affect coverage;
-- accountable manager, latest action, next action, and due date.
-
-Each exception should link to its schedule version and evidence, with actions to message the manager or create a tracked follow-up task. Do not present a subjective "manager doing nothing" label.
-
-## Responsive behavior
-
-The workforce module must work on mobile and desktop.
-
-Desktop/tablet may use richer weekly grids and drag/drop or dense calendar interactions where appropriate.
-
-Mobile should prioritize:
-
-- today's/this week's shifts;
-- shortage alerts;
-- quick assignment/change actions;
-- attendance exception review;
-- clear role-based coverage counts.
-
-## Security
-
-The PWA must not be the only authorization layer. Every staffing-template edit, schedule query, assignment, and attendance decision must be validated server-side by branch and action permission.
+- CEO or manager understands the most important customer situation without opening the customer directory.
+- Every actionable insight reaches a filtered evidence view.
+- Every displayed customer name reaches the same canonical Customer 360 Profile.
+- Branch/date/comparison context survives drill-down and back navigation.
+- No old master-detail CRM layout remains.
+- No decorative dashboard card or chart lacks a defined drill-down action.
+- No required detail screen is a placeholder.
+- Mongolian wording, privacy masking, responsive behavior, keyboard access, and accessible states are verified.
 
 ## Related documents
 
-- [CEO and Branch Manager role integration](../decisions/2026-08-13-ceo-manager-role-integration.md)
-- [Branch workforce scheduling decision](../decisions/2026-08-13-branch-workforce-scheduling.md)
-- [Workforce module](../04-modules/workforce/README.md)
-- [Role permission matrix](../03-roles/ROLE_PERMISSION_MATRIX.md)
-- [Functional requirements](../functional-requirements.md)
+- [CRM and loyalty requirements](../crm-and-loyalty-requirements.md)
+- [Dashboard catalog](../09-analytics/DASHBOARD_CATALOG.md)
+- [Development guide](../development-guide.md)
+- [Requirements traceability](../01-governance/REQUIREMENTS_TRACEABILITY.md)

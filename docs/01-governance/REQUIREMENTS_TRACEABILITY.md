@@ -1,58 +1,77 @@
 ---
-type: traceability
-status: active
-last_reviewed: 2026-08-07
+type: governance-specification
+status: required
+last_reviewed: 2026-08-16
 ---
 
 # Requirements Traceability
 
 ## Purpose
 
-Map authoritative requirement families to processes, data, UX/API, controls, and verification. This is a relationship index, not a duplicate requirement source.
+Map every approved requirement to process, data, UI, API, permission, test, GitHub change, and Linear delivery work.
 
-| Requirement family | Processes | Principal data | UX / API | Key verification |
-| --- | --- | --- | --- | --- |
-| FR-CALL | P17 CallPro-assisted call to reservation | Call Event, Classification, Block Decision, Customer, Reservation | Call Operator workspace, CallPro adapter | Provider idempotency, purpose separation, masking, limited CRM, booking conversion |
-| FR-ENT | P10 onboarding, P12 ranking | Entertainer Service Profile, Incident, Ranking Snapshot, Recommendation/Decision | Internal/public profile serializers, Entertainer PWA/assistant | Gold start, four ranks, field allowlist, human decision, explanation |
-| FR-REQ | P19 entertainer request, P38 extras | Availability, Service Request, Extra Definition/Capability/Price | Customer Assistant, operations workstation, realtime API | Separate availability/visibility, room scope, timestamps, escalation, no auto penalty |
-| FR-INCOME | P13 settlement, P14 loan | Compensation Policy, Income Event, Settlement, Deduction, Loan | Entertainer statement, finance workspace | Effective dates, historical integrity, source lines, approval, reversal |
-| FR-CUST / FR-OPS | P15 registration, P16 reservation, P18 session/reconciliation, P37 feedback | Customer, Consent, Room, Session, Drop-off, Reconciliation, Feedback | Reception, Customer Assistant, operations workstation | Session isolation, structured outcome, feedback review, no automatic accusation |
-| FR-GOAL | P40 target/plan, P44 KPI/reward/penalty | Goal Cycle, Plan, KPI Snapshot, Reward Allocation, Penalty Review | CEO/Manager dashboards, task API, assistants | CEO-set target, plan approval, AI advisory, human reward/penalty review |
-| FR-TASK | P20/P21/P22/P26 | ERPNext Project/Task, Comment, Evidence, Notification | Internal PWA, AI Tool Gateway | Hierarchy, backend permission, discussion context, reminders, reopening |
-| FR-MSG | P25 internal message/feedback | Message, Feedback Submission, Protected Identity Access | Internal messaging and notification services | Recipient anonymity disclosure, reveal authorization and audit |
-| FR-AI | Cross-cutting | Tool request/audit, source records | CEO, Manager, Entertainer assistant contexts | Acting-user permissions, allowlisted tools, prohibited approvals |
-| FR-REPORT | P35 intelligence, P44 KPI, P45 health | KPI/Reporting Snapshot and source links | Dashboard/report APIs | Authorized drill-down, policy/formula version, freshness, missing data |
-| FR-CRM | P30–P36 | Membership Account, Point Ledger, Privilege, Evaluation | Customer/CRM PWA and APIs | One status/balance, anniversary/grace, cross-branch rules, financial controls |
+GitHub Markdown is the business and technical source of truth. Linear is the execution tracker. Linear must link to requirements; it must not silently replace or redefine them.
 
-## Cross-module chains
+## Required traceability fields
 
-~~~text
-CallPro → Customer → Reservation → Branch Operations
+| Field | Required content |
+| --- | --- |
+| Requirement ID | Stable ID such as FR-CRM-017 |
+| Source document | Exact GitHub MD path and heading |
+| Decision status | Confirmed, proposed, or open |
+| Linear issue | Issue identifier and URL |
+| Owner | Responsible implementer |
+| Process | BPMN/process ID |
+| Data | DocTypes/tables and migrations |
+| API | Query/command/event contracts |
+| UI | Route, screen, component, and states |
+| Permission | Roles, branches, fields, actions |
+| Tests | Unit, integration, E2E, permission, audit |
+| Pull request | Implementation PR |
+| Evidence | Test run, screenshot, staging link, or log |
+| Status | Not started, in progress, blocked, verified, released |
 
-Check-in → Session/QR → Request → Service → Bill/Drop-off → Reconciliation
+## Linear work structure for Customer 360
 
-Feedback → Review → Verified Incident → Ranking Evidence
+Create or reuse one Customer 360 project/initiative and track at least these bounded workstreams:
 
-Ranking Evidence → Recommendation → Human Decision → Rank
-→ Compensation Policy → Settlement
+1. Repository and current-state audit
+2. Customer/POS identity and data-quality foundation
+3. Membership policy and versioning
+4. Per-visit evaluation engine
+5. Recommendation and manager approval workflow
+6. CEO intelligence dashboard
+7. Branch manager intelligence dashboard
+8. Insight drill-down framework
+9. Customer Explorer
+10. Canonical Customer 360 Profile and timeline
+11. Benefits and cashback
+12. Consent, segmentation, campaigns, and outcomes
+13. Permissions, masking, export, and audit
+14. Data migration and reconciliation
+15. Automated tests and full-flow verification
+16. Deployment, monitoring, rollback, and runbook
 
-CEO Target → Manager/AI Plan → ERPNext Projects/Tasks
-→ KPI → Reward/Penalty Review → Next Cycle
-~~~
+Each issue must contain acceptance criteria, dependencies, relevant requirement IDs, source-document links, test expectations, and evidence of completion.
 
-## Test obligations
+## Codex operating rule
 
-Each implementation slice needs:
+Before code changes, Codex must:
 
-- unit tests for effective policies and calculations;
-- permission and field-masking tests by role/branch/ownership;
-- workflow/state transition and human-approval tests;
-- idempotency, retry, reconciliation, and provider-failure tests;
-- realtime subscription, reconnect, stale-state, and session-isolation tests;
-- audit, reversal/adjustment, and historical-policy tests;
-- PWA journeys for empty, denied, offline, stale, and exception states;
-- report drill-down and source-evidence tests.
+1. Read the relevant GitHub MD documents completely.
+2. Audit current code and production behavior.
+3. Link the task to an existing Linear issue or create the authorized issue.
+4. Record requirement IDs and acceptance criteria in the Linear issue.
+5. Mark material blockers instead of inventing policy.
 
-## Open traceability work
+During implementation, Codex updates Linear status and records important findings. After implementation, Codex attaches PR/test/staging evidence and updates the traceability mapping and MD documents when behavior or an approved decision changes.
 
-Add Linear items, final DocType/API names, BPMN links, test IDs, and policy decision IDs after repository audit and business approval.
+A task is not complete because code exists. It is complete only when requirements, Linear work, code, tests, evidence, and documentation agree.
+
+## Change control
+
+- Business rules are changed in approved GitHub MD/decision records first.
+- Linear tracks delivery of the approved rule.
+- Code and tests reference stable requirement IDs.
+- A Linear description or comment cannot silently override an approved GitHub rule.
+- Conflicts are documented and escalated before implementation.

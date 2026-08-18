@@ -30,7 +30,7 @@ The ERPNext/Frappe package is now the detailed blueprint. The live project conve
 
 | Decision | Why it matters |
 | --- | --- |
-| Membership formula | The package leaves formula open; the live discussion considers rolling 12-month, active-month, or lifetime spending. |
+| Membership evaluation window and eligible-spend details | The authoritative metric is now average eligible expenditure per eligible completed visit, recalculated after each eligible completed visit. Final visit/date window, minimum visit count, eligible-spend exclusions, rounding, and boundary rules require approval. |
 | Branch-specific versus company-wide membership | Branch managers set thresholds, but multi-branch member classification is not yet defined. |
 | Five membership names and benefits | The package proposes some names and examples; final names, thresholds, eligibility, and expiry require approval. |
 | Customer lifetime value | Confirm whether this is total customer spend or net revenue after discounts, benefits, and cashback. |
@@ -76,7 +76,10 @@ Each model may apply approved lateness/no-show penalties, loan repayments, and a
 ### CRM, loyalty, and communication
 
 - Customer intelligence includes member segmentation, visit cadence, spend ranges, entertainer affinity, lifetime value, and campaign outcomes.
-- Membership thresholds are branch-specific and configurable by authorized users; cross-branch classification remains open.
+- Membership thresholds are branch-specific, versioned, and configurable by authorized users; cross-branch classification remains open.
+- Every eligible completed visit and relevant financial correction triggers evaluation using eligible net expenditure divided by eligible completed visits in the effective policy window.
+- A calculation produces a recommendation only. An authorized manager must approve before an upgrade or downgrade takes effect.
+- Managers can Keep current for one evaluation; later visits continue evaluation and may refresh the recommendation.
 - Benefits and cashback require an auditable entitlement and ledger model.
 - Customer communications remain consent-based and channel-preference-aware; internal operational notifications use the PWA.
 
