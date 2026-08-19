@@ -178,12 +178,13 @@ The total must be reproducible from the recorded component scores, weights, and 
 1. A new entertainer begins as Rookie/unranked unless an approved onboarding rule states otherwise.
 2. The system collects verified evidence for exactly the eight weighted factors, including attendance/no-show/lateness inputs, personal-development evidence, and any attitude incident decision effective for the scoring day.
 3. For each scoring day, the system normalizes each component, calculates the unrounded 0-100 daily weighted score, and assigns its confirmed threshold classification.
-4. At the approved evaluation cadence, an entertainer is promoted when the relevant daily-score history, minimum evidence, and hard gates are met.
-5. An entertainer is not demoted because of one weak period alone.
-6. Repeated unresolved no-shows may trigger an approved hard gate or benefit suspension in addition to their treatment within the attendance component.
-7. Demotion is allowed when the rolling score remains below the required threshold for the approved grace period, including sustained sales decline, or when an approved hard gate applies.
-8. Every result records source events, policy version, component scores and contributions, total score, hard gates, previous/new rank, explanation, and effective date.
-9. A manual review, appeal, adjustment, and audit process is available for disputed data or exceptional circumstances.
+4. The completed scoring-day result determines the effective rank for the following scoring date. Transactions on the scored date keep the rank already effective for that date.
+5. Example: an entertainer who is Rank 3 on 2026-08-01 and meets Rank 2 conditions that day remains at the Rank 3 financial share for 2026-08-01; Rank 2 and its 60% table-service share begin on 2026-08-02.
+6. An entertainer is not demoted because of one weak period alone.
+7. Repeated unresolved no-shows may trigger an approved hard gate or benefit suspension in addition to their treatment within the attendance component.
+8. Demotion is allowed when the rolling score remains below the required threshold for the approved grace period, including sustained sales decline, or when an approved hard gate applies.
+9. Every result records source events, policy version, component scores and contributions, total score, hard gates, previous/new rank, explanation, scoring date, and `effective_from` date.
+10. A manual review, appeal, adjustment, and audit process is available for disputed data or exceptional circumstances.
 
 ## API, UI, and reporting contract
 
@@ -224,6 +225,7 @@ The total must be reproducible from the recorded component scores, weights, and 
 16. Different branches may use different per-miss amounts; negative amounts are invalid, and later effective versions do not alter stored historical penalties.
 17. On-time attendance creates no attendance financial deduction; lateness charges exact lateness minutes times the effective branch rate; no-show charges only the fixed no-show amount and suppresses lateness.
 18. Branch-specific/effective-dated attendance rates may differ without retroactively changing stored deductions, and settlement lines remain separate from the 10% ranking input.
+19. A rank earned from 2026-08-01 evidence becomes effective on 2026-08-02: 2026-08-01 settlements retain the previously effective rank/rate, while 2026-08-02 settlements use the new rank/rate.
 
 The executable policy-contract checks are in [`tests/test_entertainer_ranking_policy.py`](../tests/test_entertainer_ranking_policy.py).
 
@@ -235,7 +237,7 @@ The eight weights, daily 0-100 scale, and rank thresholds above are fixed by the
 - the attitude deduction/evidence rubric, appeal authority, and interaction with the customer-complaints factor;
 - the daily POS-sales-to-monthly-benchmark normalization formula;
 - settlement processing timing, monetary-penalty approval/reversal authority, and legal/policy limits;
-- evaluation window and cadence;
+- evaluation window used by promotion and demotion gates;
 - display precision and rounding;
 - hard gates and grace period;
 - promotion/demotion authority;

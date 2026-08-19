@@ -46,6 +46,14 @@ CUSTOMER_MESSAGE_SCHEMA_PATH = (
     / "docs"
     / "customer-entertainer-messages.schema.json"
 )
+RANKING_REQUIREMENTS_PATH = (
+    Path(__file__).resolve().parents[1] / "docs" / "entertainer-ranking-policy.md"
+)
+SETTLEMENT_REQUIREMENTS_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "docs"
+    / "loans-and-settlement-requirements.md"
+)
 
 EXPECTED_WEIGHTS = {
     "attendance": 10,
@@ -660,6 +668,17 @@ class EntertainerRankingPolicyContractTest(unittest.TestCase):
         cls.customer_message_schema = json.loads(
             CUSTOMER_MESSAGE_SCHEMA_PATH.read_text(encoding="utf-8")
         )
+
+    def test_rank_share_is_three_level_and_effective_on_the_next_day(self):
+        ranking_requirements = RANKING_REQUIREMENTS_PATH.read_text(encoding="utf-8")
+        settlement_requirements = SETTLEMENT_REQUIREMENTS_PATH.read_text(encoding="utf-8")
+
+        for rank, share in (("Rank 3", "50%"), ("Rank 2", "60%"), ("Rank 1", "70%")):
+            self.assertIn(f"| {rank} | {share} |", settlement_requirements)
+        self.assertNotIn("| Diamond | 80% |", settlement_requirements)
+        self.assertIn("Rank 2 and its 60% share begin on 2026-08-02", settlement_requirements)
+        self.assertIn("Rank 2 and its 60% table-service share begin on 2026-08-02", ranking_requirements)
+        self.assertIn("`effective_from`", ranking_requirements)
 
     def test_has_exactly_the_eight_canonical_weights(self):
         component_ids = [
