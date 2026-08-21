@@ -32,5 +32,9 @@ Backend setup болон Frappe app суулгалтын заавар `apps/back
 
 - `main` — production-д баталгаажсан source.
 - `develop` — дараагийн хөгжүүлэлтийн нэгдсэн branch.
+- `nymka` — Nymka-ийн өдөр тутмын үндсэн хөгжүүлэлтийн branch. Хэрэглэгчийн хүссэн local сайжруулалтыг өөрөөр заагаагүй бол энд commit/push хийнэ.
+- `battushig` — Battushig-ийн өдөр тутмын хөгжүүлэлтийн branch.
+
+Linear task-аас эхлээд local хөгжүүлэлт, review, merge, deploy хүртэлх дүрмийг [`CONTRIBUTING.md`](CONTRIBUTING.md)-ээс харна уу.
 
 Нууц түлхүүр, `.env`, production backup, `node_modules`, build output repository-д commit хийхгүй.

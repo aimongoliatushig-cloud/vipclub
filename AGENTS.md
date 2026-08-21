@@ -42,3 +42,12 @@ The canonical color and component guidance is in `UI_UX_DESIGN_SYSTEM.md`. New U
 - Design desktop and mobile layouts together. Do not compress a desktop table until it becomes unreadable; use purpose-built mobile rows/cards with the same information hierarchy.
 - Verify at minimum: 390x844 mobile, 768x1024 tablet, and 1440x900 desktop.
 - Check long Mongolian labels, iPhone safe areas, keyboard focus, overflow, sticky navigation, empty states, loading states, and error states before deployment.
+
+## Repository delivery workflow
+
+- Linear is the source of truth for scope, priority, owner, status, acceptance criteria, and delivery evidence. GitHub is the source of truth for code and review history.
+- Local work must be synchronized into this repository's matching `apps/*` path. A production change must never exist only on a workstation or server.
+- The user's default working branch is `nymka`. Use `battushig` only for Battushig-owned work. Do not commit directly to `main` or `develop`.
+- Open pull requests from the owner's branch into `develop`. Promote tested, approved work from `develop` to `main` for production.
+- Include the Linear issue identifier in commits and pull requests. Move work through `Todo` → `In Progress` → `In Review` → `Done`; mark it `Done` only after the required verification and deployment evidence are recorded.
+- Follow `CONTRIBUTING.md` for the exact local-to-repository mapping and delivery steps.
