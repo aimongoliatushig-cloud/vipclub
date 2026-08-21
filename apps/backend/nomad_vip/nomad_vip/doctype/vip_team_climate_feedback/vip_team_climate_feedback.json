@@ -1,0 +1,44 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "sender_entertainer",
+  "sender_employee",
+  "sender_display_name",
+  "target_entertainer",
+  "target_employee",
+  "target_display_name",
+  "branch",
+  "category",
+  "feedback",
+  "submitted_at",
+  "idempotency_key"
+ ],
+ "fields": [
+  {"fieldname":"sender_entertainer","fieldtype":"Link","label":"Sender Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_standard_filter":1},
+  {"fieldname":"sender_employee","fieldtype":"Link","label":"Sender Employee","options":"Employee","reqd":1,"in_standard_filter":1},
+  {"fieldname":"sender_display_name","fieldtype":"Data","label":"Sender Display Name","reqd":1,"in_list_view":1,"read_only":1},
+  {"fieldname":"target_entertainer","fieldtype":"Link","label":"Target Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_standard_filter":1},
+  {"fieldname":"target_employee","fieldtype":"Link","label":"Target Employee","options":"Employee","reqd":1,"in_standard_filter":1},
+  {"fieldname":"target_display_name","fieldtype":"Data","label":"Target Display Name","reqd":1,"in_list_view":1,"read_only":1},
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"category","fieldtype":"Select","label":"Category","options":"Positive\nConcern\nSupport","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"feedback","fieldtype":"Small Text","label":"Feedback","reqd":1},
+  {"fieldname":"submitted_at","fieldtype":"Datetime","label":"Submitted At","reqd":1,"read_only":1,"in_list_view":1},
+  {"fieldname":"idempotency_key","fieldtype":"Data","label":"Idempotency Key","unique":1,"read_only":1,"no_copy":1}
+ ],
+ "module": "NOMAD VIP",
+ "name": "VIP Team Climate Feedback",
+ "naming_rule": "Random",
+ "permissions": [
+  {"role":"System Manager","read":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1}
+ ],
+ "sort_field": "submitted_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

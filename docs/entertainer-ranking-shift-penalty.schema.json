@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vipclub.example/schemas/entertainer-ranking-shift-penalty.schema.json",
+  "title": "Entertainer Missed-Performance Penalty Setting",
+  "description": "Effective-dated, branch-specific currency amount applied per missed public performance.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "branchId",
+    "currency",
+    "amountPerMiss",
+    "effectiveFrom",
+    "version",
+    "status",
+    "configuredBy",
+    "configuredAt",
+    "reason",
+    "auditHistory"
+  ],
+  "properties": {
+    "branchId": {"type": "string", "minLength": 1},
+    "currency": {"type": "string", "minLength": 3, "maxLength": 3},
+    "amountPerMiss": {"type": "number", "minimum": 0},
+    "effectiveFrom": {"type": "string", "format": "date-time"},
+    "version": {"type": "string", "minLength": 1},
+    "status": {"type": "string", "minLength": 1},
+    "configuredBy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["userId", "role", "authorizedBranchId"],
+      "properties": {
+        "userId": {"type": "string", "minLength": 1},
+        "role": {"const": "branch_manager"},
+        "authorizedBranchId": {"type": "string", "minLength": 1}
+      }
+    },
+    "configuredAt": {"type": "string", "format": "date-time"},
+    "reason": {"type": "string", "minLength": 1},
+    "auditHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["actorUserId", "actorRole", "timestamp", "version", "action", "reason"],
+        "properties": {
+          "actorUserId": {"type": "string", "minLength": 1},
+          "actorRole": {"const": "branch_manager"},
+          "timestamp": {"type": "string", "format": "date-time"},
+          "version": {"type": "string", "minLength": 1},
+          "action": {"type": "string", "minLength": 1},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  },
+  "x-formula": "monetaryPenalty = missedCount * amountPerMiss",
+  "x-cross-field-validations": [
+    "configuredBy.authorizedBranchId equals branchId and authorization is checked server-side.",
+    "amountPerMiss is non-negative.",
+    "The version effective at the checklist scoring date/time is retained on the checklist calculation.",
+    "Later setting versions never retroactively change a stored monetary penalty."
+  ]
+}

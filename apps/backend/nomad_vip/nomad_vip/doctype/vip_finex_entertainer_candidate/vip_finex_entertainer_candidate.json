@@ -1,0 +1,44 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:finex_dancer_id",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "finex_dancer_id", "dancer_name", "dancer_nickname", "inferred_branch",
+  "source_section", "observed_branches", "bill_count", "first_seen", "last_seen", "last_synced_at",
+  "review_section", "suggested_classification", "review_status", "review_note", "reviewed_by", "reviewed_at", "linked_profile"
+ ],
+ "fields": [
+  {"fieldname":"finex_dancer_id","fieldtype":"Data","label":"Finex Dancer ID","reqd":1,"unique":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"dancer_name","fieldtype":"Data","label":"Finex Name","in_list_view":1},
+  {"fieldname":"dancer_nickname","fieldtype":"Data","label":"Stage Name","in_list_view":1},
+  {"fieldname":"inferred_branch","fieldtype":"Link","label":"Inferred Branch","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"source_section","fieldtype":"Section Break","label":"Finex Evidence"},
+  {"fieldname":"observed_branches","fieldtype":"Small Text","label":"Observed Branches","read_only":1},
+  {"fieldname":"bill_count","fieldtype":"Int","label":"Bill Count","read_only":1},
+  {"fieldname":"first_seen","fieldtype":"Date","label":"First Seen","read_only":1},
+  {"fieldname":"last_seen","fieldtype":"Date","label":"Last Seen","read_only":1,"in_standard_filter":1},
+  {"fieldname":"last_synced_at","fieldtype":"Datetime","label":"Last Synced At","read_only":1},
+  {"fieldname":"review_section","fieldtype":"Section Break","label":"Manager Review"},
+  {"fieldname":"suggested_classification","fieldtype":"Select","label":"Suggested Classification","options":"Entertainer\nStaff\nReview","default":"Review","read_only":1,"in_standard_filter":1},
+  {"fieldname":"review_status","fieldtype":"Select","label":"Review Status","options":"Pending\nEntertainer\nStaff\nInactive","default":"Pending","in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"review_note","fieldtype":"Small Text","label":"Review Note"},
+  {"fieldname":"reviewed_by","fieldtype":"Link","label":"Reviewed By","options":"User","read_only":1},
+  {"fieldname":"reviewed_at","fieldtype":"Datetime","label":"Reviewed At","read_only":1},
+  {"fieldname":"linked_profile","fieldtype":"Link","label":"Linked Entertainer Profile","options":"VIP Entertainer Profile","read_only":1}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Finex Entertainer Candidate",
+ "naming_rule": "By fieldname",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1},
+  {"role":"VIP Admin","read":1,"write":1,"create":1,"report":1,"export":1},
+  {"role":"HR Manager","read":1,"write":1,"create":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"write":1,"report":1}
+ ],
+ "sort_field": "last_seen",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

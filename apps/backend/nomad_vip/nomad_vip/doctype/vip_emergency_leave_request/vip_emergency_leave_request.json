@@ -1,0 +1,35 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["entertainer","employee","branch","leave_date","status","requested_at","reason","idempotency_key","decision_section","decided_by","decided_at","decision_reason"],
+ "fields": [
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"employee","fieldtype":"Link","label":"Employee","options":"Employee","reqd":1,"in_standard_filter":1},
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"leave_date","fieldtype":"Date","label":"Leave Date","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"status","fieldtype":"Select","label":"Status","options":"Pending\nApproved\nRejected\nCancelled","default":"Pending","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"requested_at","fieldtype":"Datetime","label":"Requested At","reqd":1,"read_only":1},
+  {"fieldname":"reason","fieldtype":"Small Text","label":"Reason","reqd":1},
+  {"fieldname":"idempotency_key","fieldtype":"Data","label":"Idempotency Key","unique":1,"read_only":1,"no_copy":1},
+  {"fieldname":"decision_section","fieldtype":"Section Break","label":"Manager Decision"},
+  {"fieldname":"decided_by","fieldtype":"Link","label":"Decided By","options":"User","read_only":1},
+  {"fieldname":"decided_at","fieldtype":"Datetime","label":"Decided At","read_only":1},
+  {"fieldname":"decision_reason","fieldtype":"Small Text","label":"Decision Reason","read_only":1}
+ ],
+ "module": "NOMAD VIP",
+ "name": "VIP Emergency Leave Request",
+ "naming_rule": "Random",
+ "permissions": [
+  {"role":"System Manager","read":1,"report":1,"export":1},
+  {"role":"VIP Admin","read":1,"report":1,"export":1},
+  {"role":"HR Manager","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1},
+  {"role":"Entertainer","read":1}
+ ],
+ "sort_field": "requested_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

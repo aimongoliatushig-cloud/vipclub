@@ -1,0 +1,34 @@
+{
+  "name": "vip-entry-app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint src",
+    "test": "node --test tests/*.test.mjs",
+    "verify": "npm run lint && npm run build && npm test",
+    "test:e2e:operator": "node --test tests/operator-workflow-e2e.mjs",
+    "test:e2e:manager-ban": "node --test tests/manager-ban-e2e.mjs",
+    "test:e2e:roles": "node tests/production-role-smoke.mjs",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fontsource/noto-sans": "^5.3.0",
+    "@fontsource/noto-serif": "^5.3.0",
+    "lucide-react": "^1.28.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "socket.io-client": "^4.8.1"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "oxlint": "^1.75.0",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "VIP Club Дотоод систем",
+  "short_name": "VIP Club",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f9fafb",
+  "theme_color": "#f9fafb",
+  "icons": []
+}

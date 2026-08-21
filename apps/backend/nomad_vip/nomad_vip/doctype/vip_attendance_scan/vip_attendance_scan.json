@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["entertainer", "employee", "branch", "scanned_at", "result", "reason", "evidence_section", "qr_config", "latitude", "longitude", "accuracy_meters", "distance_meters", "shift_assignment", "employee_checkin", "scanned_by"],
+ "fields": [
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Entertainer","options":"VIP Entertainer Profile","in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"employee","fieldtype":"Link","label":"Employee","options":"Employee","reqd":1,"in_standard_filter":1},
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"scanned_at","fieldtype":"Datetime","label":"Scanned At","reqd":1,"in_list_view":1},
+  {"fieldname":"result","fieldtype":"Select","label":"Result","options":"Accepted\nDuplicate\nDenied","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"reason","fieldtype":"Small Text","label":"Reason"},
+  {"fieldname":"evidence_section","fieldtype":"Section Break","label":"Verification Evidence"},
+  {"fieldname":"qr_config","fieldtype":"Link","label":"QR Config","options":"VIP Branch Attendance QR"},
+  {"fieldname":"latitude","fieldtype":"Float","label":"Latitude","precision":"8"},
+  {"fieldname":"longitude","fieldtype":"Float","label":"Longitude","precision":"8"},
+  {"fieldname":"accuracy_meters","fieldtype":"Float","label":"Accuracy (meters)","precision":"2"},
+  {"fieldname":"distance_meters","fieldtype":"Float","label":"Distance (meters)","precision":"2"},
+  {"fieldname":"shift_assignment","fieldtype":"Link","label":"Shift Assignment","options":"Shift Assignment"},
+  {"fieldname":"employee_checkin","fieldtype":"Link","label":"Employee Checkin","options":"Employee Checkin"},
+  {"fieldname":"scanned_by","fieldtype":"Link","label":"Scanned By","options":"User","reqd":1}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Attendance Scan",
+ "naming_rule": "Random",
+ "permissions": [
+  {"role":"System Manager","read":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1,"export":1},
+  {"role":"VIP Admin","read":1,"report":1,"export":1},
+  {"role":"HR Manager","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1},
+  {"role":"Entertainer Supervisor","read":1,"report":1},
+  {"role":"Entertainer","read":1}
+ ],
+ "sort_field": "scanned_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

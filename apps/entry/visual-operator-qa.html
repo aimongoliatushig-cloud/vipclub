@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Operator UI QA</title>
+    <script>
+      (() => {
+        const originalFetch = window.fetch.bind(window)
+        let loggedIn = !new URLSearchParams(location.search).has('guest')
+        let rows = [
+          { name: 'RES-QA-001', customer: 'CUST-QA-001', customer_name: 'Бат-Эрдэнэ', phone: '99112233', expected_at: '2026-08-17 21:30:00', party_size: 4, notes: 'VIP өрөө сонирхсон', status: 'Scheduled', kind: 'reservation', is_banned: 0 },
+          { name: 'RES-QA-002', customer: 'CUST-QA-002', customer_name: 'Саруул', phone: '88114455', expected_at: '2026-08-17 22:15:00', party_size: 2, notes: '', status: 'Scheduled', kind: 'reservation', is_banned: 0 },
+          { name: 'RES-QA-003', customer: 'CUST-QA-003', customer_name: 'Нэвтрэх эрхгүй зочин', phone: '99000000', expected_at: '2026-08-17 23:00:00', party_size: 1, notes: '', status: 'Scheduled', kind: 'reservation', is_banned: 1, ban_reason: 'Менежерийн баталгаатай хориг' },
+          { name: 'RES-QA-004', customer: 'CUST-QA-004', customer_name: 'Тэмүүлэн', phone: '95001122', expected_at: '2026-08-17 20:30:00', actual_at: '2026-08-17 20:38:00', arrived_at: '2026-08-17 20:38:00', party_size: 3, notes: '', status: 'Arrived', kind: 'reservation', is_banned: 0 },
+        ]
+        const customerDetail = (phone = '99112233') => ({
+          customer: { name: `CUST-${phone}`, customer_name: phone === '99112233' ? 'Бат-Эрдэнэ' : 'Операторын зочин', phone, visit_count: 18, bill_count: 12, total_spend: 19524667, average_bill: 1627056, first_visit: '2025-12-10', last_visit: '2026-08-17', primary_branch: 'Nomad' },
+          scope_branch: 'Nomad',
+          branch_profiles: [{ branch: 'Nomad', membership_rank: 'Gold', manual_rank: null, is_banned: 0, ban_reason: null, banned_by: null, banned_at: null, visit_count: 18, bill_count: 12, total_spend: 19524667, average_bill: 1627056, last_visit: '2026-08-17' }],
+          branch_ban_notices: [], dancers: [], services: [], recent_bills: [], next_visit_number: 19, reservations: [],
+        })
+        const payload = (message, status = 200) => Promise.resolve(new Response(JSON.stringify({ message }), { status, headers: { 'Content-Type': 'application/json' } }))
+        window.fetch = (input, init = {}) => {
+          const requestUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+          const url = new URL(requestUrl, location.origin)
+          if (!url.pathname.includes('/method/')) return originalFetch(input, init)
+          const method = decodeURIComponent(url.pathname.split('/method/')[1] || '')
+          const body = init.body instanceof URLSearchParams
+            ? init.body
+            : new URLSearchParams(typeof init.body === 'string' ? init.body : '')
+          if (method === 'login') { loggedIn = true; return payload({ ok: true }) }
+          if (method.endsWith('entry.get_context')) return loggedIn
+            ? payload({ user: 'operation.qa@vipclub.local', full_name: 'Оператор QA', branch: 'Nomad', branches: ['Nomad', 'Neva', 'Sapphire', 'Monarch'], mode: 'operation', entry_access_required: false })
+            : payload('Нэвтрээгүй байна', 403)
+          if (method.endsWith('operation.get_phone_reservations')) {
+            const waiting = rows.filter(row => row.status === 'Scheduled').length
+            const arrived = rows.filter(row => row.status === 'Arrived').length
+            const cancelled = rows.filter(row => row.status === 'Cancelled').length
+            return payload({ branch: url.searchParams.get('branch') || 'Nomad', work_date: '2026-08-17', window_start: '2026-08-17 12:00:00', window_end: '2026-08-18 12:00:00', is_current: true, summary: { waiting, arrived, cancelled }, items: rows })
+          }
+          if (method.endsWith('entry.get_service_entry_feed')) {
+            return payload({ branch: url.searchParams.get('branch') || 'Nomad', work_date: '2026-08-17', window_start: '2026-08-17 12:00:00', window_end: '2026-08-18 12:00:00', today_total: 3, visible_fields: ['customer_name', 'membership_rank', 'entered_at', 'visit_number', 'service_characteristics'], entries: [
+              { name: 'ENTRY-QA-001', customer_name: 'Ундрах', membership_rank: 'Black Diamond', entered_at: '2026-08-17 22:41:00', visit_number: 4, service_characteristics: 'Тайван орчин хүсдэг, виски мөстэй уудаг' },
+              { name: 'ENTRY-QA-002', customer_name: 'Тэмүүлэн', membership_rank: 'Gold', entered_at: '2026-08-17 22:18:00', visit_number: 2, service_characteristics: 'VIP өрөө сонирхдог' },
+              { name: 'ENTRY-QA-003', customer_name: 'Саруул', membership_rank: 'Unassigned', entered_at: '2026-08-17 21:56:00', visit_number: 1, service_characteristics: '' },
+            ] })
+          }
+          if (method.endsWith('operation.get_operation_customer_detail')) {
+            const phone = url.searchParams.get('phone') || ''
+            return payload({ found: true, branch: url.searchParams.get('branch') || 'Nomad', phone, detail: customerDetail(phone) })
+          }
+          if (method.endsWith('operation.create_phone_reservation')) {
+            const saved = { name: `RES-QA-${Date.now()}`, customer: `CUST-QA-${Date.now()}`, customer_name: body.get('customer_name') || body.get('phone'), phone: body.get('phone'), expected_at: body.get('expected_at'), party_size: Number(body.get('party_size') || 1), notes: body.get('notes') || '', status: 'Scheduled', kind: 'reservation', is_banned: 0 }
+            rows = [...rows, saved]
+            return payload(saved)
+          }
+          if (method.endsWith('operation.cancel_phone_reservation')) {
+            const name = body.get('reservation')
+            rows = rows.map(row => row.name === name ? { ...row, status: 'Cancelled' } : row)
+            return payload({ name, status: 'Cancelled' })
+          }
+          if (method === 'logout') { loggedIn = false; return payload({ ok: true }) }
+          return payload({})
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:batch_id",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["batch_id", "scoring_date", "status", "policy_version", "profile_count", "complete_count", "created_by", "created_at", "notes", "summary_json", "results_json"],
+ "fields": [
+  {"fieldname":"batch_id","fieldtype":"Data","label":"Batch ID","reqd":1,"unique":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"scoring_date","fieldtype":"Date","label":"Туршилтын өдөр","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"status","fieldtype":"Select","label":"Төлөв","options":"Active\nRolled Back","default":"Active","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"policy_version","fieldtype":"Data","label":"Бодлогын хувилбар","reqd":1,"read_only":1},
+  {"fieldname":"profile_count","fieldtype":"Int","label":"Бүжигчний тоо","read_only":1},
+  {"fieldname":"complete_count","fieldtype":"Int","label":"Бүрэн тооцоолсон","read_only":1},
+  {"fieldname":"created_by","fieldtype":"Link","label":"Үүсгэсэн","options":"User","reqd":1,"read_only":1},
+  {"fieldname":"created_at","fieldtype":"Datetime","label":"Үүсгэсэн цаг","reqd":1,"read_only":1,"in_list_view":1},
+  {"fieldname":"notes","fieldtype":"Small Text","label":"Тайлбар","read_only":1},
+  {"fieldname":"summary_json","fieldtype":"Code","label":"Нэгтгэл","options":"JSON","reqd":1,"read_only":1},
+  {"fieldname":"results_json","fieldtype":"Code","label":"Хүн бүрийн үр дүн","options":"JSON","reqd":1,"read_only":1}
+ ],
+ "index_web_pages_for_search": 0,
+ "module": "NOMAD VIP",
+ "name": "VIP Demo Rank Batch",
+ "naming_rule": "By fieldname",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"report":1}
+ ],
+ "sort_field": "created_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

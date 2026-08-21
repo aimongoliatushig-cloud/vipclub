@@ -1,0 +1,172 @@
+.manager-settings-page {
+  width: min(100%, 760px);
+  margin: 0 auto;
+  display: grid;
+  gap: 16px;
+}
+
+.manager-settings-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.manager-settings-heading span {
+  color: var(--primary-strong);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.manager-settings-heading h1 {
+  margin: 4px 0 0;
+  font-size: clamp(26px, 6vw, 34px);
+}
+
+.manager-settings-heading button {
+  width: 44px;
+  height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--wb-border-strong);
+  color: var(--wb-ink);
+  background: var(--wb-surface);
+}
+
+.manager-settings-heading button:hover:not(:disabled) { background: var(--primary-soft); }
+.manager-settings-heading button svg { width: 18px; }
+.manager-settings-heading button:disabled { opacity: .55; }
+
+.manager-settings-notice {
+  margin: 0;
+  min-height: 48px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  border: 1px solid;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.manager-settings-notice svg { width: 18px; flex: 0 0 auto; }
+.manager-settings-notice.error { color: var(--wb-danger); background: var(--wb-danger-soft); border-color: color-mix(in srgb, var(--wb-danger) 28%, transparent); }
+.manager-settings-notice.success { color: var(--wb-success); background: var(--wb-success-soft); border-color: color-mix(in srgb, var(--wb-success) 28%, transparent); }
+
+.manager-settings-loading {
+  min-height: 160px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+  color: var(--wb-muted);
+  background: var(--wb-surface);
+  border: 1px solid var(--wb-border);
+  border-radius: 12px;
+}
+
+.manager-settings-loading svg { width: 22px; }
+.manager-settings-form { display: grid; gap: 12px; }
+
+.manager-settings-section {
+  overflow: hidden;
+  background: var(--wb-surface);
+  border: 1px solid var(--wb-border);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 4%);
+}
+
+.manager-settings-section > header {
+  min-height: 76px;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid var(--wb-border);
+}
+
+.manager-settings-section > header > svg {
+  width: 36px;
+  height: 36px;
+  padding: 9px;
+  color: var(--primary-strong);
+  background: var(--primary-soft);
+  border-radius: 8px;
+}
+
+.manager-settings-section h2 { margin: 0; font-size: 16px; }
+.manager-settings-section header p { margin: 2px 0 0; color: var(--wb-muted); font-size: 11px; }
+.manager-settings-section header strong { color: var(--primary-strong); font-size: 12px; }
+
+.manager-settings-section > label,
+.manager-settings-save label {
+  padding: 16px;
+  display: grid;
+  gap: 8px;
+  color: var(--wb-ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.manager-settings-section input,
+.manager-settings-save input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--wb-border-strong);
+  font-size: 16px;
+}
+
+.manager-money-input { position: relative; display: block; }
+.manager-money-input input { padding-right: 42px; }
+.manager-money-input b { position: absolute; right: 14px; top: 50%; translate: 0 -50%; color: var(--wb-muted); }
+
+.manager-score-preview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid var(--wb-border);
+}
+
+.manager-score-preview span { min-height: 60px; padding: 12px 16px; display: grid; gap: 2px; }
+.manager-score-preview span + span { border-left: 1px solid var(--wb-border); }
+.manager-score-preview b { font-size: 13px; }
+.manager-score-preview small { color: var(--primary-strong); font-size: 11px; font-weight: 750; }
+.manager-setting-hint { margin: 0; padding: 0 16px 16px; color: var(--wb-muted); font-size: 11px; }
+
+.manager-settings-save {
+  padding: 0 0 16px;
+  background: var(--wb-surface);
+  border: 1px solid var(--primary-border);
+  border-radius: 12px;
+}
+
+.manager-settings-save button {
+  min-height: 48px;
+  margin: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--primary);
+  color: #fff;
+  background: var(--primary);
+}
+
+.manager-settings-save button:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
+.manager-settings-save button:active:not(:disabled) { background: var(--primary-strong); transform: translateY(1px); }
+.manager-settings-save button:disabled { opacity: .5; }
+.manager-settings-save button svg { width: 18px; }
+
+@media (max-width: 640px) {
+  .manager-settings-page { gap: 12px; }
+  .manager-settings-heading { align-items: center; }
+  .manager-settings-heading h1 { font-size: 26px; }
+  .manager-settings-section > header { grid-template-columns: 36px minmax(0, 1fr); }
+  .manager-settings-section > header > strong { grid-column: 2; justify-self: start; }
+  .manager-settings-section header p { max-width: 250px; }
+  .manager-settings-save button { width: calc(100% - 32px); }
+}

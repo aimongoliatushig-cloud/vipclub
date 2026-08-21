@@ -1,0 +1,673 @@
+.rank-page {
+  max-width: 920px;
+}
+
+.rank-overview {
+  width: 100%;
+  margin: 0 auto;
+  padding-bottom: 16px;
+  color: var(--wb-ink, var(--ink));
+}
+
+.rank-page-heading {
+  position: relative;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rank-page-heading > div > span,
+.rank-summary-primary small,
+.rank-next-step small {
+  color: var(--primary-strong);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+.rank-page-heading h1 {
+  margin: 4px 0 0;
+  font-size: clamp(24px, 4vw, 32px);
+  letter-spacing: -.035em;
+  line-height: 1.15;
+}
+
+.rank-rules-popover {
+  position: relative;
+  z-index: 8;
+}
+
+.rank-rules-popover > button {
+  min-height: 44px;
+  padding: 0 14px;
+  border: 1px solid var(--wb-border, var(--border));
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--primary-strong);
+  background: var(--wb-surface, var(--surface));
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.rank-rules-popover > button:hover {
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+
+.rank-rules-popover > button:focus-visible,
+.rank-disclosure > summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--focus-ring) 42%, transparent);
+  outline-offset: 2px;
+}
+
+.rank-rules-popover > button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.rank-rules-popover > div {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  width: min(340px, calc(100vw - 32px));
+  padding: 16px;
+  border: 1px solid var(--wb-border, var(--border));
+  border-radius: 14px;
+  background: var(--wb-surface, var(--surface));
+  box-shadow: 0 16px 36px rgb(30 41 59 / 14%);
+}
+
+.rank-rules-popover h2 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.rank-rules-popover ul {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rank-rules-popover li {
+  min-height: 58px;
+  border-top: 1px solid var(--wb-border, var(--border));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rank-rules-popover li > span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rank-rules-popover li strong,
+.rank-rules-popover li b {
+  font-size: 12px;
+}
+
+.rank-rules-popover li small,
+.rank-rules-popover p {
+  color: var(--wb-muted, var(--muted));
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.rank-rules-popover li b {
+  color: var(--primary-strong);
+}
+
+.rank-rules-popover p {
+  margin: 12px 0 0;
+}
+
+.rank-summary-card,
+.rank-income-comparison,
+.rank-disclosures {
+  border: 1px solid var(--wb-border, var(--border));
+  border-radius: 16px;
+  background: var(--wb-surface, var(--surface));
+  box-shadow: 0 8px 24px rgb(30 41 59 / 7%);
+}
+
+.rank-summary-card {
+  padding: 24px;
+}
+
+.rank-summary-primary {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.rank-summary-crest {
+  width: 104px;
+  height: 104px;
+  flex: 0 0 auto;
+  border: 1px solid var(--primary-border);
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: var(--primary-soft);
+}
+
+.rank-summary-crest .rank-crest {
+  width: 96px;
+  height: 96px;
+}
+
+.rank-summary-primary > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.rank-summary-primary strong {
+  margin-top: 3px;
+  font-size: clamp(32px, 7vw, 48px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.045em;
+  line-height: 1.05;
+}
+
+.rank-summary-primary em {
+  color: var(--wb-muted, var(--muted));
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 650;
+  letter-spacing: 0;
+}
+
+.rank-summary-primary > div > span {
+  margin-top: 6px;
+  color: var(--wb-muted, var(--muted));
+  font-size: 11px;
+}
+
+.rank-incomplete {
+  margin-top: 20px;
+  padding: 14px;
+  border: 1px solid var(--primary-border);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--primary-soft);
+}
+
+.rank-incomplete > svg {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 auto;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: var(--primary-strong);
+  background: var(--wb-surface, var(--surface));
+}
+
+.rank-incomplete > span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rank-incomplete strong {
+  font-size: 15px;
+}
+
+.rank-incomplete small {
+  margin: 0;
+  color: var(--wb-muted, var(--muted));
+  font-size: 10px;
+}
+
+.rank-incomplete {
+  border-color: var(--wb-border, var(--border));
+  background: var(--wb-surface-subtle, #f8fafb);
+}
+
+.rank-next-target {
+  min-height: 44px;
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--wb-border, var(--border));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 11px;
+}
+
+.rank-next-target span {
+  color: var(--wb-muted, var(--muted));
+}
+
+.rank-next-target strong {
+  text-align: right;
+}
+
+.rank-income-comparison {
+  margin-top: 16px;
+  padding: 20px;
+}
+
+.rank-income-comparison header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rank-income-period-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.rank-income-period-actions button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--primary-border);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--wb-surface, var(--surface));
+  color: var(--primary-strong);
+  cursor: pointer;
+}
+
+.rank-income-period-actions button:hover:not(:disabled) {
+  background: var(--primary-soft);
+}
+
+.rank-income-period-actions button:active:not(:disabled) {
+  background: var(--primary-border);
+}
+
+.rank-income-period-actions button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.rank-income-period-actions button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.rank-income-period-actions svg {
+  width: 18px;
+  height: 18px;
+}
+
+.rank-income-comparison header small {
+  color: var(--primary-strong);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.rank-income-comparison h2 {
+  margin: 4px 0 0;
+  font-size: 18px;
+  letter-spacing: -.02em;
+}
+
+.rank-income-comparison dl {
+  margin: 16px 0 0;
+  border: 1px solid var(--wb-border, var(--border));
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  overflow: hidden;
+}
+
+.rank-income-comparison dl > div {
+  min-width: 0;
+  padding: 14px;
+}
+
+.rank-income-comparison dl > div + div {
+  border-left: 1px solid var(--wb-border, var(--border));
+}
+
+.rank-income-comparison dt,
+.rank-income-comparison dl small,
+.rank-income-note,
+.rank-income-empty p,
+.rank-income-empty span {
+  color: var(--wb-muted, var(--muted));
+  font-size: 10px;
+}
+
+.rank-income-comparison dd {
+  margin: 5px 0 3px;
+  color: var(--wb-ink, var(--ink));
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rank-income-comparison .is-scenario dd {
+  color: var(--primary-strong);
+}
+
+.rank-income-delta {
+  min-height: 44px;
+  margin: 0;
+  padding: 12px 2px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.rank-income-delta strong {
+  color: var(--primary-strong);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rank-income-note {
+  margin: 6px 0 0;
+}
+
+.rank-income-status {
+  min-height: 16px;
+  margin: 8px 0 0;
+  color: var(--wb-muted, var(--muted));
+  font-size: 11px;
+}
+
+.rank-income-status.is-error {
+  color: var(--wb-danger, #b42318);
+}
+
+.rank-income-empty {
+  margin-top: 16px;
+  padding: 14px;
+  border: 1px solid var(--wb-border, var(--border));
+  border-radius: 12px;
+  background: var(--wb-surface-subtle, #f8fafb);
+}
+
+.rank-income-empty strong {
+  font-size: 13px;
+}
+
+.rank-income-empty p {
+  margin: 4px 0 0;
+}
+
+.rank-income-empty span {
+  display: block;
+  margin-top: 10px;
+}
+
+.rank-incomplete > svg {
+  padding: 10px;
+  color: var(--wb-warning, #b54708);
+}
+
+.rank-disclosures {
+  margin-top: 16px;
+  overflow: hidden;
+}
+
+.rank-disclosure {
+  border-top: 1px solid var(--wb-border, var(--border));
+}
+
+.rank-disclosure:first-child {
+  border-top: 0;
+}
+
+.rank-disclosure > summary {
+  min-height: 68px;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  list-style: none;
+  cursor: pointer;
+}
+
+.rank-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+.rank-disclosure > summary:hover {
+  background: var(--wb-surface-subtle, #f8fafb);
+}
+
+.rank-disclosure > summary > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rank-disclosure > summary strong {
+  font-size: 13px;
+}
+
+.rank-disclosure > summary small {
+  color: var(--wb-muted, var(--muted));
+  font-size: 10px;
+}
+
+.rank-disclosure > summary > svg {
+  width: 18px;
+  color: var(--wb-muted, var(--muted));
+  transition: transform .18s ease;
+}
+
+.rank-disclosure[open] > summary {
+  border-bottom: 1px solid var(--wb-border, var(--border));
+}
+
+.rank-disclosure[open] > summary > svg {
+  transform: rotate(180deg);
+}
+
+.rank-component-list,
+.rank-history-list {
+  padding: 0 18px 14px;
+}
+
+.rank-component-list article {
+  min-height: 78px;
+  border-top: 1px solid var(--wb-border, var(--border));
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.rank-component-list article:first-child,
+.rank-history-list article:first-child {
+  border-top: 0;
+}
+
+.rank-component-state {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--wb-muted, var(--muted));
+  background: var(--wb-surface-muted, #e7eaf0);
+}
+
+.rank-component-state.verified {
+  color: var(--wb-success, var(--success));
+  background: var(--wb-success-soft, #edf8f2);
+}
+
+.rank-component-state svg {
+  width: 15px;
+  height: 15px;
+}
+
+.rank-component-list article > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rank-component-list article > div strong {
+  font-size: 11px;
+}
+
+.rank-component-list article > div small {
+  overflow: hidden;
+  color: var(--wb-muted, var(--muted));
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rank-component-score {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.rank-history-list article {
+  min-height: 70px;
+  border-top: 1px solid var(--wb-border, var(--border));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.rank-history-list time {
+  font-size: 11px;
+  font-weight: 750;
+}
+
+.rank-history-list article > span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.rank-history-list strong {
+  font-size: 11px;
+}
+
+.rank-history-list article > span {
+  color: var(--wb-muted, var(--muted));
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.rank-history-list > p {
+  margin: 0;
+  padding: 20px 0 8px;
+  color: var(--wb-muted, var(--muted));
+  font-size: 11px;
+}
+
+@media (max-width: 700px) {
+  .rank-page-heading {
+    align-items: center;
+  }
+
+  .rank-summary-card {
+    padding: 16px;
+  }
+
+  .rank-summary-primary {
+    gap: 14px;
+  }
+
+  .rank-summary-crest {
+    width: 84px;
+    height: 84px;
+    border-radius: 14px;
+  }
+
+  .rank-summary-crest .rank-crest {
+    width: 80px;
+    height: 80px;
+  }
+
+  .rank-summary-primary strong {
+    font-size: 34px;
+  }
+
+  .rank-rules-popover > div {
+    position: fixed;
+    top: 76px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+
+  .rank-component-list article {
+    padding: 14px 0;
+    grid-template-columns: 32px minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .rank-history-list article {
+    padding: 14px 0;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+}
+
+@media (max-width: 390px) {
+  .rank-page-heading h1 {
+    font-size: 23px;
+  }
+
+  .rank-rules-popover > button {
+    padding-inline: 11px;
+  }
+
+  .rank-summary-primary strong {
+    font-size: 30px;
+  }
+
+  .rank-summary-crest {
+    width: 76px;
+    height: 76px;
+  }
+
+  .rank-summary-crest .rank-crest {
+    width: 72px;
+    height: 72px;
+  }
+
+  .rank-income-comparison {
+    padding: 16px;
+  }
+
+  .rank-income-comparison dl {
+    grid-template-columns: 1fr;
+  }
+
+  .rank-income-comparison dl > div + div {
+    border-top: 1px solid var(--wb-border, var(--border));
+    border-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rank-disclosure > summary > svg {
+    transition: none;
+  }
+}

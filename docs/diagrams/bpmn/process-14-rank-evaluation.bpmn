@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_process-14-rank-evaluation" targetNamespace="https://vipclub.example/bpmn">
+  <bpmn:process id="process-14-rank-evaluation" name="Entertainer Rank Evaluation" isExecutable="false">
+    <bpmn:StartEvent id="process-14-rank-evaluation_start" name="Start" />
+    <bpmn:Task id="process-14-rank-evaluation_task1" name="Collect verified performance events" />
+    <bpmn:Task id="process-14-rank-evaluation_task2" name="Apply rank policy and gates" />
+    <bpmn:Task id="process-14-rank-evaluation_task3" name="Calculate weighted score" />
+    <bpmn:Task id="process-14-rank-evaluation_task4" name="Review proposed rank change" />
+    <bpmn:Task id="process-14-rank-evaluation_task5" name="Record rank history and benefits" />
+    <bpmn:EndEvent id="process-14-rank-evaluation_end" name="Complete" />
+    <bpmn:sequenceFlow id="process-14-rank-evaluation_flow1" sourceRef="process-14-rank-evaluation_start" targetRef="process-14-rank-evaluation_task1" />
+    <bpmn:sequenceFlow id="process-14-rank-evaluation_flow2" sourceRef="process-14-rank-evaluation_task1" targetRef="process-14-rank-evaluation_task2" />
+    <bpmn:sequenceFlow id="process-14-rank-evaluation_flow3" sourceRef="process-14-rank-evaluation_task2" targetRef="process-14-rank-evaluation_task3" />
+    <bpmn:sequenceFlow id="process-14-rank-evaluation_flow4" sourceRef="process-14-rank-evaluation_task3" targetRef="process-14-rank-evaluation_task4" />
+    <bpmn:sequenceFlow id="process-14-rank-evaluation_flow5" sourceRef="process-14-rank-evaluation_task4" targetRef="process-14-rank-evaluation_task5" />
+    <bpmn:sequenceFlow id="process-14-rank-evaluation_flow6" sourceRef="process-14-rank-evaluation_task5" targetRef="process-14-rank-evaluation_end" />
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="process-14-rank-evaluation_diagram"><bpmndi:BPMNPlane id="process-14-rank-evaluation_plane" bpmnElement="process-14-rank-evaluation">
+      <bpmndi:BPMNShape id="process-14-rank-evaluation_start_di" bpmnElement="process-14-rank-evaluation_start"><dc:Bounds x="80" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-14-rank-evaluation_task1_di" bpmnElement="process-14-rank-evaluation_task1"><dc:Bounds x="265" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-14-rank-evaluation_task2_di" bpmnElement="process-14-rank-evaluation_task2"><dc:Bounds x="450" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-14-rank-evaluation_task3_di" bpmnElement="process-14-rank-evaluation_task3"><dc:Bounds x="635" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-14-rank-evaluation_task4_di" bpmnElement="process-14-rank-evaluation_task4"><dc:Bounds x="820" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-14-rank-evaluation_task5_di" bpmnElement="process-14-rank-evaluation_task5"><dc:Bounds x="1005" y="120" width="140" height="80" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="process-14-rank-evaluation_end_di" bpmnElement="process-14-rank-evaluation_end"><dc:Bounds x="1190" y="120" width="36" height="36" /></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="process-14-rank-evaluation_flow1_di" bpmnElement="process-14-rank-evaluation_flow1"><di:waypoint x="116" y="138" /><di:waypoint x="265" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-14-rank-evaluation_flow2_di" bpmnElement="process-14-rank-evaluation_flow2"><di:waypoint x="405" y="138" /><di:waypoint x="450" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-14-rank-evaluation_flow3_di" bpmnElement="process-14-rank-evaluation_flow3"><di:waypoint x="590" y="138" /><di:waypoint x="635" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-14-rank-evaluation_flow4_di" bpmnElement="process-14-rank-evaluation_flow4"><di:waypoint x="775" y="138" /><di:waypoint x="820" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-14-rank-evaluation_flow5_di" bpmnElement="process-14-rank-evaluation_flow5"><di:waypoint x="960" y="138" /><di:waypoint x="1005" y="138" /></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="process-14-rank-evaluation_flow6_di" bpmnElement="process-14-rank-evaluation_flow6"><di:waypoint x="1145" y="138" /><di:waypoint x="1190" y="138" /></bpmndi:BPMNEdge>
+  </bpmndi:BPMNPlane></bpmndi:BPMNDiagram>
+</bpmn:definitions>

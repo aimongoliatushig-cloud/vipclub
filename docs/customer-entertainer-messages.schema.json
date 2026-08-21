@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://vipclub.example/schemas/customer-entertainer-messages.schema.json",
+  "title": "Customer Portal Entertainer Complaint or Praise",
+  "description": "Identified customer feedback submitted from a VIP-room experience into the shared management message center.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "messageId",
+    "sourceType",
+    "customerId",
+    "vipRoomId",
+    "experienceContext",
+    "selectedEntertainerId",
+    "branchId",
+    "messageType",
+    "text",
+    "sourcePortal",
+    "createdAt",
+    "deliveryStates",
+    "readStates",
+    "reviewStatus",
+    "routing",
+    "auditHistory"
+  ],
+  "properties": {
+    "messageId": {"type": "string", "minLength": 1},
+    "sourceType": {"const": "customer_portal"},
+    "customerId": {"type": "string", "minLength": 1},
+    "vipRoomId": {"type": "string", "minLength": 1},
+    "experienceContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "visitId": {"type": "string", "minLength": 1},
+        "reservationId": {"type": "string", "minLength": 1},
+        "sessionId": {"type": "string", "minLength": 1}
+      },
+      "anyOf": [
+        {"required": ["visitId"]},
+        {"required": ["reservationId"]},
+        {"required": ["sessionId"]}
+      ]
+    },
+    "selectedEntertainerId": {"type": "string", "minLength": 1},
+    "branchId": {"type": "string", "minLength": 1},
+    "messageType": {"enum": ["complaint", "praise"]},
+    "text": {"type": "string", "minLength": 1},
+    "sourcePortal": {"const": "customer_helper_portal"},
+    "createdAt": {"type": "string", "format": "date-time"},
+    "deliveryStates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["audienceType", "recipientId", "state", "updatedAt"],
+        "properties": {
+          "audienceType": {"enum": ["ceo", "authorized_branch_manager", "praised_entertainer"]},
+          "recipientId": {"type": "string", "minLength": 1},
+          "state": {"enum": ["pending", "delivered", "failed"]},
+          "updatedAt": {"type": "string", "format": "date-time"}
+        }
+      }
+    },
+    "readStates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["audienceType", "recipientId", "state"],
+        "properties": {
+          "audienceType": {"enum": ["ceo", "authorized_branch_manager", "praised_entertainer"]},
+          "recipientId": {"type": "string", "minLength": 1},
+          "state": {"enum": ["unread", "read"]},
+          "readAt": {"type": ["string", "null"], "format": "date-time"}
+        }
+      }
+    },
+    "reviewStatus": {"type": "string", "minLength": 1},
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "managerBranchId",
+        "ceoCompanyWideAccess",
+        "entertainerCanView",
+        "automaticRankingImpact",
+        "managementCustomerIdentityAccess",
+        "entertainerCustomerContextPolicy"
+      ],
+      "properties": {
+        "managerBranchId": {"type": "string", "minLength": 1},
+        "ceoCompanyWideAccess": {"const": true},
+        "entertainerCanView": {"type": "boolean"},
+        "automaticRankingImpact": {"const": false},
+        "managementCustomerIdentityAccess": {"const": "authorized_unmasked_or_policy_masked"},
+        "entertainerCustomerContextPolicy": {"const": "field_level_policy_required"}
+      }
+    },
+    "customerComplaintEvidenceReviewReference": {"type": ["string", "null"]},
+    "auditHistory": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["actorId", "action", "timestamp"],
+        "properties": {
+          "actorId": {"type": "string", "minLength": 1},
+          "action": {"type": "string", "minLength": 1},
+          "timestamp": {"type": "string", "format": "date-time"}
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"messageType": {"const": "complaint"}}},
+      "then": {
+        "properties": {
+          "routing": {"properties": {"entertainerCanView": {"const": false}}},
+          "deliveryStates": {
+            "items": {
+              "properties": {
+                "audienceType": {"enum": ["ceo", "authorized_branch_manager"]}
+              }
+            }
+          },
+          "readStates": {
+            "items": {
+              "properties": {
+                "audienceType": {"enum": ["ceo", "authorized_branch_manager"]}
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"messageType": {"const": "praise"}}},
+      "then": {
+        "properties": {
+          "routing": {"properties": {"entertainerCanView": {"const": true}}}
+        }
+      }
+    }
+  ],
+  "x-routing-rules": [
+    "Submission requires an authenticated identified customer; anonymous submission is not allowed.",
+    "vipRoomId and at least one applicable visitId, reservationId, or sessionId are required.",
+    "The server validates the selected entertainer and derives branch routing from the room/experience context.",
+    "Customer complaints are visible only to the CEO and managers authorized for managerBranchId; the named entertainer receives no delivery or view.",
+    "Customer praise is delivered to the selected entertainer and is also visible to the CEO and relevant authorized branch managers.",
+    "Customer and VIP-room fields shown to the praised entertainer are filtered by an approved field-level policy; authorized management retains scoped oversight.",
+    "The shared management center always distinguishes sourceType customer_portal from employee-submitted internal_team messages.",
+    "Submission has no automatic ranking impact. A complaint is potential customer-complaints evidence only after approved verification/review and normalization. Praise has no ranking effect unless separately approved."
+  ],
+  "x-open-policy-decisions": [
+    "exact customer and VIP-room fields visible to a praised entertainer",
+    "customer-message retention and escalation/appeal workflow"
+  ]
+}

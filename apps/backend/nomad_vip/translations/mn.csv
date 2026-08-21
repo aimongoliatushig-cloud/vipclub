@@ -1,0 +1,142 @@
+Search,Хайх
+Notification,Мэдэгдэл
+Home,Нүүр
+Lead,Сонирхогч
+Leads,Сонирхогчид
+Opportunity,Борлуулалтын боломж
+Opportunities,Борлуулалтын боломжууд
+Customer,Хэрэглэгч
+Customers,Хэрэглэгчид
+Reports,Тайлангууд
+Sales Analytics,Борлуулалтын шинжилгээ
+Lead Details,Сонирхогчийн дэлгэрэнгүй
+Sales Pipeline Analytics,Борлуулалтын явцын шинжилгээ
+Opportunity Summary by Sales Stage,Борлуулалтын үе шатны хураангуй
+Sales Funnel,Борлуулалтын шатлал
+First Response Time for Opportunity,Боломжид анх хариулсан хугацаа
+Campaign Efficiency,Кампанит ажлын үр ашиг
+Lead Owner Efficiency,Сонирхогч хариуцагчийн үр ашиг
+Maintenance,Тохиргоо
+Sales Pipeline,Борлуулалтын явц
+Contract,Гэрээ
+Appointment,Уулзалт
+Communication,Харилцаа
+Switch To Frappe CRM,Frappe CRM рүү шилжих
+Actions,Үйлдэл
+Status,Төлөв
+Territory,Бүс нутаг
+Nothing to show,Харуулах мэдээлэл алга
+Execution Time,Гүйцэтгэсэн хугацаа
+Company,Компани
+From Date,Эхлэх огноо
+To Date,Дуусах огноо
+Refresh,Шинэчлэх
+Add Customer,Хэрэглэгч нэмэх
+New Customer,Шинэ хэрэглэгч
+Customer Name,Хэрэглэгчийн нэр
+Customer Type,Хэрэглэгчийн төрөл
+Customer Group,Хэрэглэгчийн бүлэг
+Mobile No,Утасны дугаар
+Email Id,Имэйл
+Primary Contact,Үндсэн холбоо барих хүн
+Primary Address,Үндсэн хаяг
+Disabled,Идэвхгүй
+Save,Хадгалах
+Cancel,Цуцлах
+Delete,Устгах
+Edit,Засах
+Filter,Шүүлтүүр
+Filters,Шүүлтүүрүүд
+Sort,Эрэмбэлэх
+Name,Нэр
+Created On,Үүсгэсэн огноо
+Modified On,Өөрчилсөн огноо
+Finex CRM,Finex хэрэглэгчийн мэдээлэл
+Finex Client ID,Finex хэрэглэгчийн ID
+Finex Phone,Finex утас
+Finex Email,Finex имэйл
+Finex Gender,Хүйс
+Primary Finex Store ID,Үндсэн салбарын Finex ID
+Primary Branch,Үндсэн салбар
+Visited Branches,Үйлчлүүлсэн салбарууд
+Visit Count,Үйлчлүүлсэн давтамж
+Bill Count,Баримтын тоо
+Total Spend,Нийт зарцуулалт
+Average Bill,Дундаж баримтын дүн
+First Visit,Анх үйлчлүүлсэн огноо
+Last Visit,Сүүлд үйлчлүүлсэн огноо
+VIP POS Bill,VIP POS баримт
+Finex Bill ID,Finex баримтын ID
+Bill Code,Баримтын код
+Posting Date,Огноо
+Store and Customer,Салбар ба хэрэглэгч
+Finex Store ID,Finex салбарын ID
+Store Name,Салбарын нэр
+Bill Type,Баримтын төрөл
+Is Paid,Төлөгдсөн
+Opened At,Нээсэн огноо
+Closed At,Хаасан огноо
+Amounts,Дүнгийн мэдээлэл
+Subtotal,Завсрын дүн
+Tax Amount,Татварын дүн
+Discount Amount,Хөнгөлөлтийн дүн
+Total Amount,Нийт дүн
+Source Payload,Эх өгөгдөл
+Raw Finex Payload,Finex эх өгөгдөл
+Last Synced At,Сүүлд шинэчилсэн
+VIP Customer Intelligence,VIP хэрэглэгчийн шинжилгээ
+Minimum Spend,Доод зарцуулалт
+Minimum Visits,Доод ирэлтийн тоо
+Phone,Утас
+Days Since Last Visit,Сүүлд ирснээс хойших хоног
+Active in Last 30 Days,Сүүлийн 30 хоногт идэвхтэй
+Average Spend per Customer,Нэг хэрэглэгчийн дундаж зарцуулалт
+From Date cannot be after To Date,Эхлэх огноо дуусах огнооноос хойш байж болохгүй
+VIP Membership Rank,VIP гишүүнчлэлийн зэрэглэл
+VIP Customer Detail,VIP хэрэглэгчийн дэлгэрэнгүй
+Unassigned,Тодорхойгүй
+Loading VIP customer detail...,VIP хэрэглэгчийн мэдээллийг ачаалж байна...
+Entertainer History,Бүжигчний түүх
+Entertainer,Бүжигчин
+Bartender,Бармен
+Server,Зөөгч
+Nickname,Тайзны нэр
+Service Count,Үйлчилгээний тоо
+Attributed Spend,Холбогдох зарцуулалт
+Service Preferences,Үйлчилгээний сонголт
+Service,Үйлчилгээ
+Quantity,Тоо ширхэг
+Recent Bills,Сүүлийн баримтууд
+Date,Огноо
+Branch,Салбар
+Amount,Дүн
+No entertainer history,Бүжигчний түүх байхгүй
+No service history,Үйлчилгээний түүх байхгүй
+No bill history,Баримтын түүх байхгүй
+Unknown,Тодорхойгүй
+Unknown Service,Тодорхойгүй үйлчилгээ
+Unknown Entertainer,Тодорхойгүй бүжигчин
+VIP Customer Branch Profile,VIP хэрэглэгчийн салбарын профайл
+VIP Rank by Branch,Салбар тус бүрийн VIP зэрэглэл
+Branch Metrics,Салбарын үзүүлэлт
+Finex Source,Finex эх үүсвэр
+No branch profiles,Салбарын профайл алга
+A branch profile already exists for this customer and branch,Энэ хэрэглэгчийн энэ салбарын профайл аль хэдийн үүссэн байна
+VIP Reception,VIP үүдний бүртгэл
+Find VIP customer,VIP хэрэглэгч хайх
+Enter the customer's 8-digit phone number,Хэрэглэгчийн 8 оронтой утасны дугаарыг оруулна уу
+Search,Хайх
+Searching...,Хайж байна...
+New search,Дахин хайх
+Customer not found,Хэрэглэгч олдсонгүй
+Register the new customer below,Шинэ хэрэглэгчийн мэдээллийг доор бүртгэнэ үү
+Register Customer,Хэрэглэгч бүртгэх
+Registering customer...,Хэрэглэгчийг бүртгэж байна...
+Customer registered,Хэрэглэгч амжилттай бүртгэгдлээ
+Customer already exists,Хэрэглэгч аль хэдийн бүртгэлтэй байна
+Customer name is required,Хэрэглэгчийн нэрийг оруулна уу
+Enter a valid 8-digit phone number,Зөв 8 оронтой утасны дугаар оруулна уу
+Branch customer information,Салбарын хэрэглэгчийн мэдээлэл
+Your user is not assigned to a branch,Таны хэрэглэгчид салбар оноогоогүй байна
+You cannot view another branch's customer information,Та өөр салбарын хэрэглэгчийн мэдээллийг харах боломжгүй
+You are not allowed to use VIP Reception,Та VIP үүдний бүртгэл ашиглах эрхгүй байна

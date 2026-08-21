@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "hash",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "entertainer",
+  "employee",
+  "branch",
+  "effective_from",
+  "effective_to",
+  "assignment_status",
+  "reason",
+  "audit_section",
+  "assigned_by",
+  "assigned_at",
+  "allow_overlap"
+ ],
+ "fields": [
+  {"fieldname":"entertainer","fieldtype":"Link","label":"Entertainer","options":"VIP Entertainer Profile","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"employee","fieldtype":"Link","label":"Employee","options":"Employee","read_only":1,"in_standard_filter":1},
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"effective_from","fieldtype":"Date","label":"Effective From","reqd":1,"in_list_view":1},
+  {"fieldname":"effective_to","fieldtype":"Date","label":"Effective To","in_list_view":1},
+  {"fieldname":"assignment_status","fieldtype":"Select","label":"Status","options":"Planned\nActive\nEnded\nCancelled","default":"Active","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"reason","fieldtype":"Small Text","label":"Reason"},
+  {"fieldname":"audit_section","fieldtype":"Section Break","label":"Audit"},
+  {"fieldname":"assigned_by","fieldtype":"Link","label":"Assigned By","options":"User","read_only":1},
+  {"fieldname":"assigned_at","fieldtype":"Datetime","label":"Assigned At","read_only":1},
+  {"fieldname":"allow_overlap","fieldtype":"Check","label":"Allow Overlap","default":"0","permlevel":1,"description":"Exceptional override restricted to authorized administrators."}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Entertainer Branch Assignment",
+ "naming_rule": "Random",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1,"print":1},
+  {"role":"HR Manager","read":1,"write":1,"create":1,"report":1,"export":1},
+  {"role":"Branch Manager","read":1,"write":1,"create":1,"report":1},
+  {"role":"Entertainer Supervisor","read":1,"report":1},
+  {"role":"Entertainer","read":1},
+  {"role":"CEO","read":1,"report":1,"export":1},
+  {"role":"System Manager","permlevel":1,"read":1,"write":1,"create":1},
+  {"role":"HR Manager","permlevel":1,"read":1,"write":1,"create":1}
+ ],
+ "sort_field": "effective_from",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

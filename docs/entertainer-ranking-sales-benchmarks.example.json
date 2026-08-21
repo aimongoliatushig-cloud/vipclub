@@ -1,0 +1,19 @@
+{
+  "illustrativeOnly": true,
+  "completeConfiguration": false,
+  "warning": "This is only the user's January Level 1 illustration. It is not a universal benchmark and is not valid as a complete twelve-month branch configuration.",
+  "currency": "MNT",
+  "calendarMonth": 1,
+  "rankLevel": "level_1",
+  "minimum": 8000000,
+  "maximum": 10000000,
+  "omittedByDesign": [
+    "branchId",
+    "calendarYear",
+    "effective period",
+    "remaining months",
+    "Level 2 and Level 3 ranges",
+    "Rookie handling",
+    "actor and audit metadata"
+  ]
+}

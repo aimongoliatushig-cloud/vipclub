@@ -1,0 +1,29 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:unique_key",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["unique_key", "branch", "target_month", "full_score_amount", "reason", "updated_by", "updated_at"],
+ "fields": [
+  {"fieldname":"unique_key","fieldtype":"Data","label":"Давхардлын түлхүүр","reqd":1,"unique":1,"read_only":1,"hidden":1,"no_copy":1},
+  {"fieldname":"branch","fieldtype":"Link","label":"Салбар","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"target_month","fieldtype":"Date","label":"Тохируулах сар","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"full_score_amount","fieldtype":"Currency","label":"Өдрийн бүтэн онооны босго","reqd":1,"precision":"0","in_list_view":1},
+  {"fieldname":"reason","fieldtype":"Small Text","label":"Өөрчилсөн шалтгаан","reqd":1},
+  {"fieldname":"updated_by","fieldtype":"Link","label":"Шинэчилсэн","options":"User","read_only":1},
+  {"fieldname":"updated_at","fieldtype":"Datetime","label":"Шинэчилсэн огноо","read_only":1}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Monthly Rank Sales Target",
+ "naming_rule": "By fieldname",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1},
+  {"role":"VIP Admin","read":1,"write":1,"create":1,"report":1}
+ ],
+ "sort_field": "target_month",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

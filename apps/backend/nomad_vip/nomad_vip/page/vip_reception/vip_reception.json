@@ -1,0 +1,13 @@
+{
+ "content": null,
+ "doctype": "Page",
+ "module": "NOMAD VIP",
+ "name": "vip-reception",
+ "page_name": "vip-reception",
+ "roles": [
+  {"role": "System Manager"}
+ ],
+ "standard": "Yes",
+ "system_page": 0,
+ "title": "VIP Reception"
+}

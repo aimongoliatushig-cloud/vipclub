@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Manager ban UI QA</title>
+    <script>
+      (() => {
+        const originalFetch = window.fetch.bind(window)
+        const entry = { name: 'ENTRY-BAN-QA', customer: 'CUST-BAN-QA', customer_name: 'Бат-Эрдэнэ', membership_rank: 'Gold', guard_user: 'guard.qa@vipclub.local', guard_name: 'Хамгаалагч QA', entered_at: '2026-08-17 21:10:00', visit_type: 'Returning', visit_number: 18, manager_acknowledged: 1 }
+        const latestBill = {
+          name: 'VIP-BILL-QA-0192', bill_code: 'NB-260817-0192', posting_date: '2026-08-12',
+          open_date: '2026-08-12 22:15:00', closed_date: '2026-08-13 01:05:00', duration_minutes: 170,
+          store_name: 'Nomad', total_amount: 1285000, bill_type: 1, is_paid: 1,
+          rooms: [{ name: 'VIP 03 өрөө', hours: 3 }],
+          items: [
+            { name: 'VIP 03 өрөө', quantity: 3, total: 450000, is_paid_service: 1, is_room: true, is_hour_service: true, dancers: [] },
+            { name: 'Бүжигчний үйлчилгээ', quantity: 2, total: 600000, is_paid_service: 1, is_room: false, is_hour_service: true, dancers: [{ name: 'Сарнай', nickname: 'Сарнай', hours: 2 }] },
+            { name: 'Premium set', quantity: 1, total: 235000, is_paid_service: 0, is_room: false, is_hour_service: false, dancers: [] },
+          ],
+        }
+        let currentBanned = false
+        const detail = () => ({
+          customer: { name: 'CUST-BAN-QA', customer_name: 'Бат-Эрдэнэ', phone: '99112233', visit_count: 18, bill_count: 12, total_spend: 19524667, average_bill: 1627056, first_visit: '2025-12-10', last_visit: '2026-08-17', primary_branch: 'Nomad' },
+          scope_branch: 'Nomad',
+          branch_profiles: [{ branch: 'Nomad', membership_rank: 'Gold', manual_rank: null, is_banned: currentBanned ? 1 : 0, ban_reason: currentBanned ? 'Nomad салбарын менежерийн QA хориг' : null, banned_by: currentBanned ? 'manager.nomad@vipclub.local' : null, banned_at: currentBanned ? '2026-08-17 21:25:00' : null, visit_count: 18, bill_count: 12, total_spend: 19524667, average_bill: 1627056, last_visit: '2026-08-17' }],
+          branch_ban_notices: [
+            { branch: 'Monarch', ban_reason: 'Үйлчилгээний журам давтан зөрчсөн', banned_by: 'manager.monarch@vipclub.local', banned_at: '2026-08-15 23:40:00' },
+            ...(currentBanned ? [{ branch: 'Nomad', ban_reason: 'Nomad салбарын менежерийн QA хориг', banned_by: 'manager.nomad@vipclub.local', banned_at: '2026-08-17 21:25:00' }] : []),
+          ],
+          dancers: [], services: [], recent_bills: [], next_visit_number: 19, reservations: [],
+        })
+        const payload = (message, status = 200) => Promise.resolve(new Response(JSON.stringify({ message }), { status, headers: { 'Content-Type': 'application/json' } }))
+        window.fetch = (input, init = {}) => {
+          const requestUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+          const url = new URL(requestUrl, location.origin)
+          if (!url.pathname.includes('/method/')) return originalFetch(input, init)
+          const method = decodeURIComponent(url.pathname.split('/method/')[1] || '')
+          if (method.endsWith('entry.get_context')) return payload({ user: 'manager.nomad@vipclub.local', full_name: 'Nomad менежер', branch: 'Nomad', branches: ['Nomad'], mode: 'manager', entry_access_required: true })
+          if (method.endsWith('entry.get_feed')) return payload({ branch: 'Nomad', work_date: '2026-08-17', window_start: '2026-08-17 12:00:00', window_end: '2026-08-18 12:00:00', entries: [entry], pending_reservations: [], today_total: 1, today_new: 0, unread: 0 })
+          if (method.endsWith('entry.get_entry_summary')) return payload({
+            entry: { name: entry.name, customer: entry.customer, customer_name: entry.customer_name, entered_at: entry.entered_at, visit_number: entry.visit_number, guard_name: entry.guard_name },
+            phone: '99112233', visit_count: 18, membership_rank: 'Gold', average_bill: 1627056,
+            latest_bill: latestBill,
+            reservation: { name: 'VIP-RES-QA-001', customer: entry.customer, customer_name: entry.customer_name, phone: '99112233', expected_at: '2026-08-17 21:00:00', party_size: 4, order_details: 'VIP 03 өрөө\nСарнай бүжигчин\nPremium set', order_items: ['VIP 03 өрөө', 'Сарнай бүжигчин', 'Premium set'], notes: 'Төрсөн өдрийн зочин', status: 'Arrived', arrived_at: entry.entered_at, entry_event: entry.name },
+            entertainers: [{ dancer_id: 'D-003', name: 'Сарнай', nickname: 'Сарнай', service_count: 7, bill_count: 5 }],
+            top_entertainer: { dancer_id: 'D-003', name: 'Сарнай', nickname: 'Сарнай', service_count: 7, bill_count: 5 },
+          })
+          if (method.endsWith('entry.acknowledge_entry')) return payload({ ok: true })
+          if (method.endsWith('entry.search_customer_for_manager')) {
+            const phone = url.searchParams.get('phone') || ''
+            if (phone === '99999999') return payload('Хайлт түр боломжгүй байна', 500)
+            return phone === '99112233'
+              ? payload({ found: true, branch: 'Nomad', phone: '99112233', detail: detail() })
+              : payload({ found: false, branch: 'Nomad', phone })
+          }
+          if (method.endsWith('entry.get_customer_detail_for_entry')) return payload(detail())
+          if (method.endsWith('entry.set_customer_ban_for_entry')) { currentBanned = true; return payload(detail()) }
+          if (method === 'logout') return payload({ ok: true })
+          return payload({})
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

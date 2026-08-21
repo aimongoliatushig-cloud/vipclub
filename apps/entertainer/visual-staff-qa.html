@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Ахлах бүжигчин UI QA</title>
+    <script>
+      (() => {
+        const originalFetch = window.fetch.bind(window)
+        const rankQaMode = new URLSearchParams(location.search).has('rank')
+        const managerQaMode = new URLSearchParams(location.search).has('manager')
+        const stressQaMode = new URLSearchParams(location.search).has('august-stress')
+        const payload = (message, status = 200) => Promise.resolve(new Response(JSON.stringify({ message }), {
+          status,
+          headers: { 'Content-Type': 'application/json' },
+        }))
+        let readinessQueue = [
+          { entertainer: 'ENT-001', stage_name: 'Гинини', employee: 'HR-001', branch: 'Nomad', shift_assignment: 'SHIFT-001', shift_type: 'VIP Night Shift', readiness_status: 'PENDING', attendance: { checked_in: true, employee_checkin: 'CHECK-001', checked_in_at: '2026-08-17 18:48:00' } },
+          { entertainer: 'ENT-002', stage_name: 'Ариу', employee: 'HR-002', branch: 'Nomad', shift_assignment: 'SHIFT-002', shift_type: 'VIP Night Shift', readiness_status: 'PENDING', attendance: { checked_in: true, employee_checkin: 'CHECK-002', checked_in_at: '2026-08-17 18:52:00' } },
+          { entertainer: 'ENT-003', stage_name: 'Сиси', employee: 'HR-003', branch: 'Nomad', shift_assignment: 'SHIFT-003', shift_type: 'VIP Night Shift', readiness_status: 'NOT_READY', readiness_check: 'READY-003', readiness_modified: '2026-08-17 19:05:00', readiness_checked_at: '2026-08-17 19:05:00', attendance: { checked_in: true, employee_checkin: 'CHECK-003', checked_in_at: '2026-08-17 18:58:00' } },
+          { entertainer: 'ENT-004', stage_name: 'Аяаа', employee: 'HR-004', branch: 'Nomad', shift_assignment: 'SHIFT-004', shift_type: 'VIP Night Shift', readiness_status: 'PENDING', attendance: { checked_in: false } },
+        ]
+        if (stressQaMode) {
+          const names = ['Ginjin', 'Irina', 'jenny', 'manduhai', 'mona', 'Olzii', 'Sarnai', 'tanhil', 'Ариу', 'Аяана', 'Аялгуу', 'Гоо', 'Заяа', 'Луна', 'Нарка', 'Саруул', 'Сийлэн', 'Сиси', 'Соко', 'Тэргэл', 'Уярал', 'Үжин', 'Эгшиглэн']
+          readinessQueue = names.map((stageName, index) => ({
+            entertainer: `AUG-ENT-${index + 1}`,
+            stage_name: stageName,
+            employee: `AUG-HR-${index + 1}`,
+            branch: 'Nomad',
+            shift_assignment: `AUG-SHIFT-${index + 1}`,
+            shift_type: 'VIP Night Shift',
+            readiness_status: index < 11 ? 'PENDING' : index < 19 ? 'READY' : 'NOT_READY',
+            ...(index >= 11 ? { readiness_check: `AUG-READY-${index + 1}`, readiness_modified: '2026-08-18 22:10:00', readiness_checked_at: '2026-08-18 22:10:00' } : {}),
+            attendance: index === 10
+              ? { checked_in: false }
+              : { checked_in: true, employee_checkin: `AUG-CHECK-${index + 1}`, checked_in_at: `2026-08-18 22:${String((index * 3) % 60).padStart(2, '0')}:00` },
+          }))
+        }
+        const roundCounts = new Map(readinessQueue.map((row, index) => [row.entertainer, stressQaMode ? index % 8 : index]))
+        let managerSettings = {
+          branch: 'Nomad',
+          sales: { weight: 40, full_score_amount: 4000000, configured: true },
+          attendance: { late_after_time: '22:00:00' },
+          modified: '2026-08-20 10:00:00.000000',
+        }
+        let leaveRequestSequence = 0
+        let leaveRequests = []
+        const roundsPayload = () => {
+          const people = readinessQueue.filter(row => row.attendance.checked_in).map(row => {
+            const rounds = Math.min(7, roundCounts.get(row.entertainer) || 0)
+            const missing = Math.max(0, 7 - rounds)
+            return { entertainer: row.entertainer, employee: row.employee, display_name: row.stage_name, current_rank: 'Rank 3', shift_assignment: row.shift_assignment, shift_type: row.shift_type, employee_checkin: row.attendance.employee_checkin, checked_in_at: row.attendance.checked_in_at, rounds, target: 7, completed: rounds === 7, missing_rounds: missing, projected_penalty: missing * 30000 }
+          })
+          return { branch: 'Nomad', work_date: '2026-08-18', target: 7, penalty_rate: 30000, people, summary: { checked_in: people.length, completed: people.filter(row => row.completed).length, incomplete: people.filter(row => !row.completed).length, remaining_rounds: people.reduce((sum, row) => sum + row.missing_rounds, 0), projected_penalty: people.reduce((sum, row) => sum + row.projected_penalty, 0) }, access: { can_submit: true, message: 'Зөвхөн QR ирцтэй бүжигчид.' } }
+        }
+
+        window.fetch = (input, init = {}) => {
+          const requestUrl = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+          const url = new URL(requestUrl, location.origin)
+          if (!url.pathname.includes('/method/')) return originalFetch(input, init)
+          const method = decodeURIComponent(url.pathname.split('/method/')[1] || '')
+
+          if (method.endsWith('management.get_app_entry')) {
+            return payload({ authenticated: true, destination: 'staff' })
+          }
+          if (method.endsWith('workforce.get_context')) {
+            if (managerQaMode) return payload({
+              user: 'manager.nomad.qa@vipclub.local', full_name: 'Номин Менежер', branch: 'Nomad', mode: 'manager',
+              employee: 'HR-MANAGER-NOMAD', designation: 'Салбарын менежер', can_scan_attendance: true,
+            })
+            return payload({
+              user: 'lead.nomad.qa@vipclub.local',
+              full_name: rankQaMode ? 'Сиси' : 'Ахлах бүжигчин Сарнай',
+              branch: 'Nomad',
+              mode: rankQaMode ? 'entertainer' : 'lead',
+              profile: 'ENT-QA-LEAD',
+              employee: 'HR-EMP-QA-LEAD',
+              designation: rankQaMode ? 'Бүжигчин' : 'Ахлах бүжигчин',
+              can_scan_attendance: true,
+              can_view_guest_service: !rankQaMode,
+            })
+          }
+          if (method.endsWith('workforce.get_manager_dashboard')) {
+            return payload({
+              branch: 'Nomad', date: '2026-08-20',
+              summary: { total: 3, scheduled: 3, on_shift: 2, checked_in: 2, late: 0, absent: 0, leave: 0, off: 0, available: 2, reserved: 0, working: 0, break: 0, pending_readiness: 1, pending_leave: 0, pending_corrections: 0, pending_profile_changes: 0 },
+              roster: [
+                { profile: 'ENT-001', display_name: 'Гинини', rank: 'Rank 3', status: 'checked_in', availability: { status: 'Available', state_version: 1 } },
+                { profile: 'ENT-002', display_name: 'Ариу', rank: 'Rank 2', status: 'checked_in', availability: { status: 'Available', state_version: 1 } },
+              ],
+              meta: { api_version: 'qa', generated_at: '2026-08-20 22:10:00', limit: 100, cursor: 0, next_cursor: null, total: 2 },
+            })
+          }
+          if (method.endsWith('manager_settings.get_manager_settings')) return payload(managerSettings)
+          if (method.endsWith('manager_settings.update_manager_settings')) {
+            const body = new URLSearchParams(init.body || '')
+            managerSettings = {
+              ...managerSettings,
+              sales: { ...managerSettings.sales, full_score_amount: Number(body.get('sales_full_score_amount')), configured: true },
+              attendance: { ...managerSettings.attendance, late_after_time: `${body.get('late_after_time')}:00`.replace(':00:00', ':00') },
+              modified: '2026-08-20 10:05:00.000000',
+            }
+            return payload(managerSettings)
+          }
+          if (method.endsWith('entry.get_service_entry_feed')) {
+            return payload({
+              branch: 'Nomad',
+              work_date: '2026-08-19',
+              window_start: '2026-08-19 12:00:00',
+              window_end: '2026-08-20 12:00:00',
+              today_total: 3,
+              visible_fields: ['customer_name', 'membership_rank', 'entered_at', 'visit_number', 'service_characteristics'],
+              entries: [
+                { name: 'ENTRY-001', customer_name: 'Ундрах', membership_rank: 'Black Diamond', entered_at: '2026-08-19 22:41:00', visit_number: 4, service_characteristics: 'Тайван орчин хүсдэг, виски мөстэй уудаг' },
+                { name: 'ENTRY-002', customer_name: 'Тэмүүлэн', membership_rank: 'Gold', entered_at: '2026-08-19 22:18:00', visit_number: 2, service_characteristics: 'VIP өрөө сонирхдог' },
+                { name: 'ENTRY-003', customer_name: 'Саруул', membership_rank: 'Unassigned', entered_at: '2026-08-19 21:56:00', visit_number: 1, service_characteristics: '' },
+              ],
+            })
+          }
+          if (method.endsWith('entertainer.get_dashboard')) {
+            return payload({
+              profile: {
+                name: 'ENT-QA-LEAD',
+                employee_name: rankQaMode ? 'Алтанчимэг Ганбат' : 'Ахлах бүжигчин Сарнай',
+                stage_name: rankQaMode ? 'Сиси' : 'Сарнай',
+                branch: 'Nomad',
+                current_rank: 'Rank 3',
+                current_points: rankQaMode ? 73.16 : 82,
+                profile_photo: null,
+                is_demo: false,
+              },
+              shift: { name: 'SHIFT-QA-001', shift_type: 'VIP Night Shift', shift: { start_time: '19:00:00', end_time: '04:00:00' } },
+              latest_checkin: { name: 'CHECKIN-QA-001', time: '2026-08-17 18:56:00', log_type: 'IN' },
+              attendance: { checked_in: true, checked_out: false, open: true, work_date: '2026-08-17', active_window: true },
+              readiness: rankQaMode
+                ? { name: 'READY-QA-001', result: 'NOT_READY', reason: 'Тайзны гутал бэлэн биш.' }
+                : { name: 'READY-QA-001', result: 'READY', reason: '' },
+              next_reservation: { name: 'RES-QA-001', starts_at: '2026-08-17 21:30:00', status: 'Scheduled', party_size: 4, venue: 'VIP 3', customer_alias: 'Давтан зочин' },
+              week: {
+                start: '2026-08-17',
+                end: '2026-08-23',
+                days: [
+                  { date: '2026-08-17', assignment: { name: 'SHIFT-QA-001', shift_type: 'VIP Night Shift', start_date: '2026-08-17' }, start_time: '19:00:00', end_time: '04:00:00' },
+                  { date: '2026-08-19', assignment: { name: 'SHIFT-QA-002', shift_type: 'VIP Night Shift', start_date: '2026-08-19' }, start_time: '19:00:00', end_time: '04:00:00' },
+                ],
+              },
+              attention_items: rankQaMode ? [
+                { key: 'lateness', priority: 90, title: 'Хоцролтоо багасгах', detail: 'Дараагийн ээлжийн ирцээ эхлэх цагаас өмнө бүртгүүлнэ үү.', value: '18 мин', source_state: 'verified', source_label: 'Баталгаатай ирц' },
+                { key: 'readiness_not_ready', priority: 85, title: 'Бэлэн байдлаа засах', detail: 'Тайзны гутал бэлэн биш.', value: 'Бэлэн бус', source_state: 'demo', source_label: 'Туршилтын өгөгдөл' },
+                { key: 'stage_rounds', priority: 75, title: 'Өдрийн гараагаа гүйцээх', detail: 'Үлдсэн 3 гарааг ээлж дуусахаас өмнө бүртгүүлнэ үү.', value: '4/7', source_state: 'demo', source_label: 'Туршилтын өгөгдөл' },
+                { key: 'rank_sales', priority: 64, title: 'Борлуулалтын оноогоо өсгөх', detail: 'Борлуулалтын оноо 65/100 · өдрийн нийт оноонд 14 онооны боломж дутуу байна.', value: '65/100', source_state: 'verified', source_label: 'Баталгаатай борлуулалт' },
+              ] : [],
+              work_summary: { scheduled_days: 12, active_deduction: rankQaMode ? 39000 : 0, late_minutes: rankQaMode ? 18 : 0, leave_used: 1, leave_remaining: 2, stage_rounds_completed: rankQaMode ? 4 : 7 },
+            })
+          }
+          if (method.endsWith('attendance.get_my_attendance_status')) {
+            return payload({
+              employee: 'HR-EMP-QA-LEAD',
+              employee_name: 'Ахлах бүжигчин Сарнай',
+              branch: 'Nomad',
+              work_date: '2026-08-19',
+              action: 'IN',
+              attendance_mode: 'arrival_only',
+              requires_checkout: false,
+              attendance_complete: true,
+              checked_in: true,
+              checked_out: false,
+              checked_in_at: '2026-08-19 21:54:00',
+              checked_out_at: null,
+              open: true,
+              latest_checkin: { name: 'CHECKIN-QA-001', time: '2026-08-19 21:54:00', log_type: 'IN', shift: 'VIP Night Shift' },
+              late_after_time: '19:00:00',
+              late_minutes: 0,
+              shift: { name: 'SHIFT-QA-001', shift_type: 'VIP Night Shift', start: '2026-08-17 19:00:00', end: '2026-08-18 04:00:00' },
+            })
+          }
+          if (method.endsWith('attendance.get_my_attendance_history')) {
+            return payload({
+              employee: 'HR-EMP-QA-LEAD',
+              branch: 'Nomad',
+              days: [
+                { work_date: '2026-08-19', status: 'arrived', checked_in_at: '2026-08-19 21:54:00', checked_out_at: null, late_minutes: 0, shift: 'VIP Night Shift' },
+                { work_date: '2026-08-18', status: 'late', checked_in_at: '2026-08-18 22:08:00', checked_out_at: null, late_minutes: 8, shift: 'VIP Night Shift' },
+                { work_date: '2026-08-17', status: 'completed', checked_in_at: '2026-08-17 18:56:00', checked_out_at: '2026-08-18 04:03:00', late_minutes: 0, shift: 'VIP Night Shift' },
+                { work_date: '2026-08-15', status: 'arrived', checked_in_at: '2026-08-15 21:48:00', checked_out_at: null, late_minutes: 0, shift: 'VIP Night Shift' },
+              ],
+            })
+          }
+          if (method.endsWith('entertainer.get_rank')) {
+            const components = [
+              ['attendance', 'Ирц', 82, 10, 8.2, 'Ирцийн бүртгэл'],
+              ['customer_complaints', 'Зочны санал, гомдол', 100, 15, 15, 'Баталгаажсан үнэлгээ'],
+              ['sales', 'Борлуулалт', 65, 40, 26, 'Баталгаажсан үнэлгээ'],
+              ['entertaining_skill', 'Үзвэр, бүжгийн ур чадвар', 85, 5, 4.25, 'Сүүлийн баталгаажсан үнэлгээ'],
+              ['cleanliness_beauty', 'Цэвэр байдал, төрх', 60, 5, 3, 'Баталгаажсан үнэлгээ'],
+              ['shift_effort', 'Өдрийн гараа', 57.14, 10, 5.714, 'Өдрийн гарааны бүртгэл'],
+              ['personal_development', 'Хувийн хөгжил', 80, 5, 4, 'Сүүлийн баталгаажсан үнэлгээ'],
+              ['entertainer_attitude', 'Хандлага', 70, 10, 7, 'Тайлбартай үнэлгээ'],
+            ].map(([key, label, score, weight, contribution, source_label]) => ({
+              key, label, score, weight, contribution, source_label,
+              data_status: 'verified', target_status: score >= 70 ? 'met' : 'not_met',
+            }))
+            return payload({
+              scoring_date: '2026-08-19', score: 73.16, score_status: 'complete',
+              effective_rank: 'Rank 3', effective_rank_label: '3-р зэрэг', effective_from: '2026-08-01', payout_percent: 50,
+              calculated_next_rank: 'Rank 3', calculated_next_rank_label: '3-р зэрэг', calculated_next_payout_percent: 50, next_effective_from: null,
+              next_rank: 'Rank 2', next_rank_label: '2-р зэрэг', next_rank_threshold: 80, missing_score: 6.84,
+              missing_components: [], components,
+              history: [
+                { scoring_date: '2026-08-19', score: 73.16, score_status: 'complete', calculated_rank: 'Rank 3', calculated_rank_label: '3-р зэрэг', next_day_effective_rank: 'Rank 3', next_day_effective_rank_label: '3-р зэрэг' },
+                { scoring_date: '2026-08-18', score: 81.25, score_status: 'complete', calculated_rank: 'Rank 2', calculated_rank_label: '2-р зэрэг', next_day_effective_rank: 'Rank 2', next_day_effective_rank_label: '2-р зэрэг' },
+                { scoring_date: '2026-08-17', score: 76.40, score_status: 'complete', calculated_rank: 'Rank 3', calculated_rank_label: '3-р зэрэг', next_day_effective_rank: 'Rank 3', next_day_effective_rank_label: '3-р зэрэг' },
+              ],
+              rules: [
+                { rank: 'Rank 3', label: '3-р зэрэг', minimum_score: 0, maximum_score: 80, maximum_inclusive: false, payout_percent: 50 },
+                { rank: 'Rank 2', label: '2-р зэрэг', minimum_score: 80, maximum_score: 90, maximum_inclusive: false, payout_percent: 60 },
+                { rank: 'Rank 1', label: '1-р зэрэг', minimum_score: 90, maximum_score: 100, maximum_inclusive: true, payout_percent: 70 },
+              ],
+            })
+          }
+          if (false && method.endsWith('entertainer.get_rank')) {
+            return payload({
+              current: { current_rank: 'Rank 3', approved_rank: 'Rank 3', current_points: 73.16, payout_percent: 50, source: 'Өдрийн 8 үзүүлэлтийн тооцоо' },
+              next: { name: 'Rank 2', rank_order: 2, minimum_points: 100, benefits: 'Дараагийн түвшний урамшуулал' },
+              next_target: { rank: 'Rank 2', score_required: 80, current_score: 73.16, score_needed: 6.84, payout_percent: 60, requirements: ['Өдрийн нийт оноо 80 буюу түүнээс дээш', '8 үзүүлэлт бүгд баталгаажсан байх', 'Өдрийн гараа: одоо 57.14 оноо', 'Цэвэр байдал ба гоо зүй: одоо 60 оноо'] },
+              rank_targets: [
+                { rank: 'Rank 2', score_required: 80, current_score: 73.16, score_needed: 6.84, payout_percent: 60, requirements: ['Өдрийн нийт оноо 80 буюу түүнээс дээш', '8 үзүүлэлт бүгд баталгаажсан байх', 'Өдрийн гараа: одоо 57.14 оноо', 'Цэвэр байдал ба гоо зүй: одоо 60 оноо'] },
+                { rank: 'Rank 1', score_required: 90, current_score: 73.16, score_needed: 16.84, payout_percent: 70, requirements: ['Өдрийн нийт оноо 90 буюу түүнээс дээш', '8 үзүүлэлт бүгд баталгаажсан байх', 'Өдрийн гараа: одоо 57.14 оноо', 'Цэвэр байдал ба гоо зүй: одоо 60 оноо'] },
+              ],
+              ranks: [
+                { name: 'Rank 3', rank_order: 1, minimum_points: 0 },
+                { name: 'Rank 2', rank_order: 2, minimum_points: 100 },
+                { name: 'Rank 1', rank_order: 3, minimum_points: 300 },
+              ],
+              policy: { version: 'daily-eight-factor-v1', effective_from: '2026-08-18', mode: 'Active', window_days: 1, cadence: 'Daily', configuration_required: false },
+              evaluation: { interval_days: 1, next_evaluation_at: '2026-08-19', remaining_days: 1, due: false },
+              daily_rank: {
+                name: 'DAILY-RANK-QA-001', revision: 1, scoring_date: '2026-08-19', status: 'Complete',
+                weighted_score: 73.16, displayed_score: 73.16, calculated_rank: 'Rank 3', approved_rank: 'Rank 3',
+                change_state: 'No Change', missing_components: [],
+                components: [
+                  { component: 'attendance', score: 82, weight: 10, contribution: 8.2, status: 'verified', source: { mode: 'normalized_event', records: ['ERP-ATT-001'] } },
+                  { component: 'customer_complaints', score: 100, weight: 15, contribution: 15, status: 'verified', source: { mode: 'normalized_event', records: ['ERP-COM-001'] } },
+                  { component: 'sales', score: 65, weight: 40, contribution: 26, status: 'verified', source: { mode: 'normalized_event', records: ['FINEX-SALES-001'] } },
+                  { component: 'entertaining_skill', score: 85, weight: 5, contribution: 4.25, status: 'verified', source: { mode: 'latest_approved_assessment', records: ['DEMO-SKILL-001'] } },
+                  { component: 'cleanliness_beauty', score: 60, weight: 5, contribution: 3, status: 'verified', source: { mode: 'normalized_event', records: ['DEMO-CLEAN-001'] } },
+                  { component: 'shift_effort', score: 57.14, weight: 10, contribution: 5.714, status: 'verified', source: { mode: 'seven_item_stage_round_checklist', completed: 4, missed: 3, records: ['DEMO-ROUND-001'] } },
+                  { component: 'personal_development', score: 80, weight: 5, contribution: 4, status: 'verified', source: { mode: 'latest_approved_assessment', records: ['DEMO-DEV-001'] } },
+                  { component: 'entertainer_attitude', score: 70, weight: 10, contribution: 7, status: 'verified', source: { mode: 'substantiated_daily_incident', records: ['DEMO-ATT-001'] } },
+                ],
+                policy: 'POLICY-DAILY-001', policy_version: 'daily-eight-factor-v1', calculated_at: '2026-08-19 23:30:00',
+              },
+              evidence: [
+                { key: 'attendance', label: 'Ирц', status: 'verified', value: 82, unit: 'оноо', detail: 'Ирцийн бүртгэл · 18 минут хоцорсон', weight: 10, contribution: 8.2 },
+                { key: 'customer_complaints', label: 'Үйлчлүүлэгчийн гомдол', status: 'verified', value: 100, unit: 'оноо', detail: 'Гомдол бүртгэгдээгүй', weight: 15, contribution: 15 },
+                { key: 'sales', label: 'Борлуулалт', status: 'verified', value: 65, unit: 'оноо', detail: 'Баталгаатай борлуулалт', weight: 40, contribution: 26 },
+                { key: 'entertaining_skill', label: 'Үзвэрийн ур чадвар', status: 'verified', value: 85, unit: 'оноо', detail: 'Туршилтын менежерийн үнэлгээ', weight: 5, contribution: 4.25 },
+                { key: 'cleanliness_beauty', label: 'Цэвэр байдал, гоо зүй', status: 'verified', value: 60, unit: 'оноо', detail: 'Туршилтын өдрийн үнэлгээ', weight: 5, contribution: 3 },
+                { key: 'shift_effort', label: 'Өдрийн гараа', status: 'verified', value: 57.14, unit: 'оноо', detail: 'Туршилтын гараа 4/7', weight: 10, contribution: 5.714 },
+                { key: 'personal_development', label: 'Хувийн хөгжил', status: 'verified', value: 80, unit: 'оноо', detail: 'Туршилтын менежерийн үнэлгээ', weight: 5, contribution: 4 },
+                { key: 'entertainer_attitude', label: 'Хандлага', status: 'verified', value: 70, unit: 'оноо', detail: 'Туршилтын өдрийн үнэлгээ', weight: 10, contribution: 7 },
+              ],
+              recent_points: [],
+              reviews: [],
+            })
+          }
+          if (method.endsWith('entertainer_finex.get_finex_summary')) {
+            return payload({
+              window: { from: '2026-08-01', to: '2026-08-19' },
+              selected_month: '2026-08',
+              data_state: 'demo',
+              current_month_income: 20254667,
+              net_income: 20254667,
+              points: 2025.47,
+              point_rule_mnt: 10000,
+              service_count: 18,
+              bill_count: 10,
+              linked_customer_count: 8,
+              linked_customer_bill_count: 10,
+              repeat_customer_count: 2,
+              months: [{ month: '2026-08', income: 20254667, services: 18, bills: 10 }],
+              days: [
+                { date: '2026-08-01', income: 1000000, cumulative_income: 1000000 },
+                { date: '2026-08-02', income: 600000, cumulative_income: 1600000 },
+                { date: '2026-08-03', income: 1250000, cumulative_income: 2850000 },
+                { date: '2026-08-04', income: 300000, cumulative_income: 3150000 },
+                { date: '2026-08-05', income: 1500000, cumulative_income: 4650000 },
+                { date: '2026-08-06', income: 720000, cumulative_income: 5370000 },
+                { date: '2026-08-07', income: 1000000, cumulative_income: 6370000 },
+                { date: '2026-08-08', income: 1200000, cumulative_income: 7570000 },
+                { date: '2026-08-09', income: 500000, cumulative_income: 8070000 },
+                { date: '2026-08-10', income: 1400000, cumulative_income: 9470000 },
+                { date: '2026-08-11', income: 1000000, cumulative_income: 10470000 },
+                { date: '2026-08-12', income: 1500000, cumulative_income: 11970000 },
+                { date: '2026-08-13', income: 600000, cumulative_income: 12570000 },
+                { date: '2026-08-14', income: 1750000, cumulative_income: 14320000 },
+                { date: '2026-08-15', income: 1200000, cumulative_income: 15520000 },
+                { date: '2026-08-17', income: 2000000, cumulative_income: 17520000 },
+                { date: '2026-08-18', income: 734667, cumulative_income: 18254667 },
+                { date: '2026-08-19', income: 2000000, cumulative_income: 20254667 },
+              ],
+              recent_services: [
+                { key: 'service-18', date: '2026-08-19', service: 'Table Service', service_total: 4000000, amount: 2000000, percent: 50, raw_amount: 1600000, raw_percent: 40, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-17', date: '2026-08-18', service: 'Extra', service_total: 2099049, amount: 734667, percent: 35, previous_percent: 30, percent_change: 5 },
+                { key: 'service-16', date: '2026-08-17', service: 'Table Service', service_total: 4000000, amount: 2000000, percent: 50, raw_amount: 2400000, raw_percent: 60, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-15', date: '2026-08-15', service: 'VIP 3 Room', service_total: 3000000, amount: 1200000, percent: 40, previous_percent: 40, percent_change: 0 },
+                { key: 'service-14', date: '2026-08-14', service: 'Table Service', service_total: 3500000, amount: 1750000, percent: 50, raw_amount: 2100000, raw_percent: 60, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-13', date: '2026-08-13', service: 'Extra', service_total: 2000000, amount: 600000, percent: 30, previous_percent: 25, percent_change: 5 },
+                { key: 'service-12', date: '2026-08-12', service: 'Table Service', service_total: 3000000, amount: 1500000, percent: 50, raw_amount: 1800000, raw_percent: 60, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-11', date: '2026-08-11', service: 'VIP 3 Room', service_total: 2500000, amount: 1000000, percent: 40, previous_percent: 40, percent_change: 0 },
+                { key: 'service-10', date: '2026-08-10', service: 'Table Service', service_total: 2800000, amount: 1400000, percent: 50, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-9', date: '2026-08-09', service: 'Extra', service_total: 2000000, amount: 500000, percent: 25, previous_percent: 25, percent_change: 0 },
+                { key: 'service-8', date: '2026-08-08', service: 'Table Service', service_total: 2400000, amount: 1200000, percent: 50, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-7', date: '2026-08-07', service: 'Table Service', service_total: 2000000, amount: 1000000, percent: 50, raw_amount: 900000, raw_percent: 45, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-6', date: '2026-08-06', service: 'VIP 3 Room', service_total: 1800000, amount: 720000, percent: 40, previous_percent: 30, percent_change: 10 },
+                { key: 'service-5', date: '2026-08-05', service: 'Table Service', service_total: 3000000, amount: 1500000, percent: 50, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-4', date: '2026-08-04', service: 'Extra', service_total: 1200000, amount: 300000, percent: 25, previous_percent: null, percent_change: null },
+                { key: 'service-3', date: '2026-08-03', service: 'Table Service', service_total: 2500000, amount: 1250000, percent: 50, raw_amount: 1000000, raw_percent: 40, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: 50, percent_change: 0 },
+                { key: 'service-2', date: '2026-08-02', service: 'VIP 3 Room', service_total: 2000000, amount: 600000, percent: 30, previous_percent: null, percent_change: null },
+                { key: 'service-1', date: '2026-08-01', service: 'Table Service', service_total: 2000000, amount: 1000000, percent: 50, raw_amount: 800000, raw_percent: 40, payout_rank: 'Rank 3', rate_source: 'rank_policy', previous_percent: null, percent_change: null },
+              ],
+              payout_policy: { rank: 'Rank 3', percent: 50, effective_from: '2026-08-01', source: 'Зэрэглэлийн түүх', applies_to: 'table_service' },
+              last_synced_at: '2026-08-19 08:00:13',
+              quality: { verified: false, customer_linkage_verified: false, skipped_inconsistent_items: 0, skipped_malformed_bills: 0, rank_policy_services: 10, finex_allocation_services: 8, rank_policy_mismatches: 6 },
+            })
+          }
+          if (method.endsWith('entertainer.get_loan_overview')) {
+            return payload({
+              policy: { status: 'Active', request_enabled: false, message: 'Өмнөх бүтэн 3 сарын орлогын бүртгэл бүрдээгүй.', amount_step: 10000, repayment_min: 30, repayment_max: 60, repayment_step: 5, repayment_default: 50, interest_percent: 0 },
+              evidence: { employment_type: 'Employee', branch: 'Nomad', current_rank: 'Rank 3', tenure_days: 420, verified_income: 19524667, income_window: { from: '2026-05-01', to: '2026-07-31' }, verified_bill_count: 12, income_months: [{ month: '2026-05', income: 0, service_count: 0, bill_count: 0 }, { month: '2026-06', income: 4200000, service_count: 4, bill_count: 3 }, { month: '2026-07', income: 15324667, service_count: 10, bill_count: 9 }], three_month_average: 6508222, loan_multiplier: 0, maximum_amount: 0, typical_three_day_income: 650822, outstanding_balance: null, blocking_reasons: ['Одоогийн зэрэглэлд зээлийн эрх нээгдээгүй.', 'Өмнөх бүтэн 3 сарын орлогын бүртгэл бүрдээгүй.'] },
+              required_decisions: [], requests: [],
+            })
+          }
+          if (method.endsWith('attendance_policy.get_leave_policy')) {
+            const used = leaveRequests.filter(row => row.source_type !== 'Leave Application' && ['Pending', 'Approved'].includes(row.status)).length
+            return payload({
+              selected_month: '2026-08',
+              policy: { absence_deduction: 30000, late_deduction_per_minute: 500, same_day_request_deadline: '12:00:00', emergency_leave_monthly_limit: 3, hourly_leave_arrival_deadline: '00:00:00', timezone: 'Asia/Ulaanbaatar' },
+              quota: { used, remaining: Math.max(0, 3 - used) },
+              day_leave_types: ['Цалингүй чөлөө'],
+              requests: leaveRequests,
+              penalties: rankQaMode ? [
+                { name: 'PEN-QA-LATE', attendance_date: '2026-08-18', penalty_type: 'Late', late_minutes: 18, missed_rounds: 0, amount: 9000, status: 'Approved', reason: '18 минут хоцорсон' },
+                { name: 'PEN-QA-ABSENCE', attendance_date: '2026-08-15', penalty_type: 'Absence', late_minutes: 0, missed_rounds: 0, amount: 30000, status: 'Approved', reason: 'Ирц бүртгэгдээгүй' },
+              ] : [],
+            })
+          }
+          if (method.endsWith('attendance_policy.submit_emergency_leave')) {
+            const body = init.body instanceof URLSearchParams ? init.body : new URLSearchParams(String(init.body || ''))
+            const request = {
+              name: `LEAVE-QA-${++leaveRequestSequence}`,
+              entertainer: 'ENT-QA-LEAD', employee: 'HR-EMP-QA-LEAD', branch: 'Nomad',
+              leave_date: body.get('leave_date'), source_type: 'Emergency Leave', status: 'Pending',
+              requested_at: '2026-08-20 22:20:00', reason: body.get('reason') || '',
+              decision_reason: null, decided_by: null, decided_at: null, modified: '2026-08-20 22:20:00',
+            }
+            leaveRequests = [request, ...leaveRequests]
+            const used = leaveRequests.filter(row => row.source_type !== 'Leave Application' && ['Pending', 'Approved'].includes(row.status)).length
+            return payload({ request, quota: { used, remaining: Math.max(0, 3 - used) } })
+          }
+          if (method.endsWith('attendance_policy.submit_day_leave')) {
+            const body = init.body instanceof URLSearchParams ? init.body : new URLSearchParams(String(init.body || ''))
+            const request = {
+              name: `DAY-LEAVE-QA-${++leaveRequestSequence}`,
+              entertainer: 'ENT-QA-LEAD', employee: 'HR-EMP-QA-LEAD', branch: 'Nomad',
+              leave_date: body.get('from_date'), to_date: body.get('from_date'), leave_type: 'Өдрийн чөлөө',
+              source_type: 'Leave Application', status: 'Pending', requested_at: '2026-08-20 22:20:00',
+              reason: body.get('reason') || '', decision_reason: null, decided_by: null, decided_at: null,
+              modified: '2026-08-20 22:20:00',
+            }
+            leaveRequests = [request, ...leaveRequests]
+            return payload({ request })
+          }
+          if (method.endsWith('entertainer.get_my_schedule')) {
+            const requested = url.searchParams.get('week_start') || '2026-08-17'
+            const start = new Date(`${requested}T00:00:00`)
+            const formatDate = date => [
+              date.getFullYear(),
+              String(date.getMonth() + 1).padStart(2, '0'),
+              String(date.getDate()).padStart(2, '0'),
+            ].join('-')
+            const dates = Array.from({ length: 7 }, (_, index) => {
+              const date = new Date(start)
+              date.setDate(start.getDate() + index)
+              return formatDate(date)
+            })
+            return payload({
+              week: {
+                start: dates[0],
+                end: dates[6],
+                days: dates.map((date, index) => {
+                  if (![0, 2, 4].includes(index)) return { date }
+                  return {
+                    date,
+                    assignment: `SHIFT-QA-${date}`,
+                    shift_type: 'VIP Night Shift',
+                    start_time: index === 4 ? '22:00:00' : '19:00:00',
+                    end_time: '04:00:00',
+                  }
+                }),
+              },
+              attended_dates: requested === '2026-08-17'
+                ? ['2026-08-17', '2026-08-19']
+                : [],
+            })
+          }
+          if (method.endsWith('team_climate.get_feedback_candidates')) {
+            return payload({
+              branch: 'Nomad',
+              people: [
+                { profile: 'ENT-QA-GINJIN', display_name: 'Гинжин', rank: 'Rank 3' },
+                { profile: 'ENT-QA-ARIU', display_name: 'Ариу', rank: 'Rank 2' },
+                { profile: 'ENT-QA-MONA', display_name: 'Мона', rank: 'Rank 3' },
+              ],
+              meta: { total: 3 },
+            })
+          }
+          if (method.endsWith('team_climate.submit_feedback')) {
+            return payload({ submitted: true, submitted_at: '2026-08-20 22:20:00' })
+          }
+          if (method.endsWith('entertainer.get_workspace')) {
+            return payload({
+              branch: 'Nomad',
+              profile: { name: 'ENT-QA-LEAD', employee: 'HR-EMP-QA-LEAD', employee_name: 'Ахлах бүжигчин Сарнай', stage_name: 'Сарнай', branch: 'Nomad', employment_type: 'Full-time', lifecycle_status: 'Active', skills: 'Тайзны үзүүлбэр, Баг удирдах', languages: 'Монгол, Англи', service_tags: 'VIP үйлчилгээ', style_tags: 'Classic', profile_photo: null, media_consent_status: 'Granted', current_rank: 'Rank 3', current_points: 82, modified: '2026-08-17 18:00:00' },
+              week: {
+                start: '2026-08-17',
+                end: '2026-08-23',
+                days: [
+                  { date: '2026-08-17', assignment: 'SHIFT-QA-001', shift_type: 'VIP Night Shift', start_time: '19:00:00', end_time: '04:00:00' },
+                  { date: '2026-08-18' },
+                  { date: '2026-08-19', assignment: 'SHIFT-QA-002', shift_type: 'VIP Night Shift', start_time: '19:00:00', end_time: '04:00:00' },
+                  { date: '2026-08-20' },
+                  { date: '2026-08-21', assignment: 'SHIFT-QA-003', shift_type: 'VIP Night Shift', start_time: '22:00:00', end_time: '04:00:00' },
+                  { date: '2026-08-22' },
+                  { date: '2026-08-23' },
+                ],
+              },
+              attendance: [{ name: 'CHECKIN-QA-001', time: '2026-08-17 18:56:00', log_type: 'IN', shift: 'VIP Night Shift' }],
+              penalties: [],
+              leave_requests: [],
+              summary: { scheduled_days: 12, attendance_events: 11, late_minutes: 0, active_deduction: 0 },
+            })
+          }
+          if (method.endsWith('profile.get_editable_profile')) {
+            return payload({
+              profile: { name: 'ENT-QA-LEAD', employee: 'HR-EMP-QA-LEAD', employee_name: 'Ахлах бүжигчин Сарнай', stage_name: 'Сарнай', branch: 'Nomad', employment_type: 'Full-time', lifecycle_status: 'Active', skills: 'Тайзны үзүүлбэр, Баг удирдах', languages: 'Монгол, Англи', service_tags: 'VIP үйлчилгээ', style_tags: 'Classic', profile_photo: null, media_consent_status: 'Granted', current_rank: 'Rank 3', current_points: 82, modified: '2026-08-17 18:00:00' },
+              pending_request: null,
+            })
+          }
+          if (method.endsWith('profile.change_own_password')) {
+            return payload({ changed: true })
+          }
+          if (method.endsWith('stage_rounds.get_daily_rounds')) {
+            return payload(roundsPayload())
+          }
+          if (method.endsWith('stage_rounds.record_daily_round')) {
+            const body = init.body instanceof URLSearchParams ? init.body : new URLSearchParams(String(init.body || ''))
+            const entertainer = body.get('entertainer')
+            roundCounts.set(entertainer, Math.min(7, (roundCounts.get(entertainer) || 0) + 1))
+            return payload(roundsPayload())
+          }
+          if (method.endsWith('supervisor.get_readiness_queue')) {
+            const status = (url.searchParams.get('status') || 'All').toUpperCase()
+            const queue = status === 'ALL' ? readinessQueue : readinessQueue.filter(row => row.readiness_status === status)
+            const pending = readinessQueue.filter(row => row.readiness_status === 'PENDING').length
+            const ready = readinessQueue.filter(row => row.readiness_status === 'READY').length
+            const notReady = readinessQueue.filter(row => row.readiness_status === 'NOT_READY').length
+            return payload({
+              branch: 'Nomad',
+              work_date: '2026-08-17',
+              status,
+              summary: { total: readinessQueue.length, pending, ready, not_ready: notReady },
+              queue,
+              meta: { limit: 100, cursor: 0, next_cursor: null, total: queue.length },
+            })
+          }
+          if (method.endsWith('supervisor.submit_readiness')) {
+            const body = init.body instanceof URLSearchParams ? init.body : new URLSearchParams(String(init.body || ''))
+            const assignment = body.get('shift_assignment')
+            const result = body.get('result')
+            readinessQueue = readinessQueue.map(row => row.shift_assignment === assignment ? {
+              ...row,
+              readiness_status: result,
+              readiness_check: `READY-${row.entertainer}`,
+              readiness_modified: '2026-08-17 19:10:00',
+              readiness_checked_at: '2026-08-17 19:10:00',
+            } : row)
+            return payload({ ok: true })
+          }
+          if (method === 'logout') return payload({ ok: true })
+          return payload({})
+        }
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,22 @@
+services:
+  backend:
+    volumes:
+      - /opt/nomad-vip/apps/nomad_vip:/home/frappe/frappe-bench/apps/nomad_vip:ro
+  configurator:
+    volumes:
+      - /opt/nomad-vip/apps/nomad_vip:/home/frappe/frappe-bench/apps/nomad_vip:ro
+  frontend:
+    volumes:
+      - /opt/nomad-vip/apps/nomad_vip:/home/frappe/frappe-bench/apps/nomad_vip:ro
+  queue-long:
+    volumes:
+      - /opt/nomad-vip/apps/nomad_vip:/home/frappe/frappe-bench/apps/nomad_vip:ro
+  queue-short:
+    volumes:
+      - /opt/nomad-vip/apps/nomad_vip:/home/frappe/frappe-bench/apps/nomad_vip:ro
+  scheduler:
+    volumes:
+      - /opt/nomad-vip/apps/nomad_vip:/home/frappe/frappe-bench/apps/nomad_vip:ro
+  websocket:
+    volumes:
+      - /opt/nomad-vip/apps/nomad_vip:/home/frappe/frappe-bench/apps/nomad_vip:ro

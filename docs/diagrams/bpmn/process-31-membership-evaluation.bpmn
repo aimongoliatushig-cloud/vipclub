@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" id="Definitions_P31" targetNamespace="https://vipclub.example/bpmn">
+  <bpmn:process id="process-31-membership-evaluation" name="Per-Visit Membership Evaluation and Manager Approval" isExecutable="false">
+    <bpmn:startEvent id="start" name="Eligible visit or correction reconciled"/>
+    <bpmn:task id="load" name="Load verified visits, spend, policy, and current level"/>
+    <bpmn:task id="calculate" name="Calculate average eligible expenditure per visit"/>
+    <bpmn:task id="snapshot" name="Save immutable evaluation snapshot and explanation"/>
+    <bpmn:exclusiveGateway id="changed" name="Calculated level differs?"/>
+    <bpmn:task id="no_change" name="Close evaluation: no change"/>
+    <bpmn:task id="recommend" name="Create or refresh manager recommendation"/>
+    <bpmn:task id="notify" name="Notify authorized branch manager"/>
+    <bpmn:exclusiveGateway id="decision" name="Manager decision"/>
+    <bpmn:task id="approve" name="Approve level change and create assignment"/>
+    <bpmn:task id="keep" name="Keep current level and record reason"/>
+    <bpmn:task id="later" name="Keep pending with review date"/>
+    <bpmn:task id="audit" name="Record decision, policy, source, and audit event"/>
+    <bpmn:endEvent id="end" name="Evaluation complete; future visits continue evaluation"/>
+
+    <bpmn:sequenceFlow id="f1" sourceRef="start" targetRef="load"/>
+    <bpmn:sequenceFlow id="f2" sourceRef="load" targetRef="calculate"/>
+    <bpmn:sequenceFlow id="f3" sourceRef="calculate" targetRef="snapshot"/>
+    <bpmn:sequenceFlow id="f4" sourceRef="snapshot" targetRef="changed"/>
+    <bpmn:sequenceFlow id="f5" name="No" sourceRef="changed" targetRef="no_change"/>
+    <bpmn:sequenceFlow id="f6" sourceRef="no_change" targetRef="end"/>
+    <bpmn:sequenceFlow id="f7" name="Yes" sourceRef="changed" targetRef="recommend"/>
+    <bpmn:sequenceFlow id="f8" sourceRef="recommend" targetRef="notify"/>
+    <bpmn:sequenceFlow id="f9" sourceRef="notify" targetRef="decision"/>
+    <bpmn:sequenceFlow id="f10" name="Approve" sourceRef="decision" targetRef="approve"/>
+    <bpmn:sequenceFlow id="f11" name="Keep current" sourceRef="decision" targetRef="keep"/>
+    <bpmn:sequenceFlow id="f12" name="Review later" sourceRef="decision" targetRef="later"/>
+    <bpmn:sequenceFlow id="f13" sourceRef="approve" targetRef="audit"/>
+    <bpmn:sequenceFlow id="f14" sourceRef="keep" targetRef="audit"/>
+    <bpmn:sequenceFlow id="f15" sourceRef="later" targetRef="audit"/>
+    <bpmn:sequenceFlow id="f16" sourceRef="audit" targetRef="end"/>
+  </bpmn:process>
+  <bpmndi:BPMNDiagram id="diagram">
+    <bpmndi:BPMNPlane id="plane" bpmnElement="process-31-membership-evaluation">
+      <bpmndi:BPMNShape id="start_di" bpmnElement="start"><dc:Bounds x="70" y="170" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="load_di" bpmnElement="load"><dc:Bounds x="150" y="145" width="150" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="calculate_di" bpmnElement="calculate"><dc:Bounds x="345" y="145" width="160" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="snapshot_di" bpmnElement="snapshot"><dc:Bounds x="550" y="145" width="160" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="changed_di" bpmnElement="changed" isMarkerVisible="true"><dc:Bounds x="760" y="160" width="50" height="50"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="no_change_di" bpmnElement="no_change"><dc:Bounds x="850" y="30" width="150" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="recommend_di" bpmnElement="recommend"><dc:Bounds x="850" y="145" width="160" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="notify_di" bpmnElement="notify"><dc:Bounds x="1050" y="145" width="150" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="decision_di" bpmnElement="decision" isMarkerVisible="true"><dc:Bounds x="1240" y="160" width="50" height="50"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="approve_di" bpmnElement="approve"><dc:Bounds x="1340" y="30" width="160" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="keep_di" bpmnElement="keep"><dc:Bounds x="1340" y="145" width="160" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="later_di" bpmnElement="later"><dc:Bounds x="1340" y="260" width="160" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="audit_di" bpmnElement="audit"><dc:Bounds x="1550" y="145" width="160" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="end_di" bpmnElement="end"><dc:Bounds x="1760" y="170" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="f1_di" bpmnElement="f1"><di:waypoint x="106" y="188"/><di:waypoint x="150" y="188"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f2_di" bpmnElement="f2"><di:waypoint x="300" y="185"/><di:waypoint x="345" y="185"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f3_di" bpmnElement="f3"><di:waypoint x="505" y="185"/><di:waypoint x="550" y="185"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f4_di" bpmnElement="f4"><di:waypoint x="710" y="185"/><di:waypoint x="760" y="185"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f5_di" bpmnElement="f5"><di:waypoint x="785" y="160"/><di:waypoint x="785" y="70"/><di:waypoint x="850" y="70"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f6_di" bpmnElement="f6"><di:waypoint x="1000" y="70"/><di:waypoint x="1778" y="70"/><di:waypoint x="1778" y="170"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f7_di" bpmnElement="f7"><di:waypoint x="810" y="185"/><di:waypoint x="850" y="185"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f8_di" bpmnElement="f8"><di:waypoint x="1010" y="185"/><di:waypoint x="1050" y="185"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f9_di" bpmnElement="f9"><di:waypoint x="1200" y="185"/><di:waypoint x="1240" y="185"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f10_di" bpmnElement="f10"><di:waypoint x="1265" y="160"/><di:waypoint x="1265" y="70"/><di:waypoint x="1340" y="70"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f11_di" bpmnElement="f11"><di:waypoint x="1290" y="185"/><di:waypoint x="1340" y="185"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f12_di" bpmnElement="f12"><di:waypoint x="1265" y="210"/><di:waypoint x="1265" y="300"/><di:waypoint x="1340" y="300"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f13_di" bpmnElement="f13"><di:waypoint x="1500" y="70"/><di:waypoint x="1630" y="70"/><di:waypoint x="1630" y="145"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f14_di" bpmnElement="f14"><di:waypoint x="1500" y="185"/><di:waypoint x="1550" y="185"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f15_di" bpmnElement="f15"><di:waypoint x="1500" y="300"/><di:waypoint x="1630" y="300"/><di:waypoint x="1630" y="225"/></bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="f16_di" bpmnElement="f16"><di:waypoint x="1710" y="185"/><di:waypoint x="1760" y="188"/></bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

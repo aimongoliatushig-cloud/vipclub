@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "field:branch",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["branch", "qr_token", "active", "location_section", "latitude", "longitude", "radius_meters", "configured_by", "configured_at", "attendance_policy_section", "late_after_time", "policy_updated_by", "policy_updated_at", "rank_scoring_section", "sales_full_score_amount", "rank_scoring_updated_by", "rank_scoring_updated_at"],
+ "fields": [
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","reqd":1,"unique":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"qr_token","fieldtype":"Data","label":"QR Token","reqd":1,"unique":1,"read_only":1,"no_copy":1,"permlevel":1},
+  {"fieldname":"active","fieldtype":"Check","label":"Active","default":"1","in_list_view":1},
+  {"fieldname":"location_section","fieldtype":"Section Break","label":"Allowed Location"},
+  {"fieldname":"latitude","fieldtype":"Float","label":"Latitude","precision":"8"},
+  {"fieldname":"longitude","fieldtype":"Float","label":"Longitude","precision":"8"},
+  {"fieldname":"radius_meters","fieldtype":"Int","label":"Radius (meters)","default":"100"},
+  {"fieldname":"configured_by","fieldtype":"Link","label":"Configured By","options":"User","read_only":1},
+  {"fieldname":"configured_at","fieldtype":"Datetime","label":"Configured At","read_only":1},
+  {"fieldname":"attendance_policy_section","fieldtype":"Section Break","label":"Салбарын ирцийн дүрэм"},
+  {"fieldname":"late_after_time","fieldtype":"Time","label":"Хоцорсонд тооцох цаг","default":"22:00:00","reqd":1,"description":"Энэ цагаас хойш бүртгүүлсэн ирэлтийг хоцролт гэж тооцно."},
+  {"fieldname":"policy_updated_by","fieldtype":"Link","label":"Дүрэм шинэчилсэн","options":"User","read_only":1},
+  {"fieldname":"policy_updated_at","fieldtype":"Datetime","label":"Дүрэм шинэчилсэн огноо","read_only":1},
+  {"fieldname":"rank_scoring_section","fieldtype":"Section Break","label":"Өдрийн зэрэглэлийн борлуулалт"},
+  {"fieldname":"sales_full_score_amount","fieldtype":"Currency","label":"Борлуулалтын бүтэн онооны босго","default":"0","precision":"0","description":"Энэ дүнд хүрвэл борлуулалтын үзүүлэлт 100 хувь буюу өдрийн зэрэглэлд 40 оноо өгнө."},
+  {"fieldname":"rank_scoring_updated_by","fieldtype":"Link","label":"Борлуулалтын босго шинэчилсэн","options":"User","read_only":1},
+  {"fieldname":"rank_scoring_updated_at","fieldtype":"Datetime","label":"Борлуулалтын босго шинэчилсэн огноо","read_only":1}
+ ],
+ "links": [],
+ "module": "NOMAD VIP",
+ "name": "VIP Branch Attendance QR",
+ "naming_rule": "By fieldname",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1},
+  {"role":"CEO","read":1,"report":1},
+  {"role":"VIP Admin","read":1,"write":1,"create":1,"report":1},
+  {"role":"System Manager","permlevel":1,"read":1,"write":1},
+  {"role":"VIP Admin","permlevel":1,"read":1,"write":1}
+ ],
+ "sort_field": "branch",
+ "sort_order": "ASC",
+ "track_changes": 1
+}

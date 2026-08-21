@@ -1,0 +1,34 @@
+import { describe, expect, it } from 'vitest'
+import { BrowserManagerInsightsService } from './managerInsightsService'
+
+describe('Manager customer and ranking insight boundaries', () => {
+  it('returns only the authorized branch with masked customer contact data', () => {
+    const snapshot = new BrowserManagerInsightsService().getSnapshot()
+
+    expect(snapshot.branchId).toBe('branch-central')
+    expect(snapshot.salesGoal!.branchId).toBe(snapshot.branchId)
+    expect(snapshot.salesGoal!.state).toBe('active')
+    expect(snapshot.salesGoal!.approvedBy).toBe('Гүйцэтгэх захирал')
+    expect(Math.round((snapshot.salesGoal!.actualSales / snapshot.salesGoal!.approvedTargetAmount) * 100)).toBe(67)
+    expect(snapshot.customers.every((customer) => customer.branchId === snapshot.branchId)).toBe(true)
+    expect(snapshot.entertainerRankings.every((ranking) => ranking.branchId === snapshot.branchId)).toBe(true)
+    expect(snapshot.customers.every((customer) => /^•••• \d{4}$/.test(customer.maskedPhone))).toBe(true)
+    expect(snapshot.entertainerRankings.every((ranking) => ['Rank1', 'Rank2', 'Rank3'].includes(ranking.currentRank))).toBe(true)
+    expect(snapshot.customers.every((customer) => !('cashbackBalance' in customer))).toBe(true)
+    expect(snapshot.customers.every((customer) => customer.eligibleSpendTotal / customer.completedEligibleVisits === customer.averageSpend)).toBe(true)
+  })
+
+  it('denies another branch instead of returning unscoped CRM records', () => {
+    expect(() => new BrowserManagerInsightsService().getSnapshot('branch-west')).toThrow('Энэ салбарын харилцагч болон зэрэглэлийн мэдээллийг харах эрхгүй байна.')
+  })
+
+  it('returns an independent read model so a screen cannot mutate shared evidence', () => {
+    const service = new BrowserManagerInsightsService()
+    const first = service.getSnapshot()
+    first.customers[0].visits90d = 999
+    first.salesGoal!.actualSales = 999
+
+    expect(service.getSnapshot().customers[0].visits90d).toBe(14)
+    expect(service.getSnapshot().salesGoal!.actualSales).toBe(214_000_000)
+  })
+})

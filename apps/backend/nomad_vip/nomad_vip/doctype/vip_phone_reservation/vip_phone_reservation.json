@@ -1,0 +1,37 @@
+{
+ "actions": [],
+ "allow_rename": 0,
+ "autoname": "format:VIP-PHONE-RES-{YYYY}-{#####}",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["branch", "customer", "customer_name", "phone", "expected_at", "party_size", "status", "order_section", "order_details", "notes", "audit_section", "created_by", "arrived_at", "entry_event"],
+ "fields": [
+  {"fieldname":"branch","fieldtype":"Link","label":"Branch","options":"Branch","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"customer","fieldtype":"Link","label":"Customer","options":"Customer","in_standard_filter":1},
+  {"fieldname":"customer_name","fieldtype":"Data","label":"Customer Name","reqd":1,"in_list_view":1},
+  {"fieldname":"phone","fieldtype":"Data","label":"Phone","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"expected_at","fieldtype":"Datetime","label":"Expected At","reqd":1,"in_list_view":1},
+  {"fieldname":"party_size","fieldtype":"Int","label":"Party Size","default":"1"},
+  {"fieldname":"status","fieldtype":"Select","label":"Status","options":"Scheduled\nArrived\nCancelled","default":"Scheduled","reqd":1,"in_list_view":1,"in_standard_filter":1},
+  {"fieldname":"order_section","fieldtype":"Section Break","label":"Order"},
+  {"fieldname":"order_details","fieldtype":"Small Text","label":"Order Details"},
+  {"fieldname":"notes","fieldtype":"Small Text","label":"Notes"},
+  {"fieldname":"audit_section","fieldtype":"Section Break","label":"Audit"},
+  {"fieldname":"created_by","fieldtype":"Link","label":"Created By","options":"User","read_only":1},
+  {"fieldname":"arrived_at","fieldtype":"Datetime","label":"Arrived At","read_only":1},
+  {"fieldname":"entry_event","fieldtype":"Link","label":"Entry Event","options":"VIP Customer Entry Event","read_only":1}
+ ],
+ "module": "NOMAD VIP",
+ "name": "VIP Phone Reservation",
+ "naming_rule": "Expression",
+ "permissions": [
+  {"role":"System Manager","read":1,"write":1,"create":1,"delete":1,"report":1,"export":1},
+  {"role":"Operation","read":1,"write":1,"create":1,"report":1},
+  {"role":"Reception","read":1},
+  {"role":"Branch Manager","read":1,"write":1,"create":1,"report":1},
+  {"role":"CEO","read":1,"report":1,"export":1}
+ ],
+ "sort_field": "expected_at",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
