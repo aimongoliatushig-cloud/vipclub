@@ -285,10 +285,35 @@ const rankData = {
   ],
 }
 
+const rankIncomeComparison = {
+  selected_month: '2026-08',
+  period: { from: '2026-08-01', to: '2026-08-31', calculated_through: '2026-08-12', can_next: false },
+  scoring_date: '2026-08-12',
+  comparison_mode: 'daily_rank_calendar_period',
+  data_state: 'verified',
+  deduction_status: 'available',
+  service_count: 18,
+  baseline: { rank: 'Rank 3', percent: 50, service_income: 8400000, deduction: 0, calculated_salary: 4200000 },
+  scenario: { rank: 'Rank 2', percent: 60, service_income: 8400000, deduction: 0, calculated_salary: 5040000 },
+  delta: 840000,
+  mutates_payroll: false,
+}
+
 const loanOverview = {
   policy: { status: 'Configuration Required', request_enabled: false, message: 'Зээлийн нөхцөл баталгаажаагүй байна.' },
   evidence: { employment_type: 'Employee', branch: 'Nomad', current_rank: 'Rank 3', tenure_days: 420, verified_income: 4200000, income_window: { from: '2026-06-12', to: '2026-08-12' }, verified_bill_count: 9, outstanding_balance: null },
   required_decisions: ['Зээлийн дээд дүнгийн томьёо', 'Эргэн төлөх хувь', 'Батлах эрх'],
+}
+
+const requestHubData = {
+  summary: { pending_count: 1, resolved_count: 2, submitted_count: 1, total_count: 4 },
+  items: [
+    { id: 'LEAVE-QA-1', kind: 'leave', status: 'pending', submitted_at: '2026-08-20 21:00:00', title: 'Чөлөө', detail: '8-р сарын 28' },
+    { id: 'CORR-QA-1', kind: 'attendance_correction', status: 'approved', submitted_at: '2026-08-19 20:00:00', title: 'Ирц засвар', detail: '8-р сарын 19' },
+    { id: 'FEEDBACK-QA-1', kind: 'team_feedback', status: 'submitted', submitted_at: '2026-08-16 20:00:00', title: 'Багийн санал', detail: 'Илгээсэн' },
+    { id: 'PROFILE-QA-1', kind: 'profile_change', status: 'approved', submitted_at: '2026-08-10 20:00:00', title: 'Профайл өөрчлөх', detail: 'Зураг шинэчлэх' },
+  ],
+  next_cursor: null,
 }
 
 const finexSummary = {
@@ -506,7 +531,9 @@ async function defaultEntertainerApi(method) {
   if (method.endsWith('workforce.get_context')) return success(entertainerContext)
   if (method.endsWith('entertainer.get_dashboard')) return success(entertainerDashboard)
   if (method.endsWith('entertainer.get_rank')) return success(rankData)
+  if (method.endsWith('rank_income_comparison.get_rank_income_comparison')) return success(rankIncomeComparison)
   if (method.endsWith('entertainer.get_loan_overview')) return success(loanOverview)
+  if (method.endsWith('entertainer.get_my_request_hub')) return success(requestHubData)
   if (method.endsWith('entertainer_finex.get_finex_summary')) return success(finexSummary)
   if (method.endsWith('workday.get_workday')) return success(workdayData())
   if (method.endsWith('attendance_policy.get_leave_policy')) return success(leavePolicyData)
@@ -534,6 +561,7 @@ async function defaultLeadApi(method) {
   if (method.endsWith('entertainer.get_rank')) return success(rankData)
   if (method.endsWith('supervisor.get_readiness_queue')) return success(readinessQueueData)
   if (method.endsWith('entertainer_finex.get_finex_summary')) return success(finexSummary)
+  if (method.endsWith('entertainer.get_my_request_hub')) return success(requestHubData)
   return success({})
 }
 
@@ -625,6 +653,11 @@ async function visibleBottomNavLabels(page) {
   return page.locator('.bottom-nav button:visible').allTextContents().then(labels => labels.map(label => label.replace(/\s+/g, ' ').trim()))
 }
 
+async function waitForEntertainerShell(page) {
+  await page.getByRole('button', { name: /Миний мэдээлэл нээх/ }).waitFor()
+  await page.locator('.dancer-home-overview').waitFor()
+}
+
 function trackBrowserErrors(page) {
   const errors = []
   page.on('console', message => {
@@ -691,12 +724,13 @@ test('first render welcomes the employee before opening their workspace', { time
     })
     assert.ok(logoBox.width >= 100 && logoBox.height >= 79, `welcome logo too small: ${logoBox.width}x${logoBox.height}`)
     await page.screenshot({ path: join(SCREENSHOT_ROOT, 'company-welcome-mobile.png'), fullPage: true })
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    const headerLogoBox = await page.locator('.app-header .brand-mark--nomad').evaluate(element => {
+    await waitForEntertainerShell(page)
+    const headerAvatarBox = await page.locator('.dancer-app-header .header-profile-avatar').evaluate(element => {
       const box = element.getBoundingClientRect()
       return { width: box.width, height: box.height }
     })
-    assert.ok(headerLogoBox.width >= 72 && headerLogoBox.height >= 48, `header logo too small: ${headerLogoBox.width}x${headerLogoBox.height}`)
+    assert.ok(headerAvatarBox.width >= 40 && headerAvatarBox.height >= 40, `header avatar too small: ${headerAvatarBox.width}x${headerAvatarBox.height}`)
+    assert.match(await page.locator('.dancer-header-profile').innerText(), /Ану/)
     await assertNoHorizontalOverflow(page, 'company welcome')
   }, { waitUntil: 'domcontentloaded' })
 })
@@ -991,6 +1025,7 @@ test('manager roster keeps pagination, stale writes and latest-search rendering 
 
 test('entertainer navigation exposes personal work destinations without manager controls', { timeout: 30_000 }, async () => {
   await runScenario('entertainer-role-nav', context => installApi(context, (method, request) => {
+    if (method.endsWith('profile.get_editable_profile')) return success({ profile: workforceProfile(), pending_request: null })
     if (method.endsWith('entertainer_finex.get_finex_summary') && new URL(request.url()).searchParams.get('month') === '2026-07') {
       return success({
         ...finexSummary,
@@ -1009,14 +1044,48 @@ test('entertainer navigation exposes personal work destinations without manager 
     }
     return defaultEntertainerApi(method)
   }), async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    assert.match(await page.locator('.role-button').innerText(), /Бүжигчин/)
-    assert.deepEqual(await visibleBottomNavLabels(page), ['Нүүр', 'Орлого', 'QR', 'Зэрэглэл', 'Мэдээлэл'])
-    assert.match(await page.locator('.home-priority').innerText(), /Миний ээлж.*Цагийн чөлөө авах.*1 эрх үлдсэн/s)
-    assert.match(await page.locator('.home-attention').innerText(), /анхаарах зүйл алга/i)
+    await waitForEntertainerShell(page)
+    assert.match(await page.locator('.dancer-header-profile').innerText(), /Ану/)
+    assert.equal(await page.locator('.dancer-app-header .brand-mark').count(), 0)
+    assert.deepEqual(await visibleBottomNavLabels(page), ['Нүүр', 'Орлого', 'Ирц', 'Хүсэлт', 'Минийх'])
+    assert.match(await page.locator('.dancer-home-overview').innerText(), /Орлого.*₮4,200,000.*Ирц.*Ирсэн.*Ээлж 18:00–04:00.*Зэрэг.*73.2 оноо.*Санал, хүсэлт.*1 хүлээгдэж байна.*Зээл/s)
+    const homeActions = page.locator('.dancer-home-overview [data-destination]')
+    assert.equal(await homeActions.count(), 5)
+    assert.deepEqual(await homeActions.evaluateAll(elements => elements.map(element => element.dataset.destination)), ['income', 'attendance-qr', 'rank', 'requests', 'loan'])
+    const kpiActionStyles = await homeActions.evaluateAll(elements => elements.map(element => ({
+      radius: getComputedStyle(element).borderRadius,
+      minHeight: Number.parseFloat(getComputedStyle(element).minHeight),
+      backgroundImage: getComputedStyle(element).backgroundImage,
+    })))
+    assert.ok(kpiActionStyles.every(style => style.minHeight >= 44), 'KPI actions must keep a 44px touch target')
+    assert.notEqual(kpiActionStyles[0].backgroundImage, 'none', 'the approved income card uses the reference gradient')
+    assert.ok(kpiActionStyles.slice(1).every(style => style.backgroundImage === 'none'), `supporting actions stay on clean solid surfaces: ${JSON.stringify(kpiActionStyles)}`)
+    assert.match(String(await page.locator('[data-destination="requests"]').getAttribute('class')), /is-warning/, 'pending requests use the semantic warning tone')
+    assert.match(String(await page.locator('[data-destination="loan"]').getAttribute('class')), /is-neutral/, 'a closed loan state remains neutral')
+    assert.equal(await page.locator('.home-attention').count(), 0, 'empty attention state must not create filler UI')
     assert.equal(await page.locator('.home-week').count(), 0, 'full weekly calendar belongs in the schedule view')
     assert.equal(await page.locator('.rank-panel').count(), 0, 'rank detail belongs in the rank view')
+    await page.screenshot({ path: join(SCREENSHOT_ROOT, 'entertainer-home-viewport-390.png') })
     await page.screenshot({ path: join(SCREENSHOT_ROOT, 'entertainer-home-simplified-390.png'), fullPage: true })
+    await page.locator('.bottom-nav').getByRole('button', { name: 'Минийх', exact: true }).click()
+    await page.getByLabel('Дэлгэцийн горим').selectOption('dark')
+    assert.equal(await page.locator('html').getAttribute('data-theme'), 'dark')
+    await page.locator('.bottom-nav').getByRole('button', { name: 'Нүүр', exact: true }).click()
+    await page.locator('.dancer-home-overview').waitFor()
+    const darkCardStyle = await page.locator('.dancer-income-card').evaluate(element => ({
+      color: getComputedStyle(element).color,
+      background: getComputedStyle(element).backgroundImage,
+      surface: getComputedStyle(element).backgroundColor,
+    }))
+    assert.notEqual(darkCardStyle.background, 'none')
+    assert.notEqual(darkCardStyle.surface, 'rgba(0, 0, 0, 0)')
+    await page.screenshot({ path: join(SCREENSHOT_ROOT, 'entertainer-home-dark-viewport-390.png') })
+    await page.screenshot({ path: join(SCREENSHOT_ROOT, 'entertainer-home-dark-390.png'), fullPage: true })
+    await page.locator('.bottom-nav').getByRole('button', { name: 'Минийх', exact: true }).click()
+    await page.getByLabel('Дэлгэцийн горим').selectOption('light')
+    assert.equal(await page.locator('html').getAttribute('data-theme'), 'light')
+    await page.locator('.bottom-nav').getByRole('button', { name: 'Нүүр', exact: true }).click()
+    await page.locator('.dancer-home-overview').waitFor()
     for (const viewport of [{ width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
       await page.setViewportSize(viewport)
       await assertNoHorizontalOverflow(page, `simplified entertainer home at ${viewport.width}px`)
@@ -1026,9 +1095,13 @@ test('entertainer navigation exposes personal work destinations without manager 
     const mobileNavLayout = await page.locator('.bottom-nav').evaluate(element => ({
       height: element.getBoundingClientRect().height,
       rows: new Set([...element.querySelectorAll('button')].map(button => Math.round(button.getBoundingClientRect().top))).size,
+      activeRadius: getComputedStyle(element.querySelector('button.active')).borderRadius,
+      buttonMinHeights: [...element.querySelectorAll('button')].map(button => Number.parseFloat(getComputedStyle(button).minHeight)),
     }))
     assert.equal(mobileNavLayout.rows, 1, 'mobile navigation must stay on one row')
     assert.ok(mobileNavLayout.height <= 80, `mobile navigation is too tall: ${mobileNavLayout.height}px`)
+    assert.equal(mobileNavLayout.activeRadius, '10px')
+    assert.ok(mobileNavLayout.buttonMinHeights.every(height => height >= 44), 'bottom navigation must keep 44px touch targets')
     assert.equal(await page.locator('.bottom-nav button:visible').filter({ hasText: 'Ажилтнууд' }).count(), 0)
     await page.locator('.bottom-nav button[data-scan-state]').click()
     await page.getByRole('heading', { name: 'Ирц', exact: true }).waitFor()
@@ -1044,7 +1117,12 @@ test('entertainer navigation exposes personal work destinations without manager 
     await page.getByRole('heading', { name: 'Миний сарын орлого' }).waitFor()
     await page.locator('.income-chart-total strong').filter({ hasText: '4,200,000' }).waitFor()
     assert.match(await page.locator('.income-chart-total').innerText(), /3-р зэрэг.*50% ногдол/s)
-    assert.match(await page.locator('.income-ledger-metrics').innerText(), /Үйлчилгээний ногдол.*Суутгал.*Тооцоолсон цалин/s)
+    const ledgerText = await page.locator('.income-ledger-metrics').innerText()
+    assert.match(ledgerText, /Үйлчилгээний ногдол.*Суутгал.*Тооцоолсон цалин/s)
+    assert.match(ledgerText, /₮4,200,000/)
+    assert.doesNotMatch(ledgerText, /MNT/, 'income money labels use one employee-facing format')
+    assert.match(String(await page.locator('.income-data-state').getAttribute('class')), /is-success/, 'verified income uses the semantic success state')
+    assert.match(await page.locator('#income-chart-summary').textContent(), /8-р сарын 2.*₮650,000.*8-р сарын 12.*₮4,200,000/s)
     assert.match(await page.locator('.income-calculation-note').innerText(), /Эцсийн цалин биш/)
     assert.match(await page.locator('.income-analytics-card').innerText(), /8-р сарын 1.*8-р сарын 12.*4,200,000/s)
     assert.match(await page.locator('.income-service-breakdown').innerText(), /18 үйлчилгээ.*9 төлөгдсөн баримт/s)
@@ -1071,10 +1149,74 @@ test('entertainer navigation exposes personal work destinations without manager 
 
 test('entertainer home omits the redundant workday action', { timeout: 30_000 }, async () => {
   await runScenario('entertainer-home-no-workday-action', context => installApi(context, defaultEntertainerApi), async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
+    await waitForEntertainerShell(page)
     assert.equal(await page.getByRole('button', { name: /Өнөөдрийн ажлаа үргэлжлүүлэх/ }).count(), 0)
     assert.equal(await page.getByRole('button', { name: /Боломжгүй болгох|Бэлэн болох/ }).count(), 0)
     await assertNoHorizontalOverflow(page, 'entertainer home without redundant workday action')
+  })
+})
+
+test('all five approved dancer home actions open their own workflow route', { timeout: 30_000 }, async () => {
+  await runScenario('entertainer-home-card-routes', context => installApi(context, defaultEntertainerApi), async (_context, page) => {
+    for (const destination of ['income', 'attendance-qr', 'rank', 'requests', 'loan']) {
+      await page.locator(`[data-destination="${destination}"]`).click()
+      await page.waitForFunction(expected => new URL(window.location.href).searchParams.get('view') === expected, destination)
+      assert.equal(await page.getByText('Энэ хэсэгт хандах эрх алга', { exact: true }).count(), 0)
+      await page.goBack()
+      await page.locator('.dancer-home-overview').waitFor()
+    }
+    await assertNoHorizontalOverflow(page, 'dancer home card routes')
+  })
+})
+
+test('active loan policy accepts one complete entertainer request', { timeout: 30_000 }, async () => {
+  const writes = []
+  let requests = []
+  const activeOverview = () => ({
+    policy: {
+      status: 'Active', request_enabled: true, message: 'Зээлийн хүсэлт илгээх боломжтой.',
+      amount_step: 100000, repayment_min: 10, repayment_max: 30, repayment_step: 5, repayment_default: 20,
+    },
+    evidence: {
+      branch: 'Sapphire', current_rank: 'Rank 3', tenure_days: 420,
+      verified_income: 4200000, income_window: { from: '2026-06-12', to: '2026-08-12' },
+      verified_bill_count: 9, three_month_average: 3900000, maximum_amount: 2000000, outstanding_balance: null,
+    },
+    required_decisions: [],
+    requests,
+  })
+  await runScenario('entertainer-loan-request', context => installApi(context, async (method, request) => {
+    if (method.endsWith('entertainer.get_loan_overview')) return success(activeOverview())
+    if (method.endsWith('entertainer.submit_loan_request')) {
+      const body = Object.fromEntries(new URLSearchParams(request.postData() || ''))
+      writes.push(body)
+      const created = {
+        name: 'LOAN-QA-001', requested_at: '2026-08-24 21:30:00', requested_amount: Number(body.requested_amount),
+        repayment_rate: Number(body.repayment_rate), status: 'Pending', purpose: body.purpose,
+      }
+      requests = [created]
+      return success({ request: created, replayed: false })
+    }
+    return defaultEntertainerApi(method)
+  }), async (_context, page) => {
+    await page.locator('[data-destination="loan"]').click()
+    await page.getByRole('heading', { name: 'Зээл', exact: true }).waitFor()
+    assert.match(await page.locator('.loan-center').innerText(), /₮2,000,000/)
+    assert.doesNotMatch(await page.locator('.loan-center').innerText(), /MNT/, 'loan money labels match the dancer income format')
+    await page.getByLabel(/Хүсэх дүн/).fill('1500000')
+    await page.getByLabel(/Эргэн төлөх хувь/).fill('20')
+    await page.getByLabel('Зээлийн зориулалт').fill('Гэр бүлийн хэрэгцээ')
+    await page.getByRole('checkbox').check()
+    await page.getByRole('button', { name: 'Хүсэлт илгээх' }).click()
+    await page.getByText('Зээлийн хүсэлтийг илгээлээ.', { exact: true }).waitFor()
+    assert.equal(writes.length, 1)
+    assert.equal(writes[0].requested_amount, '1500000')
+    assert.equal(writes[0].repayment_rate, '20')
+    assert.equal(writes[0].accepted_terms, '1')
+    assert.equal(writes[0].terms_version, 'entertainer-loan-v1')
+    assert.match(await page.locator('.loan-history').innerText(), /1,500,000.*20%.*Хүлээгдэж байна/s)
+    await assertNoHorizontalOverflow(page, 'active loan request')
+    await page.screenshot({ path: join(SCREENSHOT_ROOT, 'entertainer-loan-request-390.png'), fullPage: true })
   })
 })
 
@@ -1170,7 +1312,7 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 1440, height: 900 
 for (const viewport of [{ width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
   test(`settlement calculation stays clear at ${viewport.width}px`, { timeout: 30_000 }, async () => {
     await runScenario(`settlement-clarity-${viewport.width}`, context => installApi(context, defaultEntertainerApi), async (_context, page) => {
-      await page.getByRole('heading', { name: 'Ану' }).waitFor()
+      await waitForEntertainerShell(page)
       const navigation = viewport.width >= 1024 ? page.locator('.desktop-nav') : page.locator('.bottom-nav')
       await navigation.getByRole('button', { name: 'Орлого', exact: true }).click()
       await page.getByRole('heading', { name: 'Миний сарын орлого' }).waitFor()
@@ -1186,12 +1328,11 @@ for (const viewport of [{ width: 390, height: 844 }, { width: 768, height: 1024 
 for (const viewport of [{ width: 390, height: 844 }, { width: 768, height: 1024 }, { width: 1440, height: 900 }]) {
   test(`rank overview keeps today's points and current rank visible at ${viewport.width}px`, { timeout: 30_000 }, async () => {
     await runScenario(`rank-today-summary-${viewport.width}`, context => installApi(context, defaultEntertainerApi), async (_context, page) => {
-      await page.getByRole('heading', { name: 'Ану' }).waitFor()
-      const navigation = viewport.width >= 1024 ? page.locator('.desktop-nav') : page.locator('.bottom-nav')
-      await navigation.getByRole('button', { name: 'Зэрэглэл', exact: true }).click()
+      await waitForEntertainerShell(page)
+      await page.locator('[data-destination="rank"]').click()
       await page.getByRole('heading', { name: 'Миний зэрэглэл' }).waitFor()
       const todaySummary = page.getByTestId('today-rank-summary')
-      assert.match(await todaySummary.innerText(), /ӨНӨӨДРИЙН ЗЭРЭГ\s*3-р зэрэг/s)
+      assert.match(await todaySummary.innerText(), /НИЙТ ДУНДАЖ ОНОО\s*3-р зэрэг.*73\.16 оноо/s)
       assert.match(await todaySummary.innerText(), /73.16 оноо · 50%/s)
       assert.match(await todaySummary.innerText(), /Дараагийн шат\s*2-р зэрэг · 6.84 оноо дутуу/s)
       assert.equal(await page.locator('.rank-disclosure[open]').count(), 0)
@@ -1240,14 +1381,14 @@ test('entertainer profile keeps identity, photo and preferences in one mobile vi
       return success({})
     })
   }, async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    await page.locator('.bottom-nav').getByRole('button', { name: 'Мэдээлэл', exact: true }).click()
+    await waitForEntertainerShell(page)
+    await page.locator('.bottom-nav').getByRole('button', { name: 'Минийх', exact: true }).click()
     await page.getByRole('heading', { name: 'Миний мэдээлэл' }).waitFor()
     assert.equal((await page.locator('.self-profile-card #self-profile-title').innerText()).trim(), 'Ану')
     assert.equal(await page.getByLabel('Профайл зураг оруулах').count(), 1)
     assert.equal(await page.getByRole('button', { name: /Мэдээлэл өөрчлөх хүсэлт/ }).count(), 0)
     await page.getByText('Мэдэгдэл', { exact: true }).waitFor()
-    await page.getByText('Харанхуй горим', { exact: true }).waitFor()
+    await page.getByText('Дэлгэцийн горим', { exact: true }).waitFor()
     await page.getByText('Нууц үг солих', { exact: true }).waitFor()
     await page.getByRole('button', { name: /Системээс гарах/ }).waitFor()
     assert.equal(submissions.length, 0)
@@ -1441,13 +1582,20 @@ async function installFixedClock(page, instant) {
   }, { fixedInstant: instant })
 }
 
+async function openRequestFlow(page, label) {
+  await page.locator('.bottom-nav').getByRole('button', { name: 'Хүсэлт', exact: true }).click()
+  await page.getByRole('heading', { name: 'Санал, хүсэлт' }).waitFor()
+  await page.getByRole('button', { name: 'Шинэ хүсэлт' }).click()
+  await page.locator('#request-create-menu').getByRole('button', { name: label }).click()
+}
+
 test('overnight leave request is open at 09:00 until the previous-day 21:00 cutoff', { timeout: 30_000 }, async () => {
   await runScenario('leave-open-at-0900', async (context, page) => {
     await installFixedClock(page, '2026-08-12T01:00:00.000Z')
     await installApi(context, defaultEntertainerApi)
   }, async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    await page.locator('.home-priority').getByRole('button', { name: /Цагийн чөлөө авах/ }).click()
+    await waitForEntertainerShell(page)
+    await openRequestFlow(page, /Чөлөө авах/)
     await page.getByRole('heading', { name: 'Чөлөө авах' }).waitFor()
     assert.equal(await page.getByLabel('Чөлөө авах ээлжийн өдөр').inputValue(), '2026-08-13')
     await page.getByText(/2026\.08\.12-ны 21:00 хүртэл/).first().waitFor()
@@ -1482,8 +1630,8 @@ test('submitted hourly leave appears immediately in My requests at 390px', { tim
       return defaultEntertainerApi(method)
     })
   }, async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    await page.locator('.home-priority').getByRole('button', { name: /Цагийн чөлөө авах/ }).click()
+    await waitForEntertainerShell(page)
+    await openRequestFlow(page, /Чөлөө авах/)
     await page.getByRole('heading', { name: 'Чөлөө авах' }).waitFor()
     await page.getByLabel('Шалтгаан').fill('Эрүүл мэндийн шалтгаантай')
     await page.getByRole('button', { name: 'Хүсэлт илгээх' }).click()
@@ -1503,8 +1651,8 @@ test('overnight leave request closes after the previous-day 21:00 cutoff', { tim
     await installFixedClock(page, '2026-08-12T13:01:00.000Z')
     await installApi(context, defaultEntertainerApi)
   }, async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    await page.locator('.home-priority').getByRole('button', { name: /Цагийн чөлөө авах/ }).click()
+    await waitForEntertainerShell(page)
+    await openRequestFlow(page, /Чөлөө авах/)
     await page.getByRole('heading', { name: 'Чөлөө авах' }).waitFor()
     await page.getByText('Хүсэлтийн хугацаа дууссан', { exact: true }).waitFor()
     assert.equal(await page.getByLabel('Шалтгаан').isDisabled(), true)
@@ -1536,8 +1684,8 @@ test('approved leave stays approved after cutoff and does not show a second requ
       return defaultEntertainerApi(method)
     })
   }, async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    await page.locator('.home-priority').getByRole('button', { name: /Цагийн чөлөө авах/ }).click()
+    await waitForEntertainerShell(page)
+    await openRequestFlow(page, /Чөлөө авах/)
     await page.getByRole('heading', { name: 'Чөлөө авах' }).waitFor()
     await page.getByText('Чөлөө зөвшөөрөгдсөн', { exact: true }).first().waitFor()
     assert.equal(await page.getByText('Хүсэлтийн хугацаа дууссан', { exact: true }).count(), 0)
@@ -1576,8 +1724,6 @@ test('an entertainer browses every week and sees attended days in green', { time
     }
     return defaultEntertainerApi(method)
   }), async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    await page.locator('.home-priority').getByRole('button', { name: /Миний ээлж/ }).click()
     await page.getByRole('heading', { name: 'Миний ээлж' }).waitFor()
     assert.match(await page.locator('.personal-week-schedule article.is-attended').innerText(), /08[-/]12.*Ирсэн/s)
     await page.getByRole('button', { name: 'Дараагийн долоо хоног' }).click()
@@ -1586,7 +1732,7 @@ test('an entertainer browses every week and sees attended days in green', { time
     assert.equal(await page.locator('.personal-week-schedule article.is-attended').count(), 1)
     await assertNoHorizontalOverflow(page, 'personal schedule week navigation')
     await page.screenshot({ path: join(SCREENSHOT_ROOT, 'entertainer-schedule-attended-next-week.png'), fullPage: true })
-  })
+  }, { search: '?view=schedule' })
 })
 
 test('an entertainer opens and submits team climate feedback at 390px', { timeout: 30_000 }, async () => {
@@ -1613,11 +1759,9 @@ test('an entertainer opens and submits team climate feedback at 390px', { timeou
     }
     return defaultEntertainerApi(method)
   }), async (_context, page) => {
-    await page.getByRole('heading', { name: 'Ану' }).waitFor()
-    await page.getByRole('button', { name: 'Мэдээлэл', exact: true }).click()
-    await page.getByRole('heading', { name: 'Миний мэдээлэл' }).waitFor()
-    await page.getByRole('button', { name: 'Охидын уур амьсгалын санал нээх' }).click()
-    await page.getByRole('heading', { name: 'Охидын уур амьсгал' }).waitFor()
+    await waitForEntertainerShell(page)
+    await openRequestFlow(page, /Багийн санал/)
+    await page.getByRole('heading', { name: 'Багийн уур амьсгал' }).waitFor()
     await page.getByLabel('Хэнд санал өгөх вэ?').selectOption('ENT-GINJIN')
     await page.getByRole('textbox').fill('Ээлжийн үеэр багтайгаа маш сайн ойлголцож ажилласан.')
     await page.getByRole('button', { name: 'Санал илгээх' }).click()
@@ -1739,7 +1883,7 @@ test('a non-entertainer employee does not scan again after arrival', { timeout: 
   await runScenario('general-employee-checkout', async (context) => {
     await context.grantPermissions(['geolocation'], { origin })
     await context.setGeolocation({ latitude: 47.9188, longitude: 106.9176, accuracy: 10 })
-    await installApi(context, async (method, request) => {
+    await installApi(context, async (method, _request) => {
       if (method.endsWith('workforce.get_context')) return success(employeeContext)
       if (method.endsWith('attendance.get_my_attendance_status')) return success({
         employee: 'EMP-QA-GENERAL', employee_name: 'Бат Ажилтан', branch: 'Nomad', work_date: '2026-08-13',
@@ -1842,7 +1986,7 @@ test('entertainer home keeps attendance visible when no shift is assigned', asyn
       return success({})
     })
   }, async (_context, page) => {
-    const attendance = page.getByRole('button', { name: /Ирц бүртгэл/ })
+    const attendance = page.locator('[data-destination="attendance-qr"]')
     await attendance.waitFor()
     await assertNoHorizontalOverflow(page, 'attendance without shift')
   })

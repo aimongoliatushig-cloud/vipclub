@@ -1,5 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import '@fontsource-variable/inter/wght.css'
 import '@fontsource/noto-sans/cyrillic-400.css'
 import '@fontsource/noto-sans/cyrillic-500.css'
 import '@fontsource/noto-sans/cyrillic-600.css'

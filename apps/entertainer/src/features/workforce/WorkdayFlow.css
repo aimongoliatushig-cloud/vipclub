@@ -56,3 +56,48 @@
   .correction-decision-panel>div{display:grid;grid-template-columns:1fr 1fr}
   .correction-decision-panel button{padding:0 10px}
 }
+
+/* Calm shared workbench treatment for dancer and lead detail views. */
+#root .workday-page{max-width:760px;color:var(--wb-ink)}
+#root .workday-header>button,#root .workday-secondary{border-color:var(--wb-border);border-radius:10px;background:var(--wb-surface);color:var(--wb-ink)}
+#root .workday-header>button:hover,#root .workday-secondary:hover{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-strong);transform:none}
+#root .workday-header small{color:var(--wb-muted);text-transform:none;letter-spacing:0}
+#root .workday-status{min-height:136px;border-color:var(--wb-border);border-radius:16px;background:var(--wb-surface)}
+#root .workday-status:after{display:none}
+#root .workday-status-icon{border-color:var(--primary-border);border-radius:12px;background:var(--primary-soft);color:var(--primary-strong)}
+#root .workday-status.status-working{border-color:var(--wb-border);background:var(--wb-surface)}
+#root .workday-status.status-working .workday-status-icon{border-color:color-mix(in srgb,var(--wb-success) 30%,var(--wb-border));background:var(--wb-success-soft);color:var(--wb-success)}
+#root .workday-status>span{color:var(--wb-muted)}
+#root .today-shift-card,#root .correction-card,#root .correction-history,#root .manager-correction-intro,#root .manager-correction-list>article{border-color:var(--wb-border);border-radius:16px;background:var(--wb-surface);box-shadow:none}
+#root .today-shift-card>header svg,#root .correction-toggle>span>svg,#root .correction-toggle>svg,#root .correction-history>header svg,#root .manager-correction-intro>svg{color:var(--primary)}
+#root .today-shift-card>header i{border-radius:7px;background:var(--wb-danger-soft);color:var(--wb-danger)}
+#root .today-shift-card>header i.complete{background:var(--wb-success-soft);color:var(--wb-success)}
+#root .workday-primary,#root .availability-actions button.primary-action,#root .manager-correction-list footer button.approve,#root .correction-decision-panel button.approve{border-color:var(--primary);border-radius:10px;background:var(--primary);color:#fff}
+#root .workday-primary:hover:not(:disabled),#root .availability-actions button.primary-action:hover:not(:disabled),#root .manager-correction-list footer button.approve:hover:not(:disabled),#root .correction-decision-panel button.approve:hover:not(:disabled){border-color:var(--primary-hover);background:var(--primary-hover);transform:none}
+#root .workday-primary small{color:rgb(255 255 255 / 78%)}
+#root .availability-actions button{border-color:var(--wb-border);border-radius:10px;background:var(--wb-surface);color:var(--wb-ink)}
+#root .availability-actions button:hover:not(:disabled){border-color:var(--primary);background:var(--primary-soft);color:var(--primary-strong);transform:none}
+#root .availability-actions p{color:var(--wb-success)}
+#root .verified-summary{gap:0;border:1px solid var(--wb-border);border-radius:14px;overflow:hidden;background:var(--wb-surface)}
+#root .verified-summary article{min-height:88px;border:0;border-radius:0;background:transparent}
+#root .verified-summary article+article{border-left:1px solid var(--wb-border)}
+#root .verified-summary strong{color:var(--wb-ink)}
+#root .correction-toggle{color:var(--wb-ink)}
+#root .correction-kind{grid-template-columns:1fr}
+#root .correction-kind button{border-color:var(--primary-border);border-radius:10px;background:var(--primary-soft);color:var(--primary-strong)}
+#root .correction-form input,#root .correction-form textarea,#root .correction-decision-panel textarea{border-color:var(--wb-border-strong);border-radius:10px;background:var(--wb-surface);color:var(--wb-ink)}
+#root .workday-inline-error,#root .correction-review-blocked{border-color:color-mix(in srgb,var(--wb-danger) 35%,var(--wb-border));background:var(--wb-danger-soft);color:var(--wb-danger)}
+#root .workday-inline-success{margin:0 16px 16px;padding:12px;display:flex;align-items:flex-start;gap:8px;color:var(--wb-success);border:1px solid color-mix(in srgb,var(--wb-success) 32%,var(--wb-border));border-radius:10px;background:color-mix(in srgb,var(--wb-success) 8%,var(--wb-surface));font-size:12px;line-height:1.45}
+#root .workday-inline-success svg{width:18px;flex:0 0 auto}
+#root .correction-history>header small{color:var(--wb-muted)}
+#root .correction-history>article>span{border-radius:7px;background:var(--primary-soft);color:var(--primary-strong)}
+#root .correction-history>article>span.approved{background:var(--wb-success-soft);color:var(--wb-success)}
+#root .correction-history>article>span.rejected{background:var(--wb-danger-soft);color:var(--wb-danger)}
+#root .manager-correction-list header b,#root .correction-evidence .proposed dd{color:var(--primary-strong)}
+#root .correction-evidence{border-color:var(--wb-border);background:var(--wb-surface-subtle)}
+#root .manager-correction-list footer button,#root .correction-decision-panel button{min-height:44px;border-color:var(--wb-border);border-radius:10px;background:var(--wb-surface);color:var(--wb-ink)}
+#root .correction-decision-panel button.reject-confirm{border-color:var(--wb-danger);background:var(--wb-danger);color:#fff}
+#root .workday-page :is(button,input,textarea):focus-visible{outline:3px solid var(--focus-ring);outline-offset:2px;box-shadow:none}
+#root .workday-page :is(button,input,textarea):disabled{cursor:not-allowed;opacity:.55}
+@media(max-width:640px){#root .verified-summary{grid-template-columns:1fr}#root .verified-summary article:first-child{grid-column:auto}#root .verified-summary article+article{border-top:1px solid var(--wb-border);border-left:0}}
+@media(prefers-reduced-motion:reduce){#root .workday-page *{transition-duration:.01ms!important;animation-duration:.01ms!important}}

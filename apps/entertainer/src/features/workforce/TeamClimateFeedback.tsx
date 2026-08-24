@@ -61,7 +61,7 @@ export function TeamClimateFeedbackPage({ onBack, backLabel = 'Миний мэд
   return <div className="page team-climate-page">
     <button className="back-link" type="button" onClick={onBack}><ChevronLeft />{backLabel}</button>
     <header className="team-climate-title">
-      <div><span>БАГИЙН ДОТООД САНАЛ</span><h1>Охидын уур амьсгал</h1><p>Хамт ажиллаж буй бүжигчиндээ өгөх саналаа товч, бодитоор бичнэ үү.</p></div>
+      <div><h1>Багийн уур амьсгал</h1><p>Хамт ажиллаж буй бүжигчиндээ өгөх саналаа товч, бодитоор бичнэ үү.</p></div>
       <HeartHandshake aria-hidden="true" />
     </header>
 
@@ -88,7 +88,7 @@ export function TeamClimateFeedbackPage({ onBack, backLabel = 'Миний мэд
         <small className="team-climate-counter">{feedback.trim().length}/500 · хамгийн багадаа 10 тэмдэгт</small>
       </label>
 
-      <button className="gold-button" type="submit" disabled={busy || !target || feedback.trim().length < 10}>{busy ? <RefreshCw className="spin" /> : <Send />}{busy ? 'Хадгалж байна…' : 'Санал илгээх'}</button>
+      <button className="team-climate-submit" type="submit" disabled={busy || !target || feedback.trim().length < 10}>{busy ? <RefreshCw className="spin" /> : <Send />}{busy ? 'Хадгалж байна…' : 'Санал илгээх'}</button>
     </form> : null}
   </div>
 }

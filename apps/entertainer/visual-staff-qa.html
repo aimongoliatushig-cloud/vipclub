@@ -264,7 +264,99 @@
               reviews: [],
             })
           }
+          if (method.endsWith('rank_income_comparison.get_rank_income_comparison')) {
+            return payload({
+              selected_month: '2026-08',
+              period: { from: '2026-08-01', to: '2026-08-31', calculated_through: '2026-08-19', can_next: false },
+              scoring_date: '2026-08-19',
+              comparison_mode: 'daily_rank_calendar_period',
+              data_state: 'verified',
+              deduction_status: 'available',
+              service_count: 18,
+              baseline: { rank: 'Rank 3', percent: 50, service_income: 40509334, deduction: 39000, calculated_salary: 20215667 },
+              scenario: { rank: 'Rank 2', percent: 60, service_income: 40509334, deduction: 39000, calculated_salary: 24266600 },
+              delta: 4050933,
+              mutates_payroll: false,
+            })
+          }
           if (method.endsWith('entertainer_finex.get_finex_summary')) {
+            const requestedMonth = /^\d{4}-\d{2}$/.test(url.searchParams.get('month') || '')
+              ? url.searchParams.get('month')
+              : '2026-08'
+            if (requestedMonth === '2026-07') {
+              let cumulativeIncome = 0
+              const julyIncome = [
+                ['2026-07-02', 1000000],
+                ['2026-07-05', 1250000],
+                ['2026-07-08', 1500000],
+                ['2026-07-11', 1200000],
+                ['2026-07-14', 1750000],
+                ['2026-07-17', 1500000],
+                ['2026-07-20', 1800000],
+                ['2026-07-23', 1324667],
+                ['2026-07-27', 2000000],
+                ['2026-07-31', 2000000],
+              ]
+              return payload({
+                window: { from: '2026-07-01', to: '2026-07-31' },
+                selected_month: '2026-07',
+                data_state: 'demo',
+                current_month_income: 15324667,
+                net_income: 15324667,
+                points: 1532.47,
+                point_rule_mnt: 10000,
+                service_count: 10,
+                bill_count: 9,
+                linked_customer_count: 7,
+                linked_customer_bill_count: 9,
+                repeat_customer_count: 2,
+                months: [{ month: '2026-07', income: 15324667, services: 10, bills: 9 }],
+                days: julyIncome.map(([date, income]) => ({
+                  date,
+                  income,
+                  cumulative_income: (cumulativeIncome += income),
+                })),
+                recent_services: julyIncome.map(([date, amount], index) => ({
+                  key: `july-service-${index + 1}`,
+                  date,
+                  service: index % 3 === 1 ? 'VIP 3 Room' : 'Table Service',
+                  service_total: amount * 2,
+                  amount,
+                  percent: 50,
+                  payout_rank: 'Rank 3',
+                  rate_source: 'rank_policy',
+                  previous_percent: 50,
+                  percent_change: 0,
+                })).reverse(),
+                payout_policy: { rank: 'Rank 3', percent: 50, effective_from: '2026-07-01', source: 'Зэрэглэлийн түүх', applies_to: 'table_service' },
+                last_synced_at: '2026-07-31 08:00:13',
+                quality: { verified: false, customer_linkage_verified: false, skipped_inconsistent_items: 0, skipped_malformed_bills: 0, rank_policy_services: 10, finex_allocation_services: 0, rank_policy_mismatches: 0 },
+              })
+            }
+            if (requestedMonth !== '2026-08') {
+              const [year, month] = requestedMonth.split('-').map(Number)
+              const lastDay = String(new Date(Date.UTC(year, month, 0)).getUTCDate()).padStart(2, '0')
+              return payload({
+                window: { from: `${requestedMonth}-01`, to: `${requestedMonth}-${lastDay}` },
+                selected_month: requestedMonth,
+                data_state: 'demo',
+                current_month_income: 0,
+                net_income: 0,
+                points: 0,
+                point_rule_mnt: 10000,
+                service_count: 0,
+                bill_count: 0,
+                linked_customer_count: 0,
+                linked_customer_bill_count: 0,
+                repeat_customer_count: 0,
+                months: [{ month: requestedMonth, income: 0, services: 0, bills: 0 }],
+                days: [],
+                recent_services: [],
+                payout_policy: { rank: 'Rank 3', percent: 50, effective_from: `${requestedMonth}-01`, source: 'Зэрэглэлийн түүх', applies_to: 'table_service' },
+                last_synced_at: `${requestedMonth}-${lastDay} 08:00:13`,
+                quality: { verified: false, customer_linkage_verified: false, skipped_inconsistent_items: 0, skipped_malformed_bills: 0, rank_policy_services: 0, finex_allocation_services: 0, rank_policy_mismatches: 0 },
+              })
+            }
             return payload({
               window: { from: '2026-08-01', to: '2026-08-19' },
               selected_month: '2026-08',
@@ -331,15 +423,30 @@
               required_decisions: [], requests: [],
             })
           }
+          if (method.endsWith('entertainer.get_my_request_hub')) {
+            return payload({
+              summary: { pending_count: 1, resolved_count: 2, submitted_count: 1, total_count: 4 },
+              items: [
+                { id: 'LEAVE-QA-1', kind: 'leave', status: 'pending', submitted_at: '2026-08-20 21:00:00', title: 'Чөлөө', detail: '8-р сарын 28' },
+                { id: 'CORR-QA-1', kind: 'attendance_correction', status: 'approved', submitted_at: '2026-08-19 20:00:00', title: 'Ирц засвар', detail: '8-р сарын 19' },
+                { id: 'FEEDBACK-QA-1', kind: 'team_feedback', status: 'submitted', submitted_at: '2026-08-16 20:00:00', title: 'Багийн санал', detail: 'Илгээсэн' },
+                { id: 'PROFILE-QA-1', kind: 'profile_change', status: 'approved', submitted_at: '2026-08-10 20:00:00', title: 'Профайл өөрчлөх', detail: 'Зураг шинэчлэх' },
+              ],
+              next_cursor: null,
+            })
+          }
           if (method.endsWith('attendance_policy.get_leave_policy')) {
+            const selectedMonth = /^\d{4}-\d{2}$/.test(url.searchParams.get('month') || '')
+              ? url.searchParams.get('month')
+              : '2026-08'
             const used = leaveRequests.filter(row => row.source_type !== 'Leave Application' && ['Pending', 'Approved'].includes(row.status)).length
             return payload({
-              selected_month: '2026-08',
+              selected_month: selectedMonth,
               policy: { absence_deduction: 30000, late_deduction_per_minute: 500, same_day_request_deadline: '12:00:00', emergency_leave_monthly_limit: 3, hourly_leave_arrival_deadline: '00:00:00', timezone: 'Asia/Ulaanbaatar' },
               quota: { used, remaining: Math.max(0, 3 - used) },
               day_leave_types: ['Цалингүй чөлөө'],
               requests: leaveRequests,
-              penalties: rankQaMode ? [
+              penalties: rankQaMode && selectedMonth === '2026-08' ? [
                 { name: 'PEN-QA-LATE', attendance_date: '2026-08-18', penalty_type: 'Late', late_minutes: 18, missed_rounds: 0, amount: 9000, status: 'Approved', reason: '18 минут хоцорсон' },
                 { name: 'PEN-QA-ABSENCE', attendance_date: '2026-08-15', penalty_type: 'Absence', late_minutes: 0, missed_rounds: 0, amount: 30000, status: 'Approved', reason: 'Ирц бүртгэгдээгүй' },
               ] : [],

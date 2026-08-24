@@ -1,19 +1,21 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertTriangle,
+  ArrowLeft,
+  BarChart3,
   Bell,
-  CalendarClock,
   CalendarDays,
   CheckCircle2,
   ChevronRight,
   ClipboardCheck,
+  ClipboardList,
   Clock3,
   Home,
   DoorOpen,
-  HeartHandshake,
   KeyRound,
   LogOut,
   Medal,
+  MessageCircle,
   QrCode,
   RefreshCw,
   Search,
@@ -33,6 +35,9 @@ import type {
   ManagerDashboard,
   RankData,
   RankIncomeComparison,
+  LoanOverview,
+  FinexEntertainerSummary,
+  RequestHubData,
 } from "./api";
 import {
   AccessBanner,
@@ -78,6 +83,10 @@ import { ManagerSchedulePage } from "./features/workforce/ManagerSchedule";
 import { LeadReadinessChecklist } from "./features/workforce/ReadinessChecklist";
 import { DailyRoundsChecklist } from "./features/workforce/DailyRoundsChecklist";
 import { TeamClimateFeedbackPage } from "./features/workforce/TeamClimateFeedback";
+import {
+  RequestHub,
+  type RequestCreateKind,
+} from "./features/requests/RequestHub";
 import { GuestServiceFeedPage } from "./features/screens/GuestServiceFeed";
 import { ManagerSettingsPage } from "./features/settings/ManagerSettings";
 import {
@@ -91,6 +100,7 @@ import "./Premium.css";
 import "./Workbench.css";
 import "./RuntimeStates.css";
 import "./theme.css";
+import "./DancerApp.css";
 import { ThemeToggle } from "./components/ThemeToggle";
 
 type Tab = StaffTab;
@@ -134,9 +144,24 @@ const requestedTab = () => {
   return isStaffTab(value) ? value : "home";
 };
 
+const REQUEST_KINDS = ["leave", "attendance", "profile", "feedback"] as const;
+
+const requestedRequestKind = (): RequestCreateKind | undefined => {
+  const value = new URLSearchParams(window.location.search).get("kind");
+  return REQUEST_KINDS.includes(value as RequestCreateKind)
+    ? (value as RequestCreateKind)
+    : undefined;
+};
+
+const storedReturnTab = (): Tab | undefined => {
+  const value = window.history.state?.returnTab;
+  return isStaffTab(value) ? value : undefined;
+};
+
 const primaryNavigationTab = (
   mode: AppContext["mode"],
   tab: Tab,
+  returnTab?: Tab,
 ): Tab => {
   if (mode === "manager") {
     if (["roster-review", "person-detail"].includes(tab)) return "people";
@@ -145,12 +170,13 @@ const primaryNavigationTab = (
   }
   if (mode === "lead" || mode === "entertainer") {
     if (tab === "loan") return "income";
-    if (tab === "climate") return "profile";
+    if (tab === "rank") return "profile";
+    if (["leave", "climate"].includes(tab)) return "requests";
+    if (tab === "workday")
+      return returnTab === "requests" ? "requests" : "attendance-qr";
     if (
       [
         "schedule",
-        "leave",
-        "workday",
         "readiness",
         "rounds",
         "guests",
@@ -175,6 +201,7 @@ const writeStaffRoute = (
   if (nextTab === "home") url.searchParams.delete("view");
   else url.searchParams.set("view", nextTab);
   if (nextTab !== "attendance-qr") url.searchParams.delete("attendance");
+  url.searchParams.delete("kind");
   const currentState =
     window.history.state && typeof window.history.state === "object"
       ? window.history.state
@@ -184,6 +211,32 @@ const writeStaffRoute = (
     [STAFF_ROUTE_STATE]: true,
     staffTab: nextTab,
     returnTab: returnTab || null,
+  };
+  if (method === "push") window.history.pushState(state, "", url);
+  else window.history.replaceState(state, "", url);
+};
+
+const writeRequestRoute = (
+  kind: RequestCreateKind | undefined,
+  method: "push" | "replace",
+) => {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("tab");
+  url.searchParams.delete("attendance");
+  url.searchParams.set("view", "requests");
+  if (kind) url.searchParams.set("kind", kind);
+  else url.searchParams.delete("kind");
+  const currentState =
+    window.history.state && typeof window.history.state === "object"
+      ? window.history.state
+      : {};
+  const state = {
+    ...currentState,
+    [STAFF_ROUTE_STATE]: true,
+    staffTab: "requests",
+    returnTab: "requests",
+    requestKind: kind || null,
+    requestParent: Boolean(kind && method === "push"),
   };
   if (method === "push") window.history.pushState(state, "", url);
   else window.history.replaceState(state, "", url);
@@ -210,10 +263,45 @@ const money = new Intl.NumberFormat("mn-MN", {
   currency: "MNT",
   maximumFractionDigits: 0,
 });
+const wholeNumber = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+const formatHeroMoney = (value?: number | null) =>
+  value === null || value === undefined ? null : `₮${wholeNumber.format(value)}`;
+const formatCompactMoney = (value?: number | null) => {
+  if (value === null || value === undefined) return null;
+  if (Math.abs(value) >= 1_000_000) {
+    return `${new Intl.NumberFormat("mn-MN", { maximumFractionDigits: 1 }).format(value / 1_000_000)} сая ₮`;
+  }
+  return money.format(value);
+};
+const hasLoanOverviewShape = (value?: LoanOverview): value is LoanOverview =>
+  Boolean(value?.policy && value?.evidence && Array.isArray(value.required_decisions));
+const requestHubKinds = new Set(["leave", "attendance_correction", "profile_change", "team_feedback"]);
+const requestHubStatuses = new Set(["pending", "approved", "rejected", "cancelled", "withdrawn", "submitted"]);
+const hasRequestHubShape = (value: unknown): value is RequestHubData => {
+  if (!value || typeof value !== "object") return false;
+  const candidate = value as Record<string, unknown>;
+  const summary = candidate.summary as Record<string, unknown> | undefined;
+  const items = candidate.items;
+  if (!summary || !Array.isArray(items)) return false;
+  if (candidate.next_cursor !== undefined && candidate.next_cursor !== null && typeof candidate.next_cursor !== "string") return false;
+  if (!["pending_count", "resolved_count", "submitted_count", "total_count"].every(key =>
+    typeof summary[key] === "number" && Number.isFinite(summary[key]),
+  )) return false;
+  return items.every(item => {
+    if (!item || typeof item !== "object") return false;
+    const row = item as Record<string, unknown>;
+    return typeof row.id === "string"
+      && typeof row.title === "string"
+      && typeof row.submitted_at === "string"
+      && (row.detail === undefined || row.detail === null || typeof row.detail === "string")
+      && (row.decision_reason === undefined || row.decision_reason === null || typeof row.decision_reason === "string")
+      && requestHubKinds.has(String(row.kind))
+      && requestHubStatuses.has(String(row.status));
+  });
+};
 const mongoliaDateKey = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Ulaanbaatar",
 });
-const shortDate = new Intl.DateTimeFormat("mn-MN", { day: "2-digit" });
 const dayLabels = ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"];
 const WELCOME_MINIMUM_MS = 900;
 
@@ -395,6 +483,31 @@ function Header({
     roleLabel(ctx.mode, ctx.designation);
   const avatarInitial =
     Array.from(avatarName)[0]?.toLocaleUpperCase("mn-MN") || "Х";
+  if (isEntertainerMode(ctx.mode)) {
+    return (
+      <header className="app-header dancer-app-header">
+        <button
+          className="dancer-header-profile"
+          type="button"
+          aria-label={`${avatarName} — Миний мэдээлэл нээх`}
+          onClick={() => onTab("profile")}
+        >
+          <span className="header-profile-avatar" aria-hidden="true">
+            <img src={profilePhoto || "/staff/profile-dancer-default.webp"} alt="" />
+          </span>
+          <strong>{avatarName}</strong>
+        </button>
+        <button
+          className="dancer-header-notifications"
+          type="button"
+          aria-label="Мэдэгдэл"
+          onClick={() => onTab("notifications")}
+        >
+          <Bell aria-hidden="true" />
+        </button>
+      </header>
+    );
+  }
   return (
     <header className="app-header">
       <Brand branch={ctx.branch} />
@@ -433,11 +546,9 @@ function Header({
 }
 
 function ProfilePreferences({
-  onOpenClimate,
   onLogout,
   logoutBusy,
 }: {
-  onOpenClimate?: () => void;
   onLogout: () => void;
   logoutBusy: boolean;
 }) {
@@ -587,26 +698,11 @@ function ProfilePreferences({
       ) : null}
       <div className="profile-preference-row">
         <span>
-          <strong>Харанхуй горим</strong>
-          <small>Дэлгэцийн өнгийг солих</small>
+          <strong>Дэлгэцийн горим</strong>
+          <small>Цайвар, бараан эсвэл системийн тохиргоо</small>
         </span>
         <ThemeToggle />
       </div>
-      {onOpenClimate ? (
-        <button
-          className="profile-preference-row profile-preference-link"
-          type="button"
-          onClick={onOpenClimate}
-          aria-label="Охидын уур амьсгалын санал нээх"
-        >
-          <HeartHandshake size={20} aria-hidden="true" />
-          <span>
-            <strong>Охидын уур амьсгал</strong>
-            <small>Нууц санал өгөх</small>
-          </span>
-          <ChevronRight size={20} aria-hidden="true" />
-        </button>
-      ) : null}
       <button
         className="profile-preference-row profile-preference-link"
         type="button"
@@ -737,8 +833,8 @@ function ThemePreference() {
       <h2 id="profile-display-title">Тохиргоо</h2>
       <div className="profile-preference-row">
         <span>
-          <strong>Харанхуй горим</strong>
-          <small>Дэлгэцийн өнгийг солих</small>
+          <strong>Дэлгэцийн горим</strong>
+          <small>Цайвар, бараан эсвэл системийн тохиргоо</small>
         </span>
         <ThemeToggle />
       </div>
@@ -1134,21 +1230,39 @@ function ManagerHome({
 
 function EntertainerHome({
   data,
+  rank,
+  rankIncomeComparison,
+  incomeSummary,
+  loanOverview,
+  loanOverviewUnavailable,
+  requestHub,
+  requestHubUnavailable,
   attendanceAvailability,
   isLead,
-  onScanQR,
-  onOpenLeave,
-  onSchedule,
+  onOpenAttendance,
+  onOpenIncome,
+  onOpenRank,
+  onOpenRequests,
+  onOpenLoan,
   onGuests,
   onReadiness,
   onRounds,
 }: {
   data: EntertainerDashboard;
+  rank?: RankData;
+  rankIncomeComparison?: RankIncomeComparison;
+  incomeSummary?: FinexEntertainerSummary;
+  loanOverview?: LoanOverview;
+  loanOverviewUnavailable?: boolean;
+  requestHub?: RequestHubData;
+  requestHubUnavailable?: boolean;
   attendanceAvailability: AttendanceScanAvailability;
   isLead?: boolean;
-  onScanQR: () => void;
-  onOpenLeave: () => void;
-  onSchedule: () => void;
+  onOpenAttendance: () => void;
+  onOpenIncome: () => void;
+  onOpenRank: () => void;
+  onOpenRequests: () => void;
+  onOpenLoan: () => void;
   onGuests?: () => void;
   onReadiness?: () => void;
   onRounds?: () => void;
@@ -1159,98 +1273,207 @@ function EntertainerHome({
     (data.attendance?.checked_in ?? data.latest_checkin?.log_type === "IN");
   const activeWindow = attendanceAvailability.available;
   const today = mongoliaDateKey.format(new Date());
-  const nextShift = data.week.days.find(
-    (day) => day.assignment && day.date >= today,
-  ) || data.week.days.find((day) => day.assignment);
-  const nextShiftDate = nextShift
-    ? new Date(`${nextShift.date}T00:00:00`)
+  const salary =
+    rankIncomeComparison?.data_state === "verified"
+      ? rankIncomeComparison.baseline?.calculated_salary
+      : null;
+  const incomeValue = incomeSummary?.net_income ?? salary;
+  const incomeLabel = formatHeroMoney(incomeValue);
+  const incomePeriod =
+    incomeSummary?.selected_month ||
+    rankIncomeComparison?.selected_month ||
+    today.slice(0, 7);
+  const [incomeYear, incomeMonth] = incomePeriod.split("-");
+  const incomePeriodLabel = incomeYear && incomeMonth
+    ? `${incomeYear} оны ${Number(incomeMonth)} сар`
+    : incomePeriod;
+  const incomeMonths = [...(incomeSummary?.months || [])].sort((left, right) =>
+    left.month.localeCompare(right.month),
+  );
+  const currentIncomeMonth = incomeMonths.at(-1);
+  const previousIncomeMonth = incomeMonths.at(-2);
+  const comparisonPercent =
+    currentIncomeMonth && previousIncomeMonth && previousIncomeMonth.income > 0
+      ? Math.round(((currentIncomeMonth.income - previousIncomeMonth.income) / previousIncomeMonth.income) * 100)
+      : null;
+  const dailyIncome = (incomeSummary?.days || []).slice(-16);
+  const dailyMaximum = Math.max(...dailyIncome.map(day => day.cumulative_income), 1);
+  const sparklinePoints = dailyIncome
+    .map((day, index) => {
+      const x = dailyIncome.length <= 1 ? 0 : (index / (dailyIncome.length - 1)) * 320;
+      const y = 80 - (day.cumulative_income / dailyMaximum) * 68;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  const sparklineAreaPoints = sparklinePoints
+    ? `0,88 ${sparklinePoints} 320,88`
+    : "";
+  const lastIncomePoint = dailyIncome.length
+    ? {
+        x: dailyIncome.length <= 1 ? 0 : 320,
+        y: 80 - (dailyIncome.at(-1)!.cumulative_income / dailyMaximum) * 68,
+      }
     : null;
-  const attentionItems =
-    data.attention_items?.slice(0, 3) ||
-    (data.work_summary.late_minutes
-      ? [
-          {
-            key: "lateness",
-            priority: 90,
-            title: "Хоцролтоо багасгах",
-            detail: "Дараагийн ээлжийн ирцээ эхлэх цагаас өмнө бүртгүүлнэ үү.",
-            value: `${data.work_summary.late_minutes} мин`,
-            source_state: "verified" as const,
-            source_label: "Баталгаатай бүртгэл",
-          },
-        ]
-      : []);
-  const hasAttention = attentionItems.length > 0;
+  const rankScore = rank?.score ?? profile.daily_rank?.career_average_score ?? null;
+  const checkinTime = checkedIn
+    ? formatTime(data.latest_checkin?.time?.split(" ")[1])
+    : null;
+  const rankLabel = rank?.effective_rank_label || entertainerRankLabel(profile.current_rank);
+  const rankThreshold = rank?.next_rank_threshold || 100;
+  const rankProgress = rankScore === null
+    ? 0
+    : Math.min(100, Math.max(0, (rankScore / rankThreshold) * 100));
+  const shiftStart = formatTime(data.shift?.shift?.start_time);
+  const shiftEnd = formatTime(data.shift?.shift?.end_time);
+  const scheduledDays = new Map(data.week.days.map(day => [day.date, day]));
+  const weekStart = new Date(`${data.week.start}T00:00:00Z`);
+  const weekDays = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(weekStart);
+    date.setUTCDate(weekStart.getUTCDate() + index);
+    const dateKey = date.toISOString().slice(0, 10);
+    return scheduledDays.get(dateKey) || { date: dateKey, assignment: null };
+  });
+  const lastScheduledIndex = weekDays.reduce(
+    (latest, day, index) => day.assignment ? index : latest,
+    -1,
+  );
+  const latestLoanRequest = [...(loanOverview?.requests || [])].sort((left, right) =>
+    right.requested_at.localeCompare(left.requested_at),
+  )[0];
+  let loanValue = "Ачаалсангүй";
+  let loanDetail = "Дэлгэрэнгүй хэсгээс дахин оролдоно уу";
+  if (!loanOverviewUnavailable && loanOverview) {
+    if (loanOverview.evidence.outstanding_balance !== null && loanOverview.evidence.outstanding_balance !== undefined) {
+      loanValue = formatCompactMoney(loanOverview.evidence.outstanding_balance) || "—";
+      loanDetail = "Зээлийн үлдэгдэл";
+    } else if (latestLoanRequest) {
+      loanValue = formatCompactMoney(latestLoanRequest.requested_amount) || "—";
+      loanDetail = `Хүсэлт · ${({
+        Pending: "Хүлээгдэж байна",
+        Approved: "Зөвшөөрсөн",
+        Rejected: "Татгалзсан",
+        Disbursed: "Олгосон",
+        Repaid: "Төлж дууссан",
+        Cancelled: "Цуцалсан",
+      } as Record<string, string>)[latestLoanRequest.status] || latestLoanRequest.status}`;
+    } else if (loanOverview.policy.request_enabled && loanOverview.evidence.maximum_amount !== undefined) {
+      loanValue = formatCompactMoney(loanOverview.evidence.maximum_amount) || "—";
+      loanDetail = "Хүсэх боломжтой дээд дүн";
+    } else {
+      loanValue = "Хүсэлт хаалттай";
+      loanDetail = loanOverview.policy.message;
+    }
+  }
+  const attendanceValue = checkedIn
+    ? `Ирсэн${checkinTime ? ` · ${checkinTime}` : ""}`
+    : activeWindow
+      ? "Бүртгүүлэх боломжтой"
+      : data.shift
+        ? attendanceAvailability.label
+        : "Өнөөдөр бүртгэлгүй";
+  const attendanceDetail = checkedIn
+    ? "Өнөөдрийн ирц баталгаажсан"
+    : activeWindow
+      ? attendanceAvailability.detail
+      : data.shift
+        ? attendanceAvailability.detail
+        : "Ээлжгүй өдөр";
+  const requestDetail = requestHubUnavailable
+    ? "Төлөв ачаалсангүй"
+    : requestHub
+      ? requestHub.summary.pending_count > 0
+        ? `${requestHub.summary.pending_count} хүлээгдэж байна`
+        : "Хүлээгдэж буй хүсэлт алга"
+      : "Төлөв ачаалж байна";
+  const requestTone = requestHubUnavailable
+    ? "is-danger"
+    : requestHub
+      ? requestHub.summary.pending_count > 0
+        ? "is-warning"
+        : "is-success"
+      : "is-neutral";
+  const loanTone = loanOverviewUnavailable
+    ? "is-danger"
+    : loanOverview && (
+        Number(loanOverview.evidence.outstanding_balance || 0) > 0 ||
+        Boolean(latestLoanRequest) ||
+        loanOverview.policy.request_enabled
+      )
+      ? "is-info"
+      : "is-neutral";
   return (
-    <div className="page entertainer-page entertainer-home-v2">
-      <section className="entertainer-hero">
-        <div className="hero-avatar">
-          {profile.profile_photo ? (
-            <img
-              src={profile.profile_photo}
-              alt={`${profile.stage_name || "Бүжигчин"} бүжигчний зураг`}
-            />
-          ) : (
-            <img
-              src="/staff/profile-dancer-default.webp"
-              alt=""
-              aria-hidden="true"
-            />
-          )}
-        </div>
-        <div className="hero-copy">
-          <div className="hero-name">
-            <h1>{profile.stage_name || profile.employee_name || "Бүжигчин"}</h1>
-            {profile.is_demo ? <span className="demo-badge">DEMO</span> : null}
-          </div>
-          <p>{profile.branch} салбар</p>
-        </div>
-        {data.shift ? (
-          <div className="hero-shift">
-            <small>Энэ ээлж</small>
-            <strong>{`${formatTime(data.shift.shift?.start_time)}–${formatTime(data.shift.shift?.end_time)}`}</strong>
-            <span
-              className={
-                checkedIn
-                  ? "is-complete"
-                  : activeWindow
-                    ? "is-pending"
-                    : ""
-              }
-            >
-              {checkedIn
-                  ? `Ирсэн · ${formatTime(data.latest_checkin?.time?.split(" ")[1])}`
-                  : activeWindow
-                    ? "Ирц хүлээгдэж байна"
-                    : "Ирц бүртгэх цаг болоогүй"}
-            </span>
-          </div>
-        ) : null}
-      </section>
-      {!checkedIn ? (
-        <button
-          className="attendance-cta"
-          onClick={data.shift ? onScanQR : onSchedule}
-          disabled={Boolean(data.shift) && !attendanceAvailability.available}
-        >
-          {data.shift ? (
-            <QrCode />
-          ) : (
-            <CalendarDays />
-          )}
-          <span>
-            <strong>
-              {data.shift ? "QR код уншуулж ирц бүртгэх" : "Ирц бүртгэл"}
-            </strong>
-            <small>
-              {!data.shift
-                ? "Танд идэвхтэй ээлж оноогоогүй байна · Хуваариа шалгах"
-                : attendanceAvailability.detail}
-            </small>
+    <div className="page entertainer-page dancer-home">
+      <h1 className="sr-only">Нүүр</h1>
+      <section className="dancer-home-overview" aria-label="Таны товч мэдээлэл">
+        <button className="dancer-income-card" data-destination="income" type="button" onClick={onOpenIncome}>
+          <span className="dancer-card-title"><span>Орлого</span><ChevronRight aria-hidden="true" /></span>
+          <strong>{incomeLabel || "Тооцоо бүрдэж байна"}</strong>
+          <time>{incomePeriodLabel}</time>
+          {sparklinePoints ? (
+            <svg className="dancer-income-chart" viewBox="0 0 320 88" preserveAspectRatio="none" role="img" aria-label="Энэ сарын орлогын хөдөлгөөн">
+              <defs>
+                <linearGradient id="dancer-income-area-gradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="currentColor" stopOpacity="0.24" />
+                  <stop offset="100%" stopColor="currentColor" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+              <polygon className="dancer-income-chart-area" points={sparklineAreaPoints} />
+              <polyline points={sparklinePoints} fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
+              {lastIncomePoint ? <>
+                <circle className="dancer-income-chart-halo" cx={lastIncomePoint.x} cy={lastIncomePoint.y} r="9" vectorEffect="non-scaling-stroke" />
+                <circle className="dancer-income-chart-dot" cx={lastIncomePoint.x} cy={lastIncomePoint.y} r="4.5" vectorEffect="non-scaling-stroke" />
+              </> : null}
+            </svg>
+          ) : <span className="dancer-income-chart-empty">Өдрийн мэдээлэл бүрдээгүй</span>}
+          <span className="dancer-income-context">
+            {comparisonPercent === null
+              ? incomeSummary?.data_state === "verified"
+                ? "Баталгаажсан бүртгэл"
+                : "Эцсийн цалин биш"
+              : <>Өмнөх сараас <b>{comparisonPercent > 0 ? "+" : ""}{comparisonPercent}%</b></>}
           </span>
-          <ChevronRight />
         </button>
-      ) : null}
+
+        <div className="dancer-home-pair">
+          <button className="dancer-compact-card dancer-attendance-card" data-destination="attendance-qr" type="button" onClick={onOpenAttendance}>
+            <span className="dancer-card-title"><span>Ирц</span></span>
+            <strong className={checkedIn ? "is-success" : activeWindow ? "is-action" : ""}>{attendanceValue}</strong>
+            <small className="dancer-shift-time">{data.shift ? `Ээлж ${shiftStart}–${shiftEnd}` : attendanceDetail}</small>
+            <span className="dancer-week-dots" aria-label="Энэ долоо хоногийн ээлж">
+              {weekDays.map((day, index) => {
+                const date = new Date(`${day.date}T00:00:00Z`);
+                return <span key={day.date}>
+                  <small>{dayLabels[date.getUTCDay()]}</small>
+                  <i className={day.assignment ? "is-scheduled" : index === lastScheduledIndex + 1 ? "is-next" : ""} aria-hidden="true" />
+                </span>;
+              })}
+            </span>
+          </button>
+
+          <button className="dancer-compact-card dancer-rank-card" data-destination="rank" type="button" onClick={onOpenRank}>
+            <span className="dancer-card-title"><span>Зэрэг</span><ChevronRight aria-hidden="true" /></span>
+            <strong className="dancer-rank-label">{rankLabel}</strong>
+            <b className="dancer-rank-score">{rankScore === null ? "—" : rankScore.toFixed(1)} оноо</b>
+            <span className="dancer-rank-progress" role="progressbar" aria-label={`${rankLabel} ахиц`} aria-valuemin={0} aria-valuemax={rankThreshold} aria-valuenow={rankScore || 0}>
+              <span style={{ width: `${rankProgress}%` }} />
+              <i style={{ left: `${rankProgress}%` }} />
+            </span>
+          </button>
+        </div>
+
+        <div className="dancer-home-rows">
+          <button className={`dancer-home-row ${requestTone}`} data-destination="requests" type="button" onClick={onOpenRequests}>
+            <span className="dancer-row-icon"><MessageCircle aria-hidden="true" /></span>
+            <span><strong>Санал, хүсэлт</strong><small>{requestDetail}</small></span>
+            <ChevronRight aria-hidden="true" />
+          </button>
+          <button className={`dancer-home-row ${loanTone}`} data-destination="loan" type="button" onClick={onOpenLoan}>
+            <span className="dancer-row-icon"><WalletCards aria-hidden="true" /></span>
+            <span><strong>Зээл</strong><small>{loanValue === "Хүсэлт хаалттай" ? loanValue : `${loanValue} · ${loanDetail}`}</small></span>
+            <ChevronRight aria-hidden="true" />
+          </button>
+        </div>
+      </section>
       {isLead ? (
         <section className="lead-home-actions" aria-labelledby="lead-home-actions-title">
           <h2 id="lead-home-actions-title">Ахлахын ажил</h2>
@@ -1275,57 +1498,6 @@ function EntertainerHome({
           </div>
         </section>
       ) : null}
-      <section className="home-priority" aria-label="Танд хэрэгтэй мэдээлэл">
-        <button type="button" onClick={onSchedule}>
-          <CalendarDays />
-          <span>
-            <small>Миний ээлж</small>
-            <strong>
-              {nextShift && nextShiftDate
-                ? `${nextShift.date === today ? "Өнөөдөр" : `${dayLabels[nextShiftDate.getDay()]} ${shortDate.format(nextShiftDate)}`} · ${formatTime(nextShift.start_time)}–${formatTime(nextShift.end_time)}`
-                : "Энэ 7 хоногт ээлжгүй"}
-            </strong>
-          </span>
-          <ChevronRight />
-        </button>
-        <button type="button" onClick={onOpenLeave}>
-          <CalendarClock />
-          <span>
-            <small>Цагийн чөлөө авах</small>
-            <strong>{data.work_summary.leave_remaining} эрх үлдсэн</strong>
-          </span>
-          <ChevronRight />
-        </button>
-      </section>
-      <section
-        className={`home-attention ${hasAttention ? "needs-attention" : ""}`}
-        aria-label="Анхаарах зүйл"
-      >
-        <header>
-          <span>Анхаарах зүйл</span>
-          {hasAttention ? <b>{attentionItems.length}</b> : null}
-        </header>
-        {hasAttention ? (
-          <div className="home-attention-list">
-            {attentionItems.map((item) => (
-              <article key={item.key} data-source={item.source_state}>
-                <AlertTriangle />
-                <span>
-                  <strong>{item.title}</strong>
-                  <small>{item.detail}</small>
-                  <em>{item.source_label}</em>
-                </span>
-                {item.value ? <b>{item.value}</b> : null}
-              </article>
-            ))}
-          </div>
-        ) : (
-          <p className="home-attention-clear">
-            <CheckCircle2 />
-            Одоогоор анхаарах зүйл алга.
-          </p>
-        )}
-      </section>
     </div>
   );
 }
@@ -1544,6 +1716,7 @@ function SecondaryPage({
     rounds: "Өдрийн гараа",
     climate: "Охидын уур амьсгал",
     guests: "Зочид",
+    requests: "Санал, хүсэлт",
   };
   return (
     <div className={`page secondary-page${tab === "rank" ? " rank-page" : ""}`}>
@@ -1714,18 +1887,18 @@ function Shell({
         : ctx.mode === "lead"
           ? [
               { id: "home", label: "Нүүр", icon: Home },
-              { id: "income", label: "Орлого", icon: WalletCards },
-              { id: "attendance-qr", label: "QR", icon: QrCode },
-              { id: "rank", label: "Зэрэглэл", icon: Medal },
-              { id: "profile", label: "Мэдээлэл", icon: UserRound },
+              { id: "income", label: "Орлого", icon: BarChart3 },
+              { id: "attendance-qr", label: "Ирц", icon: CalendarDays },
+              { id: "requests", label: "Хүсэлт", icon: ClipboardList },
+              { id: "profile", label: "Минийх", icon: UserRound },
             ]
           : ctx.mode === "entertainer"
             ? [
                 { id: "home", label: "Нүүр", icon: Home },
-                { id: "income", label: "Орлого", icon: WalletCards },
-                { id: "attendance-qr", label: "QR", icon: QrCode },
-                { id: "rank", label: "Зэрэглэл", icon: Medal },
-                { id: "profile", label: "Мэдээлэл", icon: UserRound },
+                { id: "income", label: "Орлого", icon: BarChart3 },
+                { id: "attendance-qr", label: "Ирц", icon: CalendarDays },
+                { id: "requests", label: "Хүсэлт", icon: ClipboardList },
+                { id: "profile", label: "Минийх", icon: UserRound },
               ]
             : isBartenderWorkspace
               ? [
@@ -1741,7 +1914,7 @@ function Shell({
   const activeNavigationTab =
     isBartenderWorkspace && tab === "attendance-qr"
       ? "home"
-      : primaryNavigationTab(ctx.mode, tab);
+      : primaryNavigationTab(ctx.mode, tab, storedReturnTab());
   const qrNavigationLabel = attendanceAvailability.available
     ? "QR уншуулж ирц бүртгэх"
     : `${attendanceAvailability.label}. Ирцийн түүх харах`;
@@ -1755,8 +1928,8 @@ function Shell({
   }, [tab]);
 
   return (
-    <div className="app-stage">
-      <div className="app-shell">
+    <div className={`app-stage${isEntertainerMode(ctx.mode) ? " dancer-app-stage" : ""}`}>
+      <div className={`app-shell${isEntertainerMode(ctx.mode) ? " dancer-app-shell" : ""}`}>
         {isEntertainerMode(ctx.mode) ? <ShiftReminderWatcher /> : null}
         <aside className="desktop-nav" aria-label="Үндсэн цэс">
           <Brand branch={ctx.branch} />
@@ -1781,10 +1954,12 @@ function Shell({
               </button>
             ))}
           </nav>
-          <button className="desktop-logout" onClick={onLogout}>
-            <LogOut />
-            <span>Системээс гарах</span>
-          </button>
+          {!isEntertainerMode(ctx.mode) ? (
+            <button className="desktop-logout" onClick={onLogout}>
+              <LogOut />
+              <span>Системээс гарах</span>
+            </button>
+          ) : null}
         </aside>
         <Header
           ctx={ctx}
@@ -1799,7 +1974,7 @@ function Shell({
           {children}
         </main>
         <nav
-          className={`bottom-nav item-count-${items.length}`}
+          className={`bottom-nav item-count-${items.length}${isEntertainerMode(ctx.mode) ? " entertainer-bottom-nav" : ""}`}
           aria-label="Үндсэн цэс"
         >
           {items.map((item) => (
@@ -1836,16 +2011,27 @@ type AppPhase =
   | "offline"
   | "fatal";
 
-export default function App() {
+function AppRuntime() {
   const [phase, setPhase] = useState<AppPhase>("booting");
   const [ctx, setCtx] = useState<AppContext | null>(null);
   const [manager, setManager] = useState<ManagerDashboard>();
   const [entertainer, setEntertainer] = useState<EntertainerDashboard>();
   const [rank, setRank] = useState<RankData>();
   const [rankIncomeComparison, setRankIncomeComparison] = useState<RankIncomeComparison>();
+  const [incomeSummary, setIncomeSummary] = useState<FinexEntertainerSummary>();
+  const [loanOverview, setLoanOverview] = useState<LoanOverview>();
+  const [loanOverviewUnavailable, setLoanOverviewUnavailable] = useState(false);
+  const [requestHub, setRequestHub] = useState<RequestHubData>();
+  const [requestHubUnavailable, setRequestHubUnavailable] = useState(false);
+  const [requestHubLoading, setRequestHubLoading] = useState(false);
+  const [requestHubLoadingMore, setRequestHubLoadingMore] = useState(false);
+  const [requestHubLoadMoreFailed, setRequestHubLoadMoreFailed] = useState(false);
   const [attendance, setAttendance] = useState<EmployeeAttendanceStatus>();
   const [selectedProfile, setSelectedProfile] = useState("");
   const [tab, setTab] = useState<Tab>("home");
+  const [requestKind, setRequestKind] = useState<RequestCreateKind | undefined>(
+    requestedRequestKind,
+  );
   const [routeDenied, setRouteDenied] = useState(false);
   const [message, setMessage] = useState("");
   const [pageError, setPageError] = useState<StaffApiError>();
@@ -1872,6 +2058,14 @@ export default function App() {
     setEntertainer(undefined);
     setRank(undefined);
     setRankIncomeComparison(undefined);
+    setIncomeSummary(undefined);
+    setLoanOverview(undefined);
+    setLoanOverviewUnavailable(false);
+    setRequestHub(undefined);
+    setRequestHubUnavailable(false);
+    setRequestHubLoading(false);
+    setRequestHubLoadingMore(false);
+    setRequestHubLoadMoreFailed(false);
     setAttendance(undefined);
     setSelectedProfile("");
     setPageError(undefined);
@@ -1948,6 +2142,52 @@ export default function App() {
     [],
   );
 
+  const loadMyRequests = useCallback(async () => {
+    setRequestHubLoading(true);
+    setRequestHubLoadMoreFailed(false);
+    try {
+      const data = await api.myRequestHub();
+      if (hasRequestHubShape(data)) {
+        setRequestHub(data);
+        setRequestHubUnavailable(false);
+      } else {
+        setRequestHubUnavailable(true);
+      }
+    } catch (error) {
+      const failure = asStaffApiError(error);
+      if (!failure.invalidatesSession && failure.kind !== "permission-denied")
+        setRequestHubUnavailable(true);
+    } finally {
+      setRequestHubLoading(false);
+    }
+  }, []);
+
+  const loadMoreRequests = useCallback(async () => {
+    const cursor = requestHub?.next_cursor;
+    if (!cursor || requestHubLoadingMore) return;
+    setRequestHubLoadingMore(true);
+    setRequestHubLoadMoreFailed(false);
+    try {
+      const data = await api.myRequestHub(25, cursor);
+      if (!hasRequestHubShape(data)) {
+        setRequestHubLoadMoreFailed(true);
+        return;
+      }
+      setRequestHub(current => {
+        if (!current) return data;
+        const seen = new Set(current.items.map(item => `${item.kind}:${item.id}`));
+        const olderItems = data.items.filter(item => !seen.has(`${item.kind}:${item.id}`));
+        return { ...data, items: [...current.items, ...olderItems] };
+      });
+    } catch (error) {
+      const failure = asStaffApiError(error);
+      if (!failure.invalidatesSession && failure.kind !== "permission-denied")
+        setRequestHubLoadMoreFailed(true);
+    } finally {
+      setRequestHubLoadingMore(false);
+    }
+  }, [requestHub?.next_cursor, requestHubLoadingMore]);
+
   const loadProjection = useCallback(
     async (context: AppContext, epoch = protectedEpoch.current) => {
       if (context.mode === "admin") {
@@ -1956,6 +2196,11 @@ export default function App() {
         setEntertainer(undefined);
         setRank(undefined);
         setRankIncomeComparison(undefined);
+        setIncomeSummary(undefined);
+        setLoanOverview(undefined);
+        setLoanOverviewUnavailable(false);
+        setRequestHub(undefined);
+        setRequestHubUnavailable(false);
         setAttendance(undefined);
         return;
       }
@@ -1969,6 +2214,11 @@ export default function App() {
         setEntertainer(undefined);
         setRank(undefined);
         setRankIncomeComparison(undefined);
+        setIncomeSummary(undefined);
+        setLoanOverview(undefined);
+        setLoanOverviewUnavailable(false);
+        setRequestHub(undefined);
+        setRequestHubUnavailable(false);
         setAttendance(attendanceData);
         return;
       }
@@ -1981,6 +2231,11 @@ export default function App() {
         setEntertainer(undefined);
         setRank(undefined);
         setRankIncomeComparison(undefined);
+        setIncomeSummary(undefined);
+        setLoanOverview(undefined);
+        setLoanOverviewUnavailable(false);
+        setRequestHub(undefined);
+        setRequestHubUnavailable(false);
         return;
       }
 
@@ -1998,10 +2253,39 @@ export default function App() {
           throw failure;
         return undefined;
       });
-      const [dashboard, rankData, rankIncomeData, attendanceData] = await Promise.all([
+      const incomePromise = api.finexIncome().catch((error: unknown) => {
+        const failure = asStaffApiError(error);
+        if (failure.invalidatesSession || failure.kind === "permission-denied")
+          throw failure;
+        return undefined;
+      });
+      const loanPromise = api.loanOverview()
+        .then((data) => hasLoanOverviewShape(data)
+          ? { data, unavailable: false }
+          : { data: undefined, unavailable: true })
+        .catch((error: unknown) => {
+          const failure = asStaffApiError(error);
+          if (failure.invalidatesSession || failure.kind === "permission-denied")
+            throw failure;
+          return { data: undefined, unavailable: true };
+        });
+      const requestPromise = api.myRequestHub()
+        .then((data) => hasRequestHubShape(data)
+          ? { data, unavailable: false }
+          : { data: undefined, unavailable: true })
+        .catch((error: unknown) => {
+          const failure = asStaffApiError(error);
+          if (failure.invalidatesSession || failure.kind === "permission-denied")
+            throw failure;
+          return { data: undefined, unavailable: true };
+        });
+      const [dashboard, rankData, rankIncomeData, incomeData, loanData, requestData, attendanceData] = await Promise.all([
         dashboardPromise,
         rankPromise,
         rankIncomePromise,
+        incomePromise,
+        loanPromise,
+        requestPromise,
         attendancePromise,
       ]);
       if (epoch !== protectedEpoch.current) return;
@@ -2009,6 +2293,11 @@ export default function App() {
       setManager(undefined);
       setRank(rankData || rankDataFromDashboard(dashboard));
       setRankIncomeComparison(rankIncomeData);
+      setIncomeSummary(incomeData);
+      setLoanOverview(loanData.data);
+      setLoanOverviewUnavailable(loanData.unavailable);
+      setRequestHub(requestData.data);
+      setRequestHubUnavailable(requestData.unavailable);
       setAttendance(attendanceData);
     },
     [],
@@ -2030,7 +2319,11 @@ export default function App() {
       const allowed = canAccessStaffTab(value.mode, candidate);
       const resolvedTab = resolveStaffTab(value.mode, candidate);
       setTab(resolvedTab);
-      writeStaffRoute(resolvedTab, "replace");
+      const initialRequestKind = resolvedTab === "requests" ? requestedRequestKind() : undefined;
+      setRequestKind(initialRequestKind);
+      if (resolvedTab === "requests" && initialRequestKind)
+        writeRequestRoute(initialRequestKind, "replace");
+      else writeStaffRoute(resolvedTab, "replace");
       setRouteDenied(!allowed);
       setPageError(undefined);
       setRuntimeError(undefined);
@@ -2245,15 +2538,24 @@ export default function App() {
         return;
       }
       if (nextTab === tab) {
+        if (nextTab === "requests" && requestKind) {
+          writeRequestRoute(undefined, "push");
+          setRequestKind(undefined);
+        }
         window.scrollTo({ top: 0, left: 0, behavior: "auto" });
         return;
       }
-      writeStaffRoute(nextTab, "push", tab);
+      writeStaffRoute(
+        nextTab,
+        "push",
+        primaryNavigationTab(ctx.mode, tab, storedReturnTab()),
+      );
       if (nextTab !== "attendance-qr") setAttendancePayload(undefined);
+      setRequestKind(undefined);
       setRouteDenied(false);
       setTab(nextTab);
     },
-    [ctx, phase, tab],
+    [ctx, phase, requestKind, tab],
   );
 
   const replaceRoute = useCallback(
@@ -2263,6 +2565,7 @@ export default function App() {
       const resolved = allowed ? resolveStaffTab(ctx.mode, nextTab) : "home";
       writeStaffRoute(resolved, "replace");
       if (resolved !== "attendance-qr") setAttendancePayload(undefined);
+      setRequestKind(undefined);
       setRouteDenied(!allowed);
       setTab(resolved);
     },
@@ -2272,9 +2575,37 @@ export default function App() {
   const returnHome = useCallback(() => {
     writeStaffRoute("home", "replace");
     setAttendancePayload(undefined);
+    setRequestKind(undefined);
     setRouteDenied(false);
     setTab("home");
   }, []);
+
+  const openRequestKind = useCallback((kind: RequestCreateKind) => {
+    writeRequestRoute(kind, "push");
+    setRouteDenied(false);
+    setTab("requests");
+    setRequestKind(kind);
+  }, []);
+
+  const closeRequestKind = useCallback(() => {
+    setRequestKind(undefined);
+    void loadMyRequests();
+    if (window.history.state?.requestParent === true) {
+      window.history.back();
+      return;
+    }
+    writeRequestRoute(undefined, "replace");
+    setTab("requests");
+  }, [loadMyRequests]);
+
+  const returnFromSecondary = useCallback((fallback: Tab) => {
+    const currentState = window.history.state;
+    if (currentState?.[STAFF_ROUTE_STATE] && isStaffTab(currentState.returnTab)) {
+      window.history.back();
+      return;
+    }
+    replaceRoute(fallback);
+  }, [replaceRoute]);
 
   useEffect(() => {
     if (!ctx || phase !== "authenticated") return;
@@ -2283,6 +2614,7 @@ export default function App() {
       const allowed = canAccessStaffTab(ctx.mode, candidate);
       const resolved = resolveStaffTab(ctx.mode, candidate);
       if (resolved !== "attendance-qr") setAttendancePayload(undefined);
+      setRequestKind(resolved === "requests" ? requestedRequestKind() : undefined);
       setRouteDenied(!allowed);
       setTab(resolved);
     };
@@ -2332,7 +2664,7 @@ export default function App() {
           attendance={attendance}
           availability={attendanceAvailability}
           initialPayload={attendancePayload}
-          onBack={returnHome}
+          onBack={() => returnFromSecondary("home")}
           onSuccess={() => loadProjection(ctx)}
         />
       );
@@ -2368,8 +2700,46 @@ export default function App() {
       return <LeadReadinessChecklist branch={ctx.branch} />;
     if (tab === "rounds" && ctx.mode === "lead")
       return <DailyRoundsChecklist branch={ctx.branch} />;
+    if (tab === "requests" && isEntertainerMode(ctx.mode)) {
+      if (requestKind === "leave")
+        return <EntertainerLeavePage onBack={closeRequestKind} />;
+      if (requestKind === "attendance")
+        return (
+          <EntertainerWorkdayPage
+            branch={ctx.branch}
+            onBack={closeRequestKind}
+            onScanQR={() => navigateTo("attendance-qr")}
+          />
+        );
+      if (requestKind === "feedback")
+        return <TeamClimateFeedbackPage onBack={closeRequestKind} backLabel="Санал, хүсэлт рүү буцах" />;
+      if (requestKind === "profile")
+        return (
+          <div className="request-child-page">
+            <header className="request-child-header">
+              <button type="button" aria-label="Хүсэлт рүү буцах" onClick={closeRequestKind}>
+                <ArrowLeft aria-hidden="true" />
+              </button>
+              <h1>Профайл өөрчлөх</h1>
+            </header>
+            <EntertainerProfilePage />
+          </div>
+        );
+      return (
+        <RequestHub
+          data={requestHub}
+          loading={requestHubLoading}
+          unavailable={requestHubUnavailable}
+          loadingMore={requestHubLoadingMore}
+          loadMoreFailed={requestHubLoadMoreFailed}
+          onReload={() => void loadMyRequests()}
+          onLoadMore={() => void loadMoreRequests()}
+          onOpenKind={openRequestKind}
+        />
+      );
+    }
     if (tab === "climate" && isEntertainerMode(ctx.mode))
-      return <TeamClimateFeedbackPage onBack={() => replaceRoute("profile")} />;
+      return <TeamClimateFeedbackPage onBack={() => returnFromSecondary("requests")} />;
     if (tab === "guests")
       return ctx.can_view_guest_service ? (
         <GuestServiceFeedPage branch={ctx.branch} />
@@ -2377,12 +2747,12 @@ export default function App() {
         <AccessDeniedState onHome={returnHome} />
       );
     if (tab === "leave" && isEntertainerMode(ctx.mode))
-      return <EntertainerLeavePage onBack={returnHome} />;
+      return <EntertainerLeavePage onBack={() => returnFromSecondary("requests")} />;
     if (tab === "workday" && isEntertainerMode(ctx.mode))
       return (
         <EntertainerWorkdayPage
           branch={ctx.branch}
-          onBack={returnHome}
+          onBack={() => returnFromSecondary("attendance-qr")}
           onScanQR={() => navigateTo("attendance-qr")}
         />
       );
@@ -2390,7 +2760,7 @@ export default function App() {
       return (
         <EntertainerSchedulePage
           branch={ctx.branch}
-          onBack={returnHome}
+          onBack={() => returnFromSecondary("home")}
         />
       );
     if (tab === "profile" && isEntertainerMode(ctx.mode))
@@ -2398,7 +2768,6 @@ export default function App() {
         <div className="profile-settings-stack">
           <EntertainerProfilePage />
           <ProfilePreferences
-            onOpenClimate={() => navigateTo("climate")}
             onLogout={() => void logout()}
             logoutBusy={logoutBusy}
           />
@@ -2415,7 +2784,7 @@ export default function App() {
         />
       );
     if (tab === "loan" && isEntertainerMode(ctx.mode))
-      return <EntertainerLoanCenter branch={ctx.branch} />;
+      return <EntertainerLoanCenter branch={ctx.branch} initialData={loanOverview} />;
     if (tab === "person-detail" && ctx.mode === "manager" && selectedProfile)
       return (
         <ManagerEntertainerDetail
@@ -2455,11 +2824,20 @@ export default function App() {
       return (
         <EntertainerHome
           data={entertainer}
+          rank={rank}
+          rankIncomeComparison={rankIncomeComparison}
+          incomeSummary={incomeSummary}
+          loanOverview={loanOverview}
+          loanOverviewUnavailable={loanOverviewUnavailable}
+          requestHub={requestHub}
+          requestHubUnavailable={requestHubUnavailable}
           attendanceAvailability={attendanceAvailability}
           isLead={ctx.mode === "lead"}
-          onScanQR={() => navigateTo("attendance-qr")}
-          onOpenLeave={() => navigateTo("leave")}
-          onSchedule={() => navigateTo("schedule")}
+          onOpenAttendance={() => navigateTo("attendance-qr")}
+          onOpenIncome={() => navigateTo("income")}
+          onOpenRank={() => navigateTo("rank")}
+          onOpenRequests={() => navigateTo("requests")}
+          onOpenLoan={() => navigateTo("loan")}
           onGuests={
             ctx.can_view_guest_service
               ? () => navigateTo("guests")
@@ -2492,15 +2870,29 @@ export default function App() {
     entertainer,
     attendance,
     attendanceAvailability,
+    requestKind,
+    requestHub,
+    requestHubLoading,
+    requestHubLoadingMore,
+    requestHubLoadMoreFailed,
+    requestHubUnavailable,
     retryProjection,
     attendancePayload,
     returnHome,
+    returnFromSecondary,
     loadProjection,
+    loadMyRequests,
+    loadMoreRequests,
     navigateTo,
     replaceRoute,
+    closeRequestKind,
+    openRequestKind,
     selectedProfile,
     rank,
     rankIncomeComparison,
+    incomeSummary,
+    loanOverview,
+    loanOverviewUnavailable,
     openPerson,
     loadManagerDashboard,
     logout,
@@ -2591,3 +2983,20 @@ export default function App() {
     </Shell>
   );
 }
+
+export default function App() {
+  const prototype = new URLSearchParams(window.location.search).get("prototype");
+  if (prototype === "dancer")
+    return (
+      <Suspense fallback={<div className="loading">Мэдээлэл ачаалж байна…</div>}>
+        <DancerPrototype />
+      </Suspense>
+    );
+  return <AppRuntime />;
+}
+
+const DancerPrototype = lazy(() =>
+  import("./features/dancer-ops/DancerOperatingApp").then((module) => ({
+    default: module.DancerOperatingApp,
+  })),
+);

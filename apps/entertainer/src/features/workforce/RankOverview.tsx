@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircleAlert, Database } from 'lucide-react'
+import { BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircleAlert, Database, RefreshCw } from 'lucide-react'
 
 import { api } from '../../api'
 import type { RankData, RankIncomeComparison } from '../../api'
@@ -40,26 +40,34 @@ export function EntertainerRankOverview({ data, incomeComparison }: Props) {
   const [visibleComparison, setVisibleComparison] = useState(incomeComparison)
   const [comparisonLoading, setComparisonLoading] = useState(false)
   const [comparisonError, setComparisonError] = useState('')
+  const [comparisonRetryDate, setComparisonRetryDate] = useState('')
 
   useEffect(() => {
     setVisibleComparison(incomeComparison)
     setComparisonError('')
+    setComparisonRetryDate('')
   }, [incomeComparison])
 
-  const moveComparison = async (direction: -1 | 1) => {
-    if (!visibleComparison?.period || comparisonLoading) return
-    const periodDate = direction < 0
-      ? shiftDate(visibleComparison.period.from, -1)
-      : shiftDate(visibleComparison.period.to, 1)
+  const loadComparison = async (periodDate: string) => {
+    if (comparisonLoading) return
     setComparisonLoading(true)
     setComparisonError('')
+    setComparisonRetryDate(periodDate)
     try {
       setVisibleComparison(await api.rankIncomeComparison(periodDate))
+      setComparisonRetryDate('')
     } catch {
       setComparisonError('3 хоногийн тооцоог ачаалсангүй.')
     } finally {
       setComparisonLoading(false)
     }
+  }
+  const moveComparison = (direction: -1 | 1) => {
+    if (!visibleComparison?.period || comparisonLoading) return
+    const periodDate = direction < 0
+      ? shiftDate(visibleComparison.period.from, -1)
+      : shiftDate(visibleComparison.period.to, 1)
+    void loadComparison(periodDate)
   }
   const score = data.score_status === 'complete' ? data.score : null
   const complete = score != null
@@ -86,7 +94,6 @@ export function EntertainerRankOverview({ data, incomeComparison }: Props) {
   return <section className="rank-overview" aria-labelledby="rank-overview-title">
     <header className="rank-page-heading">
       <div>
-        <span>ЗЭРЭГЛЭЛ</span>
         <h1 id="rank-overview-title">Миний зэрэглэл</h1>
       </div>
       <div className="rank-rules-popover">
@@ -112,7 +119,7 @@ export function EntertainerRankOverview({ data, incomeComparison }: Props) {
       <div className="rank-summary-primary">
         <span className="rank-summary-crest"><RankCrest rank={displayRank} label={`${displayRankLabel} тэмдэг`} /></span>
         <div>
-          <small>{isDemo ? `${shortDate(data.scoring_date)} · ТУРШИЛТЫН ДУНДАЖ` : 'НИЙТ ДУНДАЖ ОНОО'}</small>
+          <small>{isDemo ? `${shortDate(data.scoring_date)} · Туршилтын дундаж` : 'НИЙТ ДУНДАЖ ОНОО'}</small>
           <strong>{complete ? displayRankLabel : 'Үнэлгээ бүрдээгүй'}</strong>
           <span>{complete ? `${number.format(score)} оноо · ${displayPayout}% · ${data.counted_days} өдөр` : `${data.missing_components.length} үзүүлэлт хүлээгдэж байна`}</span>
         </div>
@@ -152,7 +159,7 @@ export function EntertainerRankOverview({ data, incomeComparison }: Props) {
         </div>
       </header>
       {comparisonLoading ? <p className="rank-income-status" role="status">Ачаалж байна…</p> : null}
-      {comparisonError ? <p className="rank-income-status is-error" role="alert">{comparisonError}</p> : null}
+      {comparisonError ? <div className="rank-income-status is-error" role="alert"><span>{comparisonError}</span><button type="button" onClick={() => void loadComparison(comparisonRetryDate)} disabled={!comparisonRetryDate || comparisonLoading}><RefreshCw aria-hidden="true" />Дахин оролдох</button></div> : null}
       {visibleComparison.data_state === 'verified'
         && visibleComparison.baseline?.calculated_salary != null
         && visibleComparison.scenario?.calculated_salary != null

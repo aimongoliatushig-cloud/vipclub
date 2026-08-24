@@ -46,12 +46,13 @@ function CorrectionForm({ data, onSaved }: { data: WorkdayData; onSaved: () => P
   const [reason, setReason] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const requestKey = useRef({ fingerprint: '', value: '' })
   const valid = time && reason.trim().length >= 5
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
     if (!valid || busy) return
-    setBusy(true); setError('')
+    setBusy(true); setError(''); setSuccess('')
     try {
       const fingerprint = `${date}|${kind}|${time}|${reason.trim()}`
       if (requestKey.current.fingerprint !== fingerprint) {
@@ -61,16 +62,18 @@ function CorrectionForm({ data, onSaved }: { data: WorkdayData; onSaved: () => P
       setReason(''); setTime(''); setOpen(false)
       requestKey.current = { fingerprint: '', value: '' }
       await onSaved()
+      setSuccess(`${date} өдрийн ирсэн цаг засах хүсэлт илгээгдлээ.`)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Хүсэлт илгээж чадсангүй')
     } finally { setBusy(false) }
   }
   return <section className="correction-card">
-    <button className="correction-toggle" onClick={() => setOpen(value => !value)} aria-expanded={open}>
+    <button className="correction-toggle" onClick={() => { setOpen(value => !value); setSuccess('') }} aria-expanded={open}>
       <span><History /><i><strong>Ирсэн цаг зөрүүтэй байна уу?</strong><small>Менежерт ирсэн цаг засах хүсэлт илгээх</small></i></span>
       <ChevronRight className={open ? 'rotated' : ''} />
     </button>
-    {open ? <form onSubmit={submit} className="correction-form">
+    {success ? <div className="workday-inline-success" role="status"><CheckCircle2 />{success}</div> : null}
+    {open ? <form onSubmit={submit} className="correction-form" aria-busy={busy}>
       <div className="correction-kind" role="group" aria-label="Засварын төрөл">
         <button type="button" className="active">Ирсэн цаг</button>
       </div>
@@ -80,7 +83,7 @@ function CorrectionForm({ data, onSaved }: { data: WorkdayData; onSaved: () => P
       </div>
       <label>Шалтгаан<textarea value={reason} onChange={event => setReason(event.target.value)} minLength={5} maxLength={300} placeholder="Жишээ: QR уншсан боловч орох цаг бүртгэгдээгүй" required /></label>
       {error ? <div className="workday-inline-error" role="alert"><AlertCircle />{error}</div> : null}
-      <button className="workday-primary" disabled={!valid || busy}>{busy ? <LoaderCircle className="spin" /> : <Check />}Хүсэлт илгээх</button>
+      <button className="workday-primary" disabled={!valid || busy}>{busy ? <LoaderCircle className="spin" /> : <Check />}{busy ? 'Илгээж байна…' : 'Хүсэлт илгээх'}</button>
     </form> : null}
   </section>
 }

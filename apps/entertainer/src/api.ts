@@ -601,6 +601,38 @@ export type TeamClimateCandidates = {
   meta: { total: number }
 }
 
+export type RequestHubKind = 'leave' | 'attendance_correction' | 'profile_change' | 'team_feedback'
+
+export type RequestHubStatus =
+  | 'pending'
+  | 'approved'
+  | 'rejected'
+  | 'cancelled'
+  | 'withdrawn'
+  | 'submitted'
+
+export type RequestHubItem = {
+  id: string
+  kind: RequestHubKind
+  status: RequestHubStatus
+  submitted_at: string
+  title: string
+  detail?: string | null
+  decision_reason?: string | null
+  metadata?: Record<string, string | number | boolean | null | undefined>
+}
+
+export type RequestHubData = {
+  summary: {
+    pending_count: number
+    resolved_count: number
+    submitted_count: number
+    total_count: number
+  }
+  items: RequestHubItem[]
+  next_cursor?: string | null
+}
+
 export type AttendancePenalty = {
   name: string
   attendance_date: string
@@ -1012,6 +1044,7 @@ export const api = {
   submitDayLeave: (leave_date: string, reason: string) => request<{ request: EmergencyLeaveRequest; replayed?: boolean }>('nomad_vip.api.attendance_policy.submit_day_leave', { from_date: leave_date, reason, idempotency_key: idempotencyKey('day-leave-create') }, 'POST'),
   teamClimateCandidates: () => request<TeamClimateCandidates>('nomad_vip.api.team_climate.get_feedback_candidates'),
   submitTeamClimateFeedback: (target_entertainer: string, category: TeamClimateCategory, feedback: string) => request<{ submitted: true; submitted_at: string; replayed?: boolean }>('nomad_vip.api.team_climate.submit_feedback', { target_entertainer, category, feedback, idempotency_key: idempotencyKey('team-climate-feedback') }, 'POST'),
+  myRequestHub: (limit = 25, cursor = '') => request<RequestHubData>('nomad_vip.api.entertainer.get_my_request_hub', { limit, cursor }),
   managerLeaveRequests: () => request<{ policy: AttendancePolicy; requests: EmergencyLeaveRequest[] }>('nomad_vip.api.attendance_policy.get_manager_leave_requests'),
   decideManagerLeave: (request_name: string, source_type: EmergencyLeaveRequest['source_type'], decision: 'Approved' | 'Rejected', reason = '', expected_modified?: string) => request<{ name: string; status: string; replayed?: boolean }>('nomad_vip.api.attendance_policy.decide_manager_leave', { request_name, source_type: source_type || 'Emergency Leave', decision, reason, expected_modified: expected_modified || '', idempotency_key: idempotencyKey('leave-decision') }, 'POST'),
   managerRosterCandidates: (status: RosterCandidateData['status'] = 'Pending', search = '', cursor = 0, limit = 50) => request<RosterCandidateData>('nomad_vip.api.entertainer_roster.get_manager_roster_candidates', { status, search, cursor, limit }),

@@ -18,6 +18,7 @@ export const STAFF_TABS = [
   'rounds',
   'climate',
   'guests',
+  'requests',
 ] as const
 
 export type StaffMode = 'admin' | 'manager' | 'lead' | 'entertainer' | 'employee'
@@ -56,6 +57,7 @@ export const ROLE_TAB_ALLOWLIST: Readonly<Record<StaffMode, readonly StaffTab[]>
     'rounds',
     'climate',
     'guests',
+    'requests',
   ] as const),
   entertainer: Object.freeze([
     'home',
@@ -69,6 +71,7 @@ export const ROLE_TAB_ALLOWLIST: Readonly<Record<StaffMode, readonly StaffTab[]>
     'leave',
     'workday',
     'climate',
+    'requests',
   ] as const),
   employee: Object.freeze([
     'home',

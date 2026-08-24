@@ -134,7 +134,7 @@
   border: 1px solid var(--wb-border, var(--border));
   border-radius: 16px;
   background: var(--wb-surface, var(--surface));
-  box-shadow: 0 8px 24px rgb(30 41 59 / 7%);
+  box-shadow: none;
 }
 
 .rank-summary-card {
@@ -311,8 +311,11 @@
   color: var(--primary-strong);
   font-size: 10px;
   font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rank-overview * { transition-duration: .01ms !important; }
 }
 
 .rank-income-comparison h2 {
@@ -392,6 +395,29 @@
 .rank-income-status.is-error {
   color: var(--wb-danger, #b42318);
 }
+
+.rank-income-status.is-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rank-income-status.is-error button {
+  min-height: 44px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--primary-strong);
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  font: inherit;
+  font-weight: 700;
+}
+
+.rank-income-status.is-error button svg { width: 16px; }
 
 .rank-income-empty {
   margin-top: 16px;

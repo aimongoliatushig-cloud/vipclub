@@ -1,0 +1,600 @@
+/* Dancer Home v3: scoped light-glass cards with real destinations and real data. */
+#root .entertainer-home-v3 {
+  --dancer-glass: rgb(255 255 255 / 86%);
+  --dancer-glass-strong: rgb(255 255 255 / 94%);
+  --dancer-glass-border: color-mix(in srgb, var(--primary-border) 58%, white);
+  --dancer-shadow: 0 18px 45px rgb(40 48 91 / 10%);
+  --dancer-violet: #7c3aed;
+  --dancer-pink: #c084fc;
+  --dancer-cyan: #38bdf8;
+  position: relative;
+  width: 100%;
+  max-width: 1120px;
+  display: grid;
+  gap: 18px;
+  isolation: isolate;
+}
+
+#root .entertainer-home-v3::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 68px 0 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 8% 18%, rgb(56 189 248 / 15%), transparent 34%),
+    radial-gradient(circle at 88% 24%, rgb(124 58 237 / 16%), transparent 32%),
+    radial-gradient(circle at 64% 72%, rgb(192 132 252 / 12%), transparent 34%),
+    linear-gradient(180deg, #f8f9ff 0%, #f4f6fb 52%, #f8fafc 100%);
+}
+
+#root .dancer-home-hero,
+#root .entertainer-home-v3 .home-attention,
+#root .entertainer-home-v3 .lead-home-actions {
+  border: 1px solid var(--dancer-glass-border);
+  background: var(--dancer-glass-strong);
+  box-shadow: var(--dancer-shadow);
+}
+
+#root .dancer-home-hero {
+  min-height: 136px;
+  padding: 22px 24px;
+  display: grid;
+  grid-template-columns: 68px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+#root .dancer-home-hero::after {
+  content: "";
+  position: absolute;
+  right: -56px;
+  top: -90px;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(99 102 241 / 16%), transparent 68%);
+  pointer-events: none;
+}
+
+#root .dancer-hero-avatar {
+  width: 68px;
+  height: 68px;
+  padding: 3px;
+  border: 1px solid var(--primary-border);
+  border-radius: 22px;
+  background: linear-gradient(145deg, white, var(--primary-soft));
+  box-shadow: 0 10px 28px rgb(79 70 229 / 14%);
+}
+
+#root .dancer-hero-avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 18px;
+}
+
+#root .dancer-hero-copy { min-width: 0; }
+#root .dancer-hero-copy > small {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+#root .dancer-hero-name {
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#root .dancer-hero-name h1 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: clamp(24px, 4vw, 32px);
+  line-height: 1.08;
+  letter-spacing: -.035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#root .dancer-hero-copy p {
+  margin: 6px 0 0;
+  color: var(--primary-strong);
+  font-size: 11px;
+  font-weight: 750;
+}
+
+#root .dancer-hero-shift {
+  position: relative;
+  z-index: 1;
+  min-width: 188px;
+  padding: 14px 16px;
+  display: grid;
+  gap: 3px;
+  border: 1px solid color-mix(in srgb, var(--primary-border) 76%, white);
+  border-radius: 18px;
+  background: rgb(238 242 255 / 72%);
+}
+
+#root .dancer-hero-shift small { color: var(--muted); font-size: 9px; }
+#root .dancer-hero-shift strong {
+  color: var(--ink);
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.03em;
+}
+#root .dancer-hero-shift span { color: var(--muted); font-size: 9px; font-weight: 700; }
+#root .dancer-hero-shift span.is-complete { color: var(--wb-success, #247653); }
+#root .dancer-hero-shift span.is-pending { color: #a15c0b; }
+
+#root .dancer-dashboard {
+  padding: 2px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#root .dancer-dashboard-heading {
+  min-height: 52px;
+  padding: 0 2px 12px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+#root .dancer-dashboard-heading h2,
+#root .dancer-dashboard-heading p { margin: 0; }
+#root .dancer-dashboard-heading h2 { color: var(--ink); font-size: 20px; letter-spacing: -.025em; }
+#root .dancer-dashboard-heading p { margin-top: 3px; color: var(--muted); font-size: 10px; }
+#root .dancer-dashboard-heading time {
+  min-height: 32px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--primary-strong);
+  border: 1px solid var(--primary-border);
+  border-radius: 10px;
+  background: var(--primary-soft);
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+#root .dancer-card-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 14px;
+}
+
+#root .dancer-home-card {
+  --card-accent: var(--primary);
+  --card-secondary: var(--dancer-pink);
+  position: relative;
+  min-width: 0;
+  min-height: 180px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  overflow: hidden;
+  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 22%, white);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 94% 4%, color-mix(in srgb, var(--card-accent) 22%, transparent), transparent 40%),
+    radial-gradient(circle at 4% 100%, color-mix(in srgb, var(--card-secondary) 12%, transparent), transparent 42%),
+    linear-gradient(145deg, rgb(255 255 255 / 98%), rgb(246 248 255 / 90%));
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 92%), 0 14px 34px rgb(46 54 101 / 10%);
+  text-align: left;
+  cursor: pointer;
+  isolation: isolate;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+#root .dancer-home-card:hover {
+  border-color: color-mix(in srgb, var(--card-accent) 44%, white);
+  box-shadow: inset 0 1px 0 white, 0 18px 38px rgb(46 54 101 / 14%);
+  transform: translateY(-2px);
+}
+#root .dancer-home-card:active { transform: scale(.985); }
+#root .dancer-home-card:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: 3px; }
+
+#root .dancer-home-card.income { grid-column: span 6; --card-accent: var(--primary-hover); --card-secondary: var(--dancer-cyan); }
+#root .dancer-home-card.attendance { grid-column: span 3; --card-secondary: var(--dancer-cyan); }
+#root .dancer-home-card.rank { grid-column: span 3; --card-accent: #8b93a6; --card-secondary: var(--dancer-violet); }
+#root .dancer-home-card.schedule,
+#root .dancer-home-card.leave,
+#root .dancer-home-card.loan { grid-column: span 4; }
+#root .dancer-home-card.schedule { --card-secondary: var(--dancer-cyan); }
+#root .dancer-home-card.leave { --card-accent: var(--dancer-violet); --card-secondary: var(--dancer-pink); }
+#root .dancer-home-card.loan { --card-accent: var(--dancer-violet); --card-secondary: var(--dancer-cyan); }
+#root .dancer-home-card.attendance.is-complete { --card-accent: var(--wb-success, #247653); }
+#root .dancer-home-card.attendance.is-pending { --card-accent: #c47b18; }
+
+#root .dancer-card-header {
+  position: relative;
+  z-index: 2;
+  min-height: 36px;
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) 18px;
+  align-items: center;
+  gap: 9px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+#root .dancer-card-header > svg { width: 17px; height: 17px; color: var(--muted); }
+#root .dancer-card-icon {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  color: color-mix(in srgb, var(--card-accent) 86%, var(--ink));
+  border: 1px solid color-mix(in srgb, var(--card-accent) 24%, white);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card-accent) 10%, white);
+}
+#root .dancer-card-icon svg { width: 17px; height: 17px; }
+
+#root .dancer-card-value {
+  position: relative;
+  z-index: 2;
+  max-width: 100%;
+  margin-top: auto;
+  color: var(--ink);
+  font-size: clamp(21px, 3.3vw, 31px);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.08;
+  letter-spacing: -.045em;
+  overflow-wrap: anywhere;
+}
+
+#root .dancer-card-detail {
+  position: relative;
+  z-index: 2;
+  min-width: 0;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+#root .dancer-home-card.income .dancer-card-detail {
+  padding-right: 136px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#root .dancer-home-card.income .dancer-card-detail b {
+  color: var(--primary-strong);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+#root .income-accent-line {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: 112px;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--dancer-cyan), var(--primary-hover), var(--dancer-pink));
+  opacity: .72;
+}
+
+#root .attendance-pulse {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 28%, white);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--card-accent) 9%, white);
+}
+#root .attendance-pulse::before,
+#root .attendance-pulse i { content: ""; border-radius: 50%; background: var(--card-accent); }
+#root .attendance-pulse::before { width: 20px; height: 20px; opacity: .18; }
+#root .attendance-pulse i { position: absolute; width: 8px; height: 8px; }
+
+/* Move task icons where they reinforce each card's visual instead of repeating one rigid row. */
+#root .dancer-home-card.attendance .dancer-card-header,
+#root .dancer-home-card.leave .dancer-card-header { position: static; grid-template-columns: minmax(0, 1fr) 18px; }
+#root .dancer-home-card.attendance .dancer-card-header > span:nth-child(2),
+#root .dancer-home-card.leave .dancer-card-header > span:nth-child(2) { grid-column: 1; }
+#root .dancer-home-card.attendance .dancer-card-header > svg,
+#root .dancer-home-card.leave .dancer-card-header > svg { grid-column: 2; }
+#root .dancer-home-card.attendance .dancer-card-icon {
+  position: absolute;
+  z-index: 3;
+  right: 18px;
+  bottom: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+}
+#root .dancer-home-card.attendance .attendance-pulse { opacity: .24; transform: scale(1.28); }
+#root .dancer-home-card.leave .dancer-card-icon {
+  position: absolute;
+  z-index: 3;
+  right: 22px;
+  bottom: 22px;
+  border: 0;
+  border-radius: 50%;
+  background: white;
+}
+
+#root .dancer-home-card.rank { min-height: 240px; }
+#root .dancer-rank-visual {
+  position: relative;
+  width: 118px;
+  height: 118px;
+  margin: 10px auto 0;
+  display: grid;
+  place-items: center;
+}
+#root .dancer-rank-visual .kpi-progress-ring { position: absolute; inset: 0; transform: rotate(-90deg); }
+#root .dancer-rank-visual .kpi-progress-track { stroke: rgb(139 147 166 / 20%); }
+#root .dancer-rank-visual .kpi-progress-value {
+  stroke: #8b93a6;
+  stroke-width: 3.5;
+  filter: drop-shadow(0 4px 6px rgb(71 85 105 / 22%));
+}
+#root .dancer-rank-visual > span:last-child { z-index: 1; display: grid; justify-items: center; }
+#root .dancer-rank-visual strong { color: var(--ink); font-size: 25px; line-height: 1; }
+#root .dancer-rank-visual small { margin-top: 3px; color: var(--muted); font-size: 8px; }
+#root .rank-copy { margin-top: auto; display: grid; gap: 2px; }
+#root .rank-copy strong { color: var(--ink); font-size: 12px; }
+#root .rank-copy small { overflow: hidden; font-size: 9.5px; text-overflow: ellipsis; white-space: nowrap; }
+
+#root .schedule-visual {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  display: grid;
+  grid-template-columns: repeat(7, 8px);
+  gap: 4px;
+}
+#root .schedule-visual i { width: 8px; height: 28px; border-radius: 4px; background: var(--primary-soft); }
+#root .schedule-visual i.is-scheduled { background: color-mix(in srgb, var(--primary) 62%, white); }
+
+#root .leave-visual {
+  --leave-progress: 0%;
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(var(--primary) var(--leave-progress), var(--primary-soft) 0);
+}
+#root .leave-visual::before { content: ""; width: 38px; height: 38px; border-radius: 50%; background: white; }
+#root .leave-visual i { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+
+#root .entertainer-home-v3 .home-attention,
+#root .entertainer-home-v3 .lead-home-actions {
+  border-radius: 20px;
+  box-shadow: 0 12px 30px rgb(40 48 91 / 7%);
+}
+#root .entertainer-home-v3 .home-attention-list article { background: rgb(255 255 255 / 62%); }
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #root .dancer-home-hero,
+  #root .entertainer-home-v3 .home-attention,
+  #root .entertainer-home-v3 .lead-home-actions {
+    background: var(--dancer-glass);
+    -webkit-backdrop-filter: blur(20px) saturate(1.08);
+    backdrop-filter: blur(20px) saturate(1.08);
+  }
+}
+
+/* The dancer bottom navigation uses the same light glass material as the cards. */
+#root .entertainer-bottom-nav {
+  height: calc(76px + env(safe-area-inset-bottom));
+  padding: 6px max(7px, env(safe-area-inset-right)) env(safe-area-inset-bottom) max(7px, env(safe-area-inset-left));
+  overflow: visible;
+  border: 1px solid rgb(199 210 254 / 62%);
+  border-bottom: 0;
+  border-radius: 20px 20px 0 0;
+  background: rgb(255 255 255 / 92%);
+  box-shadow: 0 -14px 34px -25px rgb(30 41 59 / 44%);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+}
+#root .entertainer-bottom-nav button,
+#root .entertainer-bottom-nav .nav-scan-action {
+  min-height: 62px;
+  margin: 0 2px;
+  gap: 3px;
+  color: var(--muted);
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  box-shadow: none;
+}
+#root .entertainer-bottom-nav button:hover,
+#root .entertainer-bottom-nav button:focus-visible {
+  color: var(--primary-strong);
+  border-color: var(--primary-border);
+  background: var(--primary-soft);
+}
+#root .entertainer-bottom-nav button:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -1px; }
+#root .entertainer-bottom-nav button.active {
+  color: var(--primary-strong);
+  border-color: color-mix(in srgb, var(--primary-border) 72%, white);
+  background: linear-gradient(145deg, white, var(--primary-soft));
+  box-shadow: inset 0 1px 0 white;
+}
+#root .entertainer-bottom-nav button.active::before { display: none; }
+#root .entertainer-bottom-nav .nav-icon,
+#root .entertainer-bottom-nav .nav-scan-action .nav-icon {
+  width: 30px !important;
+  height: 30px !important;
+  margin: 0 !important;
+  display: grid;
+  place-items: center;
+  color: inherit !important;
+  border: 1px solid rgb(222 227 232 / 80%) !important;
+  border-radius: 10px !important;
+  background: rgb(248 250 252 / 84%) !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+#root .entertainer-bottom-nav button.active .nav-icon,
+#root .entertainer-bottom-nav button.active.nav-scan-action .nav-icon {
+  color: white !important;
+  border-color: var(--primary) !important;
+  background: var(--primary) !important;
+}
+#root .entertainer-bottom-nav .nav-icon svg,
+#root .entertainer-bottom-nav .nav-scan-action .nav-icon svg { width: 17px; height: 17px; stroke-width: 2; }
+#root .entertainer-bottom-nav button > span:last-child,
+#root .entertainer-bottom-nav .nav-scan-action > span:last-child {
+  margin: 0;
+  color: inherit;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+@media (max-width: 1023px) {
+  #root .entertainer-home-v3 { max-width: 760px; }
+  #root .dancer-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #root .dancer-home-card.income,
+  #root .dancer-home-card.loan { grid-column: 1 / -1; }
+  #root .dancer-home-card.attendance,
+  #root .dancer-home-card.rank,
+  #root .dancer-home-card.schedule,
+  #root .dancer-home-card.leave { grid-column: span 1; }
+}
+
+@media (max-width: 599px) {
+  #root .entertainer-home-v3 { gap: 12px; }
+  #root .dancer-home-hero {
+    min-height: 112px;
+    padding: 16px;
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 12px;
+    border-radius: 20px;
+  }
+  #root .dancer-hero-avatar { width: 56px; height: 56px; border-radius: 18px; }
+  #root .dancer-hero-avatar img { border-radius: 14px; }
+  #root .dancer-hero-name h1 { font-size: 23px; }
+  #root .dancer-hero-shift {
+    grid-column: 1 / -1;
+    min-width: 0;
+    padding: 11px 13px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    border-radius: 14px;
+  }
+  #root .dancer-hero-shift small { grid-column: 1; }
+  #root .dancer-hero-shift strong { grid-column: 1; font-size: 17px; }
+  #root .dancer-hero-shift span { grid-column: 2; grid-row: 1 / 3; text-align: right; }
+  #root .dancer-dashboard { padding: 2px; }
+  #root .dancer-dashboard-heading { padding: 2px 2px 14px; }
+  #root .dancer-dashboard-heading h2 { font-size: 18px; }
+  #root .dancer-dashboard-heading p { max-width: 210px; }
+  #root .dancer-card-grid { gap: 10px; }
+  #root .dancer-home-card { min-height: 164px; padding: 14px; border-radius: 16px; }
+  #root .dancer-home-card.rank { min-height: 218px; }
+  #root .dancer-card-header { grid-template-columns: 32px minmax(0, 1fr) 16px; gap: 7px; }
+  #root .dancer-card-icon { width: 32px; height: 32px; border-radius: 10px; }
+  #root .dancer-card-value { font-size: clamp(18px, 5vw, 24px); }
+  #root .dancer-card-detail { font-size: 10px; }
+  #root .dancer-home-card.income .dancer-card-detail { padding-right: 112px; }
+  #root .income-accent-line { right: 14px; bottom: 16px; width: 92px; }
+  #root .dancer-rank-visual { width: 104px; height: 104px; }
+  #root .schedule-visual { right: 12px; bottom: 12px; grid-template-columns: repeat(7, 6px); gap: 3px; }
+  #root .schedule-visual i { width: 6px; height: 23px; }
+  #root .leave-visual { right: 12px; bottom: 12px; width: 46px; height: 46px; }
+  #root .leave-visual::before { width: 34px; height: 34px; }
+}
+
+@media (max-width: 360px) {
+  #root .dancer-dashboard-heading p { display: none; }
+  #root .dancer-card-grid { grid-template-columns: 1fr; }
+  #root .dancer-home-card.income,
+  #root .dancer-home-card.attendance,
+  #root .dancer-home-card.rank,
+  #root .dancer-home-card.schedule,
+  #root .dancer-home-card.leave,
+  #root .dancer-home-card.loan { grid-column: 1; }
+  #root .dancer-home-card.rank { min-height: 210px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .dancer-home-card,
+  #root .entertainer-bottom-nav button { transition: none; }
+}
+
+html[data-theme='dark'] #root .entertainer-home-v3 {
+  --dancer-glass: rgb(21 29 45 / 88%);
+  --dancer-glass-strong: rgb(21 29 45 / 95%);
+  --dancer-glass-border: rgb(129 140 248 / 28%);
+  --ink: #f8fafc;
+  --muted: #b8c2d2;
+}
+html[data-theme='dark'] #root .entertainer-home-v3::before {
+  background:
+    radial-gradient(circle at 8% 18%, rgb(56 189 248 / 10%), transparent 34%),
+    radial-gradient(circle at 88% 28%, rgb(124 58 237 / 16%), transparent 32%),
+    radial-gradient(circle at 64% 72%, rgb(192 132 252 / 9%), transparent 34%),
+    #0f172a;
+}
+html[data-theme='dark'] #root .dancer-home-card {
+  background:
+    radial-gradient(circle at 94% 4%, color-mix(in srgb, var(--card-accent) 20%, transparent), transparent 40%),
+    radial-gradient(circle at 4% 100%, color-mix(in srgb, var(--card-secondary) 10%, transparent), transparent 42%),
+    linear-gradient(145deg, rgb(30 41 59 / 96%), rgb(21 29 45 / 94%));
+}
+html[data-theme='dark'] #root .dancer-home-hero,
+html[data-theme='dark'] #root .entertainer-home-v3 .home-attention,
+html[data-theme='dark'] #root .entertainer-home-v3 .lead-home-actions { box-shadow: 0 18px 45px rgb(0 0 0 / 24%); }
+html[data-theme='dark'] #root .dancer-hero-avatar {
+  border-color: rgb(129 140 248 / 36%);
+  background: linear-gradient(145deg, #25314a, rgb(99 102 241 / 20%));
+}
+html[data-theme='dark'] #root .dancer-hero-shift {
+  border-color: rgb(129 140 248 / 28%);
+  background: rgb(99 102 241 / 12%);
+}
+html[data-theme='dark'] #root .dancer-home-card {
+  border-color: color-mix(in srgb, var(--card-accent) 28%, #334155);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 5%), 0 16px 38px rgb(0 0 0 / 22%);
+}
+html[data-theme='dark'] #root .dancer-card-icon {
+  border-color: color-mix(in srgb, var(--card-accent) 30%, #334155);
+  background: color-mix(in srgb, var(--card-accent) 13%, #1e293b);
+}
+html[data-theme='dark'] #root .dancer-home-card.leave .dancer-card-icon,
+html[data-theme='dark'] #root .leave-visual::before { background: #1e293b; }
+html[data-theme='dark'] #root .entertainer-bottom-nav {
+  border-color: rgb(129 140 248 / 26%);
+  background: rgb(15 23 42 / 92%);
+  box-shadow: 0 -16px 36px -24px rgb(0 0 0 / 84%);
+}
+html[data-theme='dark'] #root .entertainer-bottom-nav button,
+html[data-theme='dark'] #root .entertainer-bottom-nav .nav-scan-action { color: #aeb9cc; }
+html[data-theme='dark'] #root .entertainer-bottom-nav button.active { color: #c7d2fe; }
+html[data-theme='dark'] #root .entertainer-bottom-nav .nav-icon,
+html[data-theme='dark'] #root .entertainer-bottom-nav .nav-scan-action .nav-icon {
+  border-color: rgb(129 140 248 / 18%) !important;
+  background: rgb(30 41 59 / 88%) !important;
+}
+html[data-theme='dark'] #root .entertainer-bottom-nav button.active {
+  border-color: rgb(129 140 248 / 34%);
+  background: linear-gradient(145deg, rgb(99 102 241 / 20%), rgb(30 41 59 / 96%));
+}

@@ -27,12 +27,14 @@ test('all employee modes can record their own QR attendance while privileged vie
   assert.equal(canAccessStaffTab('manager', 'income'), false)
 
   assert.equal(canAccessStaffTab('lead', 'readiness'), true)
+  assert.equal(canAccessStaffTab('lead', 'requests'), true)
   assert.equal(canAccessStaffTab('lead', 'attendance-qr'), true)
   assert.equal(canAccessStaffTab('lead', 'people'), false)
   assert.equal(canAccessStaffTab('lead', 'corrections'), false)
 
   assert.equal(canAccessStaffTab('entertainer', 'attendance-qr'), true)
   assert.equal(canAccessStaffTab('entertainer', 'workday'), true)
+  assert.equal(canAccessStaffTab('entertainer', 'requests'), true)
   assert.equal(canAccessStaffTab('entertainer', 'roster-review'), false)
   assert.equal(canAccessStaffTab('entertainer', 'corrections'), false)
 
@@ -40,6 +42,10 @@ test('all employee modes can record their own QR attendance while privileged vie
   assert.equal(canAccessStaffTab('employee', 'profile'), true)
   assert.equal(canAccessStaffTab('employee', 'people'), false)
   assert.equal(canAccessStaffTab('employee', 'income'), false)
+  assert.equal(canAccessStaffTab('employee', 'requests'), false)
+
+  assert.equal(canAccessStaffTab('admin', 'requests'), false)
+  assert.equal(canAccessStaffTab('manager', 'requests'), false)
 
   assert.equal(ROLE_TAB_ALLOWLIST.manager.includes('notifications'), true)
   assert.equal(ROLE_TAB_ALLOWLIST.lead.includes('readiness'), true)

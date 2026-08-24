@@ -4,5 +4,5 @@
   display:block;
   flex:0 0 auto;
   object-fit:contain;
-  filter:drop-shadow(0 4px 5px rgb(66 39 23 / 14%));
+  filter:none;
 }
