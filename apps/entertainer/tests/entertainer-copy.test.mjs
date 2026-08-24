@@ -317,6 +317,8 @@ test('dancer prototype keeps secondary Home cards concise and defers supporting 
   const home = await readFile('src/features/dancer-ops/HomeRequestScreens.tsx', 'utf8')
   const homeSection = home.slice(home.indexOf('export function HomeScreen'), home.indexOf('type PersonalRequestKind'))
 
+  assert.match(homeSection, /title="Ирц"/)
+  assert.doesNotMatch(homeSection, /title="(?:QR|QR ирц)"/)
   assert.match(homeSection, /detail="Цагтаа"/)
   assert.match(homeSection, /detail="2-р зэрэг"/)
   assert.match(homeSection, /detail="Чөлөө · Ирц · Санал"/)

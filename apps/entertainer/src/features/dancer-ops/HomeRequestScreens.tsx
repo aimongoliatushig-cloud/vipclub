@@ -79,7 +79,7 @@ export function HomeScreen({
           wide
         />
         <ModuleCard
-          title="QR ирц"
+          title="Ирц"
           value="20:56"
           detail="Цагтаа"
           icon={<QrCode aria-hidden="true" />}
