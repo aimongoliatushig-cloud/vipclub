@@ -143,6 +143,27 @@ test('dancer prototype keeps the senior team summary off the personal home scree
   assert.doesNotMatch(home, /12 ажиллаж байна/)
 })
 
+test('dancer QR attendance provides a camera flow with safe shift validation and recovery', async () => {
+  const attendance = await readFile('src/features/dancer-ops/AttendanceScreens.tsx', 'utf8')
+  const styles = await readFile('src/features/dancer-ops/dancer-ops.css', 'utf8')
+
+  assert.match(attendance, /Ирцийн QR уншуулах/)
+  assert.match(attendance, /getUserMedia/)
+  assert.match(attendance, /facingMode: \{ ideal: "environment" \}/)
+  assert.match(attendance, /BarcodeDetector/)
+  assert.match(attendance, /Nomad[\s\S]*21:00–04:00/)
+  assert.match(attendance, /normalized !== expectedAttendanceQr/)
+  assert.match(attendance, /Энэ ээлжид ирц бүртгэгдэнэ/)
+  assert.match(attendance, /track\.stop\(\)/)
+  assert.match(attendance, /cameraRequestRef/)
+  assert.match(attendance, /Камерын хүсэлтийг цуцлах/)
+  assert.match(attendance, /Камерын эрх хаалттай байна/)
+  assert.match(attendance, /QR кодын доорх код/)
+  assert.match(attendance, /Камерын дүрс хадгалагдахгүй/)
+  assert.match(styles, /\.ops-qr-camera video[\s\S]*object-fit: cover/)
+  assert.match(styles, /\.ops-qr-manual > input:focus[\s\S]*var\(--primary\)/)
+})
+
 test('dancer request tab is the employee request hub while VIP service requests stay separate', async () => {
   const home = await readFile('src/features/dancer-ops/HomeRequestScreens.tsx', 'utf8')
   const app = await readFile('src/features/dancer-ops/DancerOperatingApp.tsx', 'utf8')

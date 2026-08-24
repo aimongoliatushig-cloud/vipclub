@@ -30,6 +30,9 @@
 - Rank history rounded-bar chart, light mobile: `C:\Users\User\Desktop\vip club\entertainer-app\qa-rank-history-chart-light-390.png`
 - Full Monday–Sunday schedule, dark mobile: `C:\Users\User\Desktop\vip club\entertainer-app\qa-schedule-weekdays-dark-390.png`
 - Full Monday–Sunday schedule, light mobile: `C:\Users\User\Desktop\vip club\entertainer-app\qa-schedule-weekdays-light-390.png`
+- QR attendance scanner, dark mobile: `C:\Users\User\Desktop\vip club\entertainer-app\qa-attendance-qr-scanner-dark-390.png`
+- QR attendance scanner, light mobile: `C:\Users\User\Desktop\vip club\entertainer-app\qa-attendance-qr-scanner-light-390.png`
+- QR attendance confirmed state, dark mobile: `C:\Users\User\Desktop\vip club\entertainer-app\qa-attendance-qr-success-dark-390.png`
 - Home attention card dark mobile implementation: `C:\Users\User\Desktop\vip club\entertainer-app\qa-home-attention-dark-390.png`
 - Home attention card light mobile implementation: `C:\Users\User\Desktop\vip club\entertainer-app\qa-home-attention-light-390.png`
 - Final light tablet implementation: `C:\Users\User\Desktop\vip club\entertainer-app\qa-home-light-768-final.png`
@@ -77,12 +80,13 @@
 - Home no longer repeats notifications as a full analytics card. The header bell remains the single notification entry point, keeps the unread indicator, and was click-tested through the Notifications screen and back to Home. The remaining five cards reflow without a half-row gap: `Хүсэлт` and `Зээл` now use full-width rows, with no horizontal overflow in dark/light mobile or desktop checks.
 - Rank history is now a five-day rounded bar comparison on an honest 0–100 scale. Exact scores are printed above each bar; the missed day is labeled `0`, approved leave is labeled `—` and excluded from the average, and the legend distinguishes confirmed, missed, and leave states without relying on color alone. Dark/light renders and 390, 768, and 1440 widths were checked with no horizontal overflow.
 - The weekly schedule now presents every localized weekday from `Даваа` through `Ням`, paired with its date. Monday, Wednesday, and Friday retain their real shift time, branch, status, and detail navigation; Tuesday, Thursday, Saturday, and Sunday are truthfully marked `Амралт · Ээлжгүй`. Today mode stays focused on Monday only. Dark/light mobile, tablet, and desktop layouts were checked without horizontal overflow.
+- QR Attendance now includes a phone-first camera scanner with the exact `Nomad · 21:00–04:00` target visible before recording. The flow requests the rear camera, detects QR values when `BarcodeDetector` is available, provides a manual-code recovery path when it is not, rejects a QR from another shift, stops every media track, allows a pending permission request to be cancelled, and shows a final confirmation before updating today's timestamp. Idle, permission-pending, unsupported-browser, mismatched-code, valid-review, and success states were browser-tested; dark/light 390 px, light 768 px, and dark 1440 px layouts have no horizontal overflow.
 - Home ends with one compact `Анхаарах зүйлс` card containing two truthful next steps: reduce lateness by opening Attendance and improve the 78-point daily opening factor by opening Rank. Both routes, bottom-navigation clearance, and dark/light responsive layouts were verified.
 - Card controls remain semantic buttons with descriptive `aria-label` text, visible focus treatment, and minimum 44 px targets.
 - Clicking the earnings card was verified in the browser and opened `#earnings` with `data-screen="earnings"`.
 - Clicking the loan card was verified in the browser and opened `#loan` with `data-screen="loan"`. The submit action remained disabled until a valid amount, repayment rate, purpose, and explicit terms acceptance were present; submission then updated both the request status and Home card.
 - No visible Vite error overlay or alert dialog was present in the final browser pass.
-- `npm run lint`, `npm run build`, and all 57 automated tests passed. The existing unresolved `/staff/design/staff-pwa-concept.png` build warning and existing large-chunk advisory remain unrelated to these UI changes.
+- `npm run lint`, `npm run build`, and all 58 automated tests passed. The existing unresolved `/staff/design/staff-pwa-concept.png` build warning and existing large-chunk advisory remain unrelated to these UI changes.
 
 ## Comparison history
 
@@ -101,6 +105,7 @@
 13. Removed the duplicated Home notification analytics card, kept notification access and unread state in the header bell, and widened the lone request card so the five-card grid has no empty cell.
 14. Replaced the rank-history text rows with a five-day, exact-labeled rounded bar chart that exposes the confirmed scores, zero-score absence, and average-excluded approved leave on one comparable scale.
 15. Replaced the shift-only week list with a complete localized Monday–Sunday schedule, preserving shift-detail actions on working days and explicitly showing honest rest-day states on the other four days.
+16. Added the mobile QR-attendance scanner, exact-shift validation, camera cleanup/cancellation, unsupported-browser recovery, wrong-code prevention, and review-before-recording confirmation; verified the complete path in dark and light responsive layouts.
 
 ## Findings
 
