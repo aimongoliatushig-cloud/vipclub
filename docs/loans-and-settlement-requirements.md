@@ -27,16 +27,25 @@ The settlement model supports:
 
 ### Customer-time/hourly share
 
-Current interview values are:
+The confirmed company table-service shares are:
 
-| Rank | Proposed share |
+| Rank | Confirmed share |
 | --- | ---: |
-| Bronze | 50% |
-| Silver | 60% |
-| Gold | 70% |
-| Diamond | 80% |
+| Rank 3 | 50% |
+| Rank 2 | 60% |
+| Rank 1 | 70% |
 
-These are configurable financial inputs, not hard-coded constants. A policy version records branch scope, eligible charge definition, rate, effective period, approver, and superseded version.
+The calculation first divides a paid Finex table-service base by its entertainer allocation count, then applies each entertainer's rank share. Wine, normal tip, spreading tip, product, and other commission categories retain their separately approved Finex allocation rules. The raw Finex amount and percent remain audit evidence.
+
+These rates are versioned, effective-dated financial inputs. A policy version records eligible charge definition, rate, effective period, approver, and superseded version. A branch override is not allowed unless a later approved company policy explicitly introduces it.
+
+### Next-day rank effect
+
+- A scoring day's completed evidence determines the rank that becomes effective on the following scoring date.
+- Customer-time/table-service transactions on the scoring day use the rank already effective for that date.
+- Meeting Rank 2 conditions on 2026-08-01 does not recalculate 2026-08-01 earnings: that date remains Rank 3 at 50%. Rank 2 and its 60% share begin on 2026-08-02.
+- Rank history records both the evidence/scoring date and `effective_from`. Every settlement line stores the rank and rate effective on its source transaction date.
+- A later correction creates an auditable adjustment or reversal; it does not silently rewrite a finalized settlement.
 
 ### Tips and wine sales
 
@@ -143,7 +152,7 @@ For entertainers, the three-day settlement statement is the paystub-equivalent. 
 
 ## Open decisions
 
-- **TBD — Business configuration required:** approve rank share rates, eligible hourly/customer-time charge, tip rules, wine commission, spreading-tip terminology and values, and branch override authority.
+- **TBD — Business configuration required:** approve the eligible hourly/customer-time charge definition, tip rules, wine commission, spreading-tip terminology and values, and whether a future branch override workflow is permitted.
 - **TBD — Business configuration required:** approve lateness, no-show, missed-request, and other deduction policies and amounts.
 - Confirm whether all employment types are loan-eligible and the minimum tenure/income requirements.
 - Confirm maximum-loan formula, approval authority, repayment range, and treatment on departure.
