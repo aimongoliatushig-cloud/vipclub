@@ -1,4 +1,13 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  lazy,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -101,6 +110,7 @@ import "./Workbench.css";
 import "./RuntimeStates.css";
 import "./theme.css";
 import "./DancerApp.css";
+import "./StartupSplash.css";
 import { ThemeToggle } from "./components/ThemeToggle";
 
 type Tab = StaffTab;
@@ -303,7 +313,7 @@ const mongoliaDateKey = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Ulaanbaatar",
 });
 const dayLabels = ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"];
-const WELCOME_MINIMUM_MS = 900;
+const STARTUP_TITLE = "WELCOME TO DHD LLC";
 
 function Brand({ branch }: { branch?: string }) {
   const key = (branch || "").toLowerCase();
@@ -345,30 +355,40 @@ function Brand({ branch }: { branch?: string }) {
   );
 }
 
-function WelcomeScreen({ branch, name }: { branch?: string; name?: string }) {
+function WelcomeScreen({ exiting = false }: { exiting?: boolean }) {
   return (
-    <main className="welcome-screen">
-      <section className="welcome-content" aria-labelledby="welcome-title">
-        <Brand branch={branch} />
-        <div className="welcome-copy">
-          <span>Нэг баг · Нэг зорилго</span>
-          <h1 id="welcome-title">
-            BIG future DHD LLC-д
-            <br />
-            тавтай морил
-          </h1>
-          <p>
-            {name
-              ? `${name}, манай багийн нэг хэсэг болсон танд баярлалаа.`
-              : "Манай багийн нэг хэсэг болсон танд баярлалаа."}
-          </p>
+    <div
+      className={`startup-splash${exiting ? " is-exiting" : ""}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="startup-title"
+    >
+      <div className="startup-atmosphere" aria-hidden="true" />
+      <section className="startup-content">
+        <div className="startup-logo-frame" aria-hidden="true">
+          <img
+            className="startup-logo"
+            src="/staff/dhd-logo.png"
+            width="2000"
+            height="2000"
+            alt=""
+            fetchPriority="high"
+          />
         </div>
-        <div className="welcome-progress" aria-hidden="true">
-          <i />
-        </div>
-        <small role="status">Таны ажлын орчныг бэлдэж байна…</small>
+        <h1 id="startup-title" className="startup-title" aria-label={STARTUP_TITLE}>
+          {Array.from(STARTUP_TITLE).map((character, index) => (
+            <span
+              className="startup-title-character"
+              style={{ animationDelay: `${250 + index * 36}ms` }}
+              aria-hidden="true"
+              key={`${character}-${index}`}
+            >
+              {character === " " ? "\u00a0" : character}
+            </span>
+          ))}
+        </h1>
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -2013,6 +2033,9 @@ type AppPhase =
 
 function AppRuntime() {
   const [phase, setPhase] = useState<AppPhase>("booting");
+  const [splashPhase, setSplashPhase] = useState<
+    "active" | "exiting" | "hidden"
+  >("active");
   const [ctx, setCtx] = useState<AppContext | null>(null);
   const [manager, setManager] = useState<ManagerDashboard>();
   const [entertainer, setEntertainer] = useState<EntertainerDashboard>();
@@ -2044,12 +2067,44 @@ function AppRuntime() {
   const protectedEpoch = useRef(0);
   const authenticatedSession = useRef(false);
   const sessionInvalidated = useRef(false);
-  const welcomeStartedAt = useRef(Date.now());
   const [attendancePayload, setAttendancePayload] = useState(
     () =>
       new URLSearchParams(window.location.search).get("attendance") ||
       undefined,
   );
+
+  useEffect(() => {
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const audio = new Audio("/staff/dhd-startup.wav");
+    audio.preload = "auto";
+    audio.volume = 0.28;
+
+    const soundTimer = window.setTimeout(
+      () => {
+        void audio.play().catch(() => undefined);
+      },
+      reducedMotion ? 120 : 450,
+    );
+    const exitTimer = window.setTimeout(
+      () => setSplashPhase("exiting"),
+      reducedMotion ? 340 : 1650,
+    );
+    const removeTimer = window.setTimeout(
+      () => setSplashPhase("hidden"),
+      reducedMotion ? 560 : 2000,
+    );
+
+    return () => {
+      window.clearTimeout(soundTimer);
+      window.clearTimeout(exitTimer);
+      window.clearTimeout(removeTimer);
+      audio.pause();
+      audio.removeAttribute("src");
+      audio.load();
+    };
+  }, []);
 
   const clearProtectedState = useCallback(() => {
     protectedEpoch.current += 1;
@@ -2079,7 +2134,6 @@ function AppRuntime() {
     clearProtectedState();
     setRuntimeError(undefined);
     setLoginNotice("");
-    welcomeStartedAt.current = Date.now();
     setPhase("booting");
     return protectedEpoch.current;
   }, [clearProtectedState]);
@@ -2327,12 +2381,6 @@ function AppRuntime() {
       setRouteDenied(!allowed);
       setPageError(undefined);
       setRuntimeError(undefined);
-      const welcomeRemaining =
-        WELCOME_MINIMUM_MS - (Date.now() - welcomeStartedAt.current);
-      if (welcomeRemaining > 0)
-        await new Promise((resolve) =>
-          window.setTimeout(resolve, welcomeRemaining),
-        );
       if (epoch !== protectedEpoch.current) return;
       authenticatedSession.current = true;
       sessionInvalidated.current = false;
@@ -2899,10 +2947,33 @@ function AppRuntime() {
     logoutBusy,
   ]);
 
+  const splashVisible = splashPhase !== "hidden";
+  const withStartupSplash = (view: ReactNode) => (
+    <>
+      <div
+        className="startup-underlay"
+        aria-hidden={splashVisible ? true : undefined}
+        inert={splashVisible ? true : undefined}
+      >
+        {view}
+      </div>
+      {splashVisible ? (
+        <WelcomeScreen exiting={splashPhase === "exiting"} />
+      ) : null}
+    </>
+  );
+
   if (phase === "booting")
-    return <WelcomeScreen branch={ctx?.branch} name={ctx?.full_name} />;
+    return withStartupSplash(
+      splashVisible ? null : (
+        <div className="loading">
+          <RefreshCw className="spin" />
+          Мэдээлэл ачаалж байна…
+        </div>
+      ),
+    );
   if (phase === "offline")
-    return (
+    return withStartupSplash(
       <StartupState
         kind="offline"
         title="Интернет холболтгүй байна"
@@ -2915,7 +2986,7 @@ function AppRuntime() {
       />
     );
   if (phase === "fatal")
-    return (
+    return withStartupSplash(
       <StartupState
         kind="error"
         title="Ажилтны апптай холбогдож чадсангүй"
@@ -2926,7 +2997,7 @@ function AppRuntime() {
       />
     );
   if (phase === "unauthorized")
-    return (
+    return withStartupSplash(
       <UnauthorizedState
         busy={logoutBusy}
         onLogout={() => {
@@ -2935,7 +3006,7 @@ function AppRuntime() {
       />
     );
   if (phase === "guest" || phase === "session-expired")
-    return (
+    return withStartupSplash(
       <Login
         onLogin={login}
         sessionExpired={phase === "session-expired"}
@@ -2944,7 +3015,7 @@ function AppRuntime() {
       />
     );
   if (phase !== "authenticated" || !ctx)
-    return (
+    return withStartupSplash(
       <StartupState
         kind="error"
         title="Аппын төлөв тодорхойгүй байна"
@@ -2955,7 +3026,7 @@ function AppRuntime() {
       />
     );
 
-  return (
+  return withStartupSplash(
     <Shell
       ctx={ctx}
       tab={tab}

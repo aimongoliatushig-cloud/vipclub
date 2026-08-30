@@ -8,6 +8,8 @@ const SHELL = [
   '/staff/manifest.webmanifest',
   '/staff/icon-192.png',
   '/staff/icon-512.png',
+  '/staff/dhd-logo.png',
+  '/staff/dhd-startup.wav',
   '/staff/sw-policy.js',
 ]
 const {

@@ -1,0 +1,30 @@
+#root .startup-title {
+  color: #f7f8fb;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startup-splash {
+    transition-duration: 180ms !important;
+  }
+
+  .startup-content {
+    animation: startup-reduced-in 120ms ease-out both !important;
+  }
+
+  .startup-atmosphere {
+    display: none;
+  }
+
+  .startup-logo-frame,
+  .startup-title-character {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    animation: none !important;
+  }
+}
+
+@keyframes startup-reduced-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

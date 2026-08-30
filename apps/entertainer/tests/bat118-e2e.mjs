@@ -673,6 +673,7 @@ async function runScenario(name, setup, verify, options = {}) {
     locale: 'mn-MN',
     timezoneId: 'Asia/Ulaanbaatar',
     serviceWorkers: options.serviceWorkers || 'block',
+    reducedMotion: options.reducedMotion || 'no-preference',
   })
   const page = await context.newPage()
   page.setDefaultTimeout(7_000)
@@ -706,7 +707,7 @@ after(async () => {
   await closeServer()
 })
 
-test('first render welcomes the employee before opening their workspace', { timeout: 30_000 }, async () => {
+test('first render plays the DHD startup sequence before opening the workspace', { timeout: 30_000 }, async () => {
   await runScenario('company-welcome-mobile', context => installApi(context, method => {
     if (method.endsWith('workforce.get_context')) return success({ ...entertainerContext, branch: 'Nomad' })
     if (method.endsWith('entertainer.get_dashboard')) return success({
@@ -715,16 +716,18 @@ test('first render welcomes the employee before opening their workspace', { time
     })
     return defaultEntertainerApi(method)
   }), async (_context, page) => {
-    await page.getByRole('heading', { name: /BIG future DHD LLC-д.*тавтай морил/ }).waitFor()
-    assert.match(await page.locator('.welcome-content').innerText(), /Нэг баг · Нэг зорилго/i)
-    assert.match(await page.locator('.welcome-content').innerText(), /Ану, манай багийн нэг хэсэг болсон танд баярлалаа/)
-    const logoBox = await page.locator('.welcome-content .brand-mark').evaluate(element => {
+    await page.getByRole('heading', { name: 'WELCOME TO DHD LLC' }).waitFor()
+    assert.equal(await page.locator('.startup-title-character').count(), 18)
+    assert.equal(await page.locator('.welcome-progress').count(), 0)
+    const logoBox = await page.locator('.startup-logo-frame').evaluate(element => {
       const box = element.getBoundingClientRect()
       return { width: box.width, height: box.height }
     })
-    assert.ok(logoBox.width >= 100 && logoBox.height >= 79, `welcome logo too small: ${logoBox.width}x${logoBox.height}`)
+    assert.ok(logoBox.width >= 176 && logoBox.height >= 100, `startup logo too small: ${logoBox.width}x${logoBox.height}`)
+    await page.waitForTimeout(1_150)
     await page.screenshot({ path: join(SCREENSHOT_ROOT, 'company-welcome-mobile.png'), fullPage: true })
     await waitForEntertainerShell(page)
+    await page.locator('.startup-splash').waitFor({ state: 'detached' })
     const headerAvatarBox = await page.locator('.dancer-app-header .header-profile-avatar').evaluate(element => {
       const box = element.getBoundingClientRect()
       return { width: box.width, height: box.height }
@@ -733,6 +736,23 @@ test('first render welcomes the employee before opening their workspace', { time
     assert.match(await page.locator('.dancer-header-profile').innerText(), /Ану/)
     await assertNoHorizontalOverflow(page, 'company welcome')
   }, { waitUntil: 'domcontentloaded' })
+})
+
+test('reduced motion uses a brief fade and still opens the workspace', { timeout: 30_000 }, async () => {
+  await runScenario('company-welcome-reduced-motion', context => installApi(context, method => {
+    if (method.endsWith('workforce.get_context')) return success({ ...entertainerContext, branch: 'Nomad' })
+    if (method.endsWith('entertainer.get_dashboard')) return success({
+      ...entertainerDashboard,
+      profile: { ...entertainerDashboard.profile, branch: 'Nomad' },
+    })
+    return defaultEntertainerApi(method)
+  }), async (_context, page) => {
+    await page.getByRole('heading', { name: 'WELCOME TO DHD LLC' }).waitFor()
+    const characterAnimation = await page.locator('.startup-title-character').first().evaluate(element => getComputedStyle(element).animationName)
+    assert.equal(characterAnimation, 'none')
+    await page.locator('.startup-splash').waitFor({ state: 'detached', timeout: 1_500 })
+    await waitForEntertainerShell(page)
+  }, { waitUntil: 'domcontentloaded', reducedMotion: 'reduce' })
 })
 
 test('guest bootstrap renders only the login shell at 390x844', { timeout: 30_000 }, async () => {
