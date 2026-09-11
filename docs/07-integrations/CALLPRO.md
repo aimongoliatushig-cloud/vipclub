@@ -4,6 +4,8 @@ status: discovery-required
 last_reviewed: 2026-08-07
 ---
 
+> **2026-09-11:** Historical specification. Read the [current decision and evidence checklist](../VIP_LOGIC_MASTER.md) before implementation; local verification, approved policy and live integration are separate states.
+
 # CallPro Integration
 
 ## Purpose
