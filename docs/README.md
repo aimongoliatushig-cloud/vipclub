@@ -1,6 +1,6 @@
 # Knowledge Base Structure
 
-Use this folder as the maintained source of truth for VIP Club.
+Start with [VIP Logic Master](VIP_LOGIC_MASTER.md) for the 2026-09-11 reconciled decisions, evidence boundaries, and remaining-work checklist. Older module specifications remain historical detail and may contain superseded requirements.
 
 ## Authoritative documents
 
@@ -38,7 +38,7 @@ Module boundaries live under 04-modules. BPMN sources and renders live under dia
 
 - The 2026-08-07 client interview requirements delta replaces conflicting older requirements.
 - The unified Membership & Loyalty proposal remains the preferred customer membership baseline.
-- New entertainers start at Gold; ranking is recommendation plus human decision.
+- The historical Gold starting-rank statement is superseded; do not confuse employee rank with customer membership. Use the current approved effective-dated employee rank policy.
 - CEO sets monthly targets; managers prepare action plans; fixed three-days-before-month timing is superseded.
 - Extend the existing Customer Assistant and Frappe realtime architecture rather than create duplicates.
 - Unresolved values use **TBD — Business configuration required** and effective-dated configuration.

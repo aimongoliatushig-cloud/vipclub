@@ -1,3 +1,5 @@
+**2026-09-11 documentation review:** [Current logic and remaining-work checklist](docs/VIP_LOGIC_MASTER.md). Historical specs below are not proof of current production behavior.
+
 # VIP Club Knowledge Base
 
 This repository is the shared source of truth for the VIP Club product.
